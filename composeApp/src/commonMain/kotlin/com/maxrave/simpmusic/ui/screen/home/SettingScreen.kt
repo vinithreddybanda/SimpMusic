@@ -163,6 +163,7 @@ import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -470,6 +471,16 @@ fun SettingScreen(
     val localDensity = LocalDensity.current
     val uriHandler = LocalUriHandler.current
     val coroutineScope = rememberCoroutineScope()
+
+    val musicStatusStore: DataStoreManager = koinInject()
+    var showMusicStatusDialog by rememberSaveable { mutableStateOf(false) }
+    var musicStatusWorkerUrl by rememberSaveable { mutableStateOf("https://vinith-music-status.vinithreddy08-123.workers.dev") }
+    var musicStatusToken by rememberSaveable { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        musicStatusWorkerUrl = musicStatusStore.getString("cloudflare_music_status_worker_url").first()
+            ?: "https://vinith-music-status.vinithreddy08-123.workers.dev"
+        musicStatusToken = musicStatusStore.getString("cloudflare_music_status_worker_token").first().orEmpty()
+    }
 
     var width by rememberSaveable { mutableIntStateOf(0) }
 
@@ -2173,6 +2184,71 @@ fun SettingScreen(
                         isEnable = lastfmLoggedIn,
                     )
                 }
+            }
+        }
+        item(key = "music_status") {
+            SettingGroup(title = "Website music status") {
+                SettingItem(
+                    title = "Cloudflare Worker",
+                    subtitle = if (musicStatusToken.isBlank()) {
+                        "Add your Worker token to enable portfolio playback status"
+                    } else {
+                        "Worker configured. Track and playback status will be published."
+                    },
+                    onClick = {
+                        showMusicStatusDialog = true
+                    },
+                )
+            }
+            if (showMusicStatusDialog) {
+                AlertDialog(
+                    onDismissRequest = { showMusicStatusDialog = false },
+                    title = { Text("Website music status") },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                "Send your SimpMusic playback state to your Cloudflare Worker. The token is stored in app settings.",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            TextField(
+                                value = musicStatusWorkerUrl,
+                                onValueChange = { musicStatusWorkerUrl = it },
+                                label = { Text("Worker URL") },
+                                singleLine = true,
+                            )
+                            TextField(
+                                value = musicStatusToken,
+                                onValueChange = { musicStatusToken = it },
+                                label = { Text("Worker secret") },
+                                singleLine = true,
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    musicStatusStore.putString(
+                                        "cloudflare_music_status_worker_url",
+                                        musicStatusWorkerUrl.trim(),
+                                    )
+                                    musicStatusStore.putString(
+                                        "cloudflare_music_status_worker_token",
+                                        musicStatusToken.trim(),
+                                    )
+                                    showMusicStatusDialog = false
+                                }
+                            },
+                        ) {
+                            Text("Save")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showMusicStatusDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                )
             }
         }
         item(key = "sponsor_block") {
