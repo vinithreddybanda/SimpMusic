@@ -137,9 +137,13 @@ fun SongFullWidthItems(
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
     val songRepository: SongRepository = koinInject<SongRepository>()
-    val storedSong by songRepository
-        .getSongAsFlow(songEntity?.videoId ?: track?.videoId ?: "")
-        .collectAsState(initial = null)
+    val storedSongId = songEntity?.videoId ?: track?.videoId.orEmpty()
+    // Keep the DAO Flow instance stable for this row. Recreating a cold Flow on every
+    // recomposition can cancel and restart its collection while scroll/selection state changes.
+    val storedSongFlow = remember(songRepository, storedSongId) {
+        songRepository.getSongAsFlow(storedSongId)
+    }
+    val storedSong by storedSongFlow.collectAsState(initial = null)
     val downloadState = storedSong?.downloadState ?: DownloadState.STATE_NOT_DOWNLOADED
     // The list's own model says what its source said; the stored row adds what playback learned
     // since, which is the only way a queue row is marked — the queue response shows no LIVE chip.
