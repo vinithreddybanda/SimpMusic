@@ -77,9 +77,8 @@ import kotlin.math.roundToInt
  * size and a wider window adds columns instead of stretching them. `Adaptive(minSize = 120.dp)`
  * treated 120 as a floor instead, which on a 1404dp window meant eleven columns of ~108dp artwork.
  *
- * Never fewer than three: the column count must follow the window, not the device's density, and a
- * 360–412dp phone would otherwise round down to two. Below 480dp this gives exactly the three columns
- * `Adaptive(120.dp)` did, so phones keep the grid they have.
+ * Narrow windows are allowed two columns rather than forcing three undersized covers.
+ * Wider windows grow naturally to three, four, and more columns while keeping artwork near 150dp.
  */
 internal object LibraryGridCells : GridCells {
     // The artwork plus the 10dp start + 10dp end padding every item in these grids carries.
@@ -90,12 +89,23 @@ internal object LibraryGridCells : GridCells {
         spacing: Int,
     ): List<Int> {
         val target = TargetCellWidth.roundToPx() + spacing
-        val count = ((availableSize + spacing).toFloat() / target).roundToInt().coerceAtLeast(3)
+        val count = ((availableSize + spacing).toFloat() / target).roundToInt().coerceAtLeast(2)
         // The same split GridCells.Fixed makes: leftover pixels go one each to the first columns.
         val usable = availableSize - spacing * (count - 1)
         return List(count) { usable / count + if (it < usable % count) 1 else 0 }
     }
 }
+
+private fun PlaylistType.stableLibraryGridKey(): String =
+    when (this) {
+        is ChartItem -> "chart:$ytPlaylistId"
+        is LocalPlaylistEntity -> "local-playlist:$id"
+        is PlaylistsResult -> "youtube-playlist:$browseId"
+        is AlbumEntity -> "album:$browseId"
+        is PlaylistEntity -> "playlist:$id"
+        is PodcastsEntity -> "podcast:$podcastId"
+        is MonthlyRecapItem -> "recap:$year-$month"
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -224,7 +234,14 @@ internal inline fun <reified T> GridLibraryPlaylist(
                             }
                         }
                     }
-                    items(list) { item ->
+                    items(
+                        items = list,
+                        key = { item ->
+                            (item as? PlaylistType)?.stableLibraryGridKey()
+                                ?: "unsupported:${item::class.simpleName}:${item.hashCode()}"
+                        },
+                        contentType = { item -> item::class },
+                    ) { item ->
                         if (item !is PlaylistType) {
                             return@items
                         }
