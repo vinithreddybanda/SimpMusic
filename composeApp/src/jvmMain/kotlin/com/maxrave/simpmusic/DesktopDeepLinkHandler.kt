@@ -106,7 +106,7 @@ object DesktopDeepLinkHandler {
 
         val actualUri = when {
             // simpmusic://open-app?url=<encoded_url>
-            (parsed.scheme == "pluto" || parsed.scheme == "simpmusic") && parsed.host == "open-app" -> {
+            (parsed.scheme == "pluto" || (parsed.scheme == "pluto" || parsed.scheme == "simpmusic")) && parsed.host == "open-app" -> {
                 val urlParam = parsed.getQueryParameter("url")
                 if (urlParam != null) {
                     Logger.d(TAG, "Extracted URL from open-app: $urlParam")
@@ -120,13 +120,13 @@ object DesktopDeepLinkHandler {
 
             // simpmusic://discord-auth?code=…&state=… → pass through untouched: it is Discord's OAuth
             // redirect, which App.kt matches on this exact scheme and host, not a page to open.
-            parsed.scheme == "simpmusic" && parsed.host == "discord-auth" -> parsed
+            (parsed.scheme == "pluto" || parsed.scheme == "simpmusic") && parsed.host == "discord-auth" -> parsed
 
             // simpmusic://watch?v=xxx → https://simpmusic.org/app/watch?v=xxx
             // simpmusic://playlist?list=xxx → https://simpmusic.org/app/playlist?list=xxx
             // simpmusic://channel/UCxxx → https://simpmusic.org/app/channel/UCxxx
             // simpmusic://album?id=xxx → https://simpmusic.org/app/album?id=xxx
-            parsed.scheme == "simpmusic" && parsed.host != null -> {
+            (parsed.scheme == "pluto" || parsed.scheme == "simpmusic") && parsed.host != null -> {
                 val host = parsed.host!!
                 val query = parsed.query?.let { "?$it" } ?: ""
                 val pathSuffix = parsed.pathSegments.joinToString("/").let {
