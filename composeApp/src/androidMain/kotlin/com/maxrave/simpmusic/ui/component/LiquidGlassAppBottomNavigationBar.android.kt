@@ -191,10 +191,10 @@ actual fun LiquidGlassAppBottomNavigationBar(
             contentAlignment = Alignment.Center,
         ) {
             if (liquidGlass) {
-                selectedScreen.icon()
+                selectedScreen.icon(selected = true)
             } else {
                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
-                    selectedScreen.icon()
+                    selectedScreen.icon(selected = true)
                 }
             }
         }
