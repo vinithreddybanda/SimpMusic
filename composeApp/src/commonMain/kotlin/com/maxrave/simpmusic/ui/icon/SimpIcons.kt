@@ -7,6 +7,9 @@ import androidx.compose.ui.graphics.vector.PathNode
 import androidx.compose.ui.graphics.vector.VectorPath
 import androidx.compose.ui.graphics.vector.path
 import com.maxrave.logger.Logger
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.AllIcons
+import com.adamglin.phosphoricons.Regular
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -55,16 +58,126 @@ internal val KEEP_AS_DRAWN = setOf("Groups")
  * Google drew it, and nothing is ever enlarged. Anything that cannot be measured or rebuilt keeps
  * the glyph as generated, so a bad measurement can only leave an icon unfitted, never break it.
  */
+/**
+ * Compatibility names for the old generated Material Symbols call sites. All 119 legacy icon
+ * entry points now resolve to Phosphor Regular vectors, so screens can migrate without changing
+ * playback, navigation, or feature code in each screen.
+ */
+private val phosphorIconAliases =
+    mapOf(
+        "AccessAlarm" to "Alarm",
+        "Add" to "Plus",
+        "AddCircleOutline" to "PlusCircle",
+        "AddPhotoAlternate" to "Image",
+        "Album" to "Disc",
+        "ArrowBackIosNew" to "CaretLeft",
+        "ArrowForwardIos" to "CaretRight",
+        "ArrowOutward" to "ArrowUpRight",
+        "AutoGraph" to "ChartLineUp",
+        "AvTimer" to "Timer",
+        "CalendarToday" to "CalendarBlank",
+        "Close" to "X",
+        "CloudOff" to "CloudSlash",
+        "CommentOutline" to "ChatCircle",
+        "ContentCopy" to "Copy",
+        "Delete" to "Trash",
+        "Done" to "Check",
+        "DownloadForOffline" to "DownloadSimple",
+        "DownloadForOfflineOutlined" to "DownloadSimple",
+        "Downloading" to "DownloadSimple",
+        "DragHandle" to "DotsSixVertical",
+        "Edit" to "PencilSimple",
+        "Error" to "WarningCircle",
+        "Explicit" to "TextT",
+        "FastRewind" to "Rewind",
+        "Favorite" to "Heart",
+        "FavoriteBorder" to "Heart",
+        "FormatListBulleted" to "ListBullets",
+        "Forward5" to "ArrowCounterClockwise",
+        "Fullscreen" to "ArrowsOut",
+        "FullscreenExit" to "ArrowsIn",
+        "GraphicEq" to "Waveform",
+        "Groups" to "UsersThree",
+        "Help" to "Question",
+        "History" to "ClockCounterClockwise",
+        "Home" to "House",
+        "Insights" to "ChartLineUp",
+        "IosShare" to "ShareNetwork",
+        "KeyboardArrowDown" to "CaretDown",
+        "KeyboardDoubleArrowDown" to "CaretDoubleDown",
+        "KeyboardDoubleArrowLeft" to "CaretDoubleLeft",
+        "KeyboardDoubleArrowRight" to "CaretDoubleRight",
+        "KeyboardDoubleArrowUp" to "CaretDoubleUp",
+        "LeftPanelClose" to "Sidebar",
+        "LeftPanelOpen" to "SidebarSimple",
+        "LibraryMusic" to "Books",
+        "LogoDev" to "DevToLogo",
+        "Logout" to "SignOut",
+        "Lyrics" to "TextAlignLeft",
+        "MicOff" to "MicrophoneSlash",
+        "MoreVert" to "DotsThreeVertical",
+        "Movie" to "FilmStrip",
+        "MovieOff" to "FilmSlate",
+        "MusicCast" to "Airplay",
+        "MusicOff" to "MusicNote",
+        "Notifications" to "Bell",
+        "OpenInFull" to "ArrowsOut",
+        "OpenInNew" to "ArrowSquareOut",
+        "PeopleAlt" to "Users",
+        "PersonAdd" to "UserPlus",
+        "PictureInPictureAlt" to "PictureInPicture",
+        "PlayArrow" to "Play",
+        "PlaylistAdd" to "Playlist",
+        "QueueMusic" to "Queue",
+        "ReceiptLong" to "Receipt",
+        "Refresh" to "ArrowClockwise",
+        "Remove" to "Minus",
+        "RepeatOne" to "RepeatOnce",
+        "Replay" to "ArrowCounterClockwise",
+        "Replay5" to "Rewind",
+        "RestartAlt" to "ArrowCounterClockwise",
+        "RssFeed" to "Rss",
+        "Search" to "MagnifyingGlass",
+        "SelectAll" to "SelectionAll",
+        "Send" to "PaperPlaneTilt",
+        "Sensors" to "Waveform",
+        "Settings" to "Gear",
+        "SkipNext" to "SkipForward",
+        "SkipPrevious" to "SkipBack",
+        "Smartphone" to "DeviceMobile",
+        "Sort" to "SortAscending",
+        "Speaker" to "SpeakerHigh",
+        "Speed" to "Gauge",
+        "StarBorder" to "Star",
+        "Subtitles" to "ClosedCaptioning",
+        "SubtitlesOff" to "ClosedCaptioning",
+        "Sync" to "ArrowsClockwise",
+        "SyncDisabled" to "ArrowsClockwise",
+        "ThumbDown" to "ThumbsDown",
+        "ThumbDownOutline" to "ThumbsDown",
+        "ThumbUp" to "ThumbsUp",
+        "ThumbUpOutline" to "ThumbsUp",
+        "ThumbsUpDown" to "ThumbsUp",
+        "TipsAndUpdates" to "Lightbulb",
+        "TrendingUp" to "TrendUp",
+        "Tune" to "SlidersHorizontal",
+        "UnfoldLess" to "CaretUp",
+        "UnfoldMore" to "CaretDown",
+        "Update" to "ArrowClockwise",
+        "VolumeDown" to "SpeakerLow",
+        "VolumeOff" to "SpeakerSlash",
+        "VolumeUp" to "SpeakerHigh",
+    )
+
+private val phosphorRegularIcons by lazy {
+    PhosphorIcons.Regular.AllIcons.associateBy { it.name.lowercase() }
+}
+
 internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
-    val glyph = build()
-    val scale = glyph.fitScale()
-    if (scale == 1f && !SimpIcons.debugRings) return glyph
-    return try {
-        glyph.rebuilt(scale)
-    } catch (e: Exception) {
-        Logger.e(TAG, "${glyph.name}: kept unfitted, rebuilding it failed", e)
-        glyph
-    }
+    val legacyName = build().name
+    val phosphorName = phosphorIconAliases[legacyName] ?: legacyName
+    return phosphorRegularIcons[phosphorName.lowercase()]
+        ?: error("Missing Phosphor icon mapping for legacy icon: $legacyName")
 }
 
 /** 1 when the glyph already fits, is kept as drawn or cannot be measured; otherwise the shrink that fits it. */
