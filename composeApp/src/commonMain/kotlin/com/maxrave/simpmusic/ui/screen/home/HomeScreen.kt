@@ -881,7 +881,7 @@ private fun HomeAccountButton(
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(Res.string.settings), style = typo().bodyMedium) },
+                text = { Text("Settings", style = typo().bodyMedium) },
                 leadingIcon = { Icon(SimpIcons.Settings, contentDescription = null) },
                 onClick = {
                     menuOpen = false
