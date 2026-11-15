@@ -57,7 +57,6 @@ import com.maxrave.simpmusic.ui.theme.LocalIsDarkTheme
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import kotlin.reflect.KClass
 
-// How long the bar takes to morph between the tab bar and the collapsed pill.
 private const val BAR_MORPH_MS = 260
 private val BarEdgePadding = 16.dp
 private val SearchGap = 12.dp
@@ -79,22 +78,9 @@ actual fun LiquidGlassAppBottomNavigationBar(
 ) {
     val layer = rememberGraphicsLayer()
     val searchFabInteraction = rememberGlassInteraction()
-    // Only the glass reads what is behind it.
     val luminance = rememberGlassLuminance(layer, enabled = liquidGlass)
 
     val nowPlayingData by viewModel.nowPlayingState.collectAsStateWithLifecycle()
-    // MiniPlayer visibility: derived, never stored.
-    //
-    // This is a second copy of the rule App.kt applies to the plain bottom bar, and it carried the
-    // same two faults. rememberSaveable(true) makes the first composition assert "a track is
-    // playing" before anything knows — nowPlayingState starts null and only fills in once the
-    // service has connected and the queue has been restored — and the LaunchedEffect that
-    // corrected it could only run AFTER that frame had already been drawn. So the bar laid itself
-    // out with the mini player, dropped it, then brought it back, animating each step through
-    // decoupledConstraints.
-    //
-    // Fixing the copy in App.kt did nothing here, because with liquid glass on it is THIS file
-    // that draws the mini player.
     val isShowMiniPlayer by remember {
         derivedStateOf {
             val item = nowPlayingData?.mediaItem
@@ -113,7 +99,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 BottomNavScreen.Search,
             )
         }
-    // Tabs shown in the sliding bar (Apple Music style); Search lives in its own FAB.
     val barTabs =
         remember(showAnalyticsTab, showMixForYouTab) {
             listOfNotNull(
@@ -135,9 +120,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
             },
         )
     }
-    // A tab can disappear from the bar under the user: tracking gets turned off while Analytics is
-    // selected, or the YouTube session ends while Mix for you is. Fall back to Home in both cases so
-    // nothing is left highlighted.
     LaunchedEffect(showAnalyticsTab, showMixForYouTab) {
         if ((!showAnalyticsTab && selectedIndex == BottomNavScreen.Analytics.ordinal) ||
             (!showMixForYouTab && selectedIndex == BottomNavScreen.MixForYou.ordinal)
@@ -166,7 +148,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
         isExpanded = !isInSearchDestination
     }
 
-    // Flat: the bar's own 16dp side edges, so the two line up, and its 8dp gaps.
     val miniPlayerPadding = if (liquidGlass) 12.dp else 16.dp
     val miniPlayerGap = if (liquidGlass) 12.dp else 8.dp
     val constraintSet =
@@ -203,7 +184,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
         }
     }
 
-    // The folded bar is one circle holding the selected tab; tapping it opens the bar again.
     val collapsedCircle: @Composable () -> Unit = {
         val selectedScreen = bottomNavScreens.find { it.ordinal == selectedIndex } ?: BottomNavScreen.Home
         Box(
@@ -213,7 +193,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
             if (liquidGlass) {
                 selectedScreen.icon()
             } else {
-                // The flat bar marks its selected tab in primary, and this circle is that tab.
                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
                     selectedScreen.icon()
                 }
@@ -230,12 +209,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 ).padding(
                     bottom = 8.dp,
                 )
-                // The flat bar never rode above the keyboard, so it still does not.
                 .then(if (liquidGlass) Modifier.imePadding() else Modifier),
     ) {
-        // The capsule's budget: the row minus its edge padding, the gap and the search FAB. The
-        // capsule caps its tabs at TabWidth, so with two or three tabs it ends up narrower and the
-        // toolbar centres capsule + gap + FAB as one cluster (see decoupledConstraints).
         val capsuleBudget = maxWidth - BarEdgePadding * 2 - SearchGap - SearchSize
         val capsuleWidth =
             if (liquidGlass) {
@@ -248,18 +223,9 @@ actual fun LiquidGlassAppBottomNavigationBar(
             modifier = Modifier.fillMaxWidth(),
             animateChangesSpec = tween(BAR_MORPH_MS),
         ) {
-            /**
-             * LTR: HOME -> MIX FOR YOU -> LIBRARY | SEARCH
-             *
-             * ConstraintLayout plays the toolbar's frame from the folded circle out to the full bar
-             * and measures it at every width in between. The capsule is handed that growth, so the
-             * whole bar opens from the start edge in step with the mini player — never a circle
-             * drifting across and then swapped for the bar.
-             */
             Layout(
                 modifier = Modifier.layoutId("toolbar"),
                 content = {
-                    // Exactly two children, in this order, for the measure policy below.
                     if (liquidGlass) {
                         LiquidGlassTabBar(
                             tabs = barTabs,
@@ -271,7 +237,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                             onTabSelected = { position -> selectTab(barTabs[position].ordinal) },
                             collapsedContent = collapsedCircle,
                         )
-                        // Search lives in its own circular glass FAB (Apple Music style).
                         Box(
                             modifier =
                                 Modifier
@@ -279,7 +244,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                                     .drawInteractiveGlass(
                                         LocalIsDarkTheme.current,
                                         backdrop,
-                                        // Only the capsule records the shared sample; Search must not overwrite it.
                                         null,
                                         { luminance.value },
                                         CircleShape,
@@ -327,7 +291,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 val fabAlpha = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
                 layout(width, height) {
                     bar.placeRelative(0, 0)
-                    // Unplaced while hidden, so the folded bar leaves no invisible button behind.
                     if (fabAlpha > 0f) {
                         fab.placeRelativeWithLayer(capsule + gap, (height - search) / 2) {
                             alpha = fabAlpha
@@ -369,14 +332,9 @@ private fun decoupledConstraints(
             bottom.linkTo(parent.bottom)
             start.linkTo(parent.start, margin = BarEdgePadding)
             if (!isExpanded) {
-                // A fixed frame, never the content's size: ConstraintLayout re-measures the content
-                // under BOTH constraint sets whenever it recomposes, so a wrapped frame here would
-                // jump mid-animation and drag the mini player along with it.
                 width = Dimension.value(CollapsedBarSize)
                 height = Dimension.value(CollapsedBarSize)
             } else {
-                // Capsule + gap + search, centred between the edge paddings. The capsule is sized
-                // from the measured budget, so the cluster can no longer outgrow the screen.
                 end.linkTo(parent.end, margin = BarEdgePadding)
                 width = Dimension.wrapContent
                 height = Dimension.value(BarHeight)
@@ -385,8 +343,6 @@ private fun decoupledConstraints(
         val miniPlayer = createRefFor("miniPlayer")
         constrain(miniPlayer) {
             if (!isExpanded) {
-                // The card sits [miniPlayerGap] after the circle: its own side padding is pulled
-                // back out of that gap, which a link to toolbar.end could not do.
                 start.linkTo(toolbar.start, margin = CollapsedBarSize + miniPlayerGap - miniPlayerPadding)
                 end.linkTo(parent.end)
                 top.linkTo(toolbar.top)
