@@ -14,8 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import kotlin.math.PI
@@ -28,6 +26,7 @@ import kotlin.math.sin
  */
 @Composable
 fun CenterLoadingBox(modifier: Modifier) {
+    val tint = MaterialTheme.colorScheme.onSurface
     val transition = rememberInfiniteTransition(label = "ios-loading")
     val rotation by transition.animateFloat(
         initialValue = 0f,
@@ -51,7 +50,7 @@ fun CenterLoadingBox(modifier: Modifier) {
             repeat(8) { index ->
                 val angle = index * (2.0 * PI / 8.0)
                 drawCircle(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = (index + 1) / 8f),
+                    color = tint.copy(alpha = (index + 1) / 8f),
                     radius = beadRadius,
                     center = androidx.compose.ui.geometry.Offset(
                         x = center.x + cos(angle).toFloat() * orbitRadius,
