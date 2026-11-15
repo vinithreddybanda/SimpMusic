@@ -9,7 +9,7 @@ import com.adamglin.phosphoricons.regular.*
  * Compatibility receiver for the existing icon call sites. Every legacy Material Symbols entry
  * point is resolved to its Phosphor equivalent in [ImageVector.Builder.buildSimpIcon].
  */
-object SimpIcons
+object SimpIcons {}
 
 internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
     val legacy = build()
