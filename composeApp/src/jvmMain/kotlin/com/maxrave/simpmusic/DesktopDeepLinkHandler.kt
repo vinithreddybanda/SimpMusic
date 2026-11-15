@@ -106,7 +106,7 @@ object DesktopDeepLinkHandler {
 
         val actualUri = when {
             // simpmusic://open-app?url=<encoded_url>
-            (parsed.scheme == "pluto" || (parsed.scheme == "pluto" || parsed.scheme == "simpmusic")) && parsed.host == "open-app" -> {
+            (parsed.scheme == "pluto" || parsed.scheme == "simpmusic") && parsed.host == "open-app" -> {
                 val urlParam = parsed.getQueryParameter("url")
                 if (urlParam != null) {
                     Logger.d(TAG, "Extracted URL from open-app: $urlParam")
