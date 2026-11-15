@@ -224,7 +224,27 @@ actual fun LiquidGlassAppBottomNavigationBar(
             animateChangesSpec = tween(BAR_MORPH_MS),
         ) {
             Layout(
-                modifier = Modifier.layoutId("toolbar"),
+                modifier =
+                    Modifier
+                        .layoutId("toolbar")
+                        // The floating bar can be folded/unfolded directly, in addition to
+                        // following scroll direction. Up folds it; down restores the full tabs.
+                        .pointerInput(isExpanded) {
+                            var verticalDrag = 0f
+                            detectVerticalDragGestures(
+                                onVerticalDrag = { change, dragAmount ->
+                                    verticalDrag += dragAmount
+                                    change.consume()
+                                },
+                                onDragEnd = {
+                                    val threshold = 24.dp.toPx()
+                                    if (verticalDrag < -threshold) isExpanded = false
+                                    if (verticalDrag > threshold) isExpanded = true
+                                    verticalDrag = 0f
+                                },
+                                onDragCancel = { verticalDrag = 0f },
+                            )
+                        },
                 content = {
                     if (liquidGlass) {
                         LiquidGlassTabBar(
