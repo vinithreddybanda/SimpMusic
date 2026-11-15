@@ -222,6 +222,11 @@ private fun NowPlayingM3ExpressiveLayout(
     val colorScheme = MaterialTheme.colorScheme
 
     val isRepeatOne = state.controllerState.repeatState is RepeatState.One
+    val artworkPageKeys =
+        remember(state.artworkQueue) {
+            state.artworkQueue.stableArtworkPageKeys("artwork")
+        }
+
     var showOutputSheet by rememberSaveable { mutableStateOf(false) }
 
     // Canvas mode fades the info block in and out. The shell's shared 500ms linear alpha exposes
@@ -314,10 +319,7 @@ private fun NowPlayingM3ExpressiveLayout(
                                 .fillMaxWidth(),
                         beyondViewportPageCount = 1,
                         userScrollEnabled = !isRepeatOne && state.artworkQueue.isNotEmpty(),
-                        key = { idx ->
-                            val vid = state.artworkQueue.getOrNull(idx)?.videoId.orEmpty()
-                            "artwork_${vid}_$idx"
-                        },
+                        key = { idx -> artworkPageKeys.getOrNull(idx) ?: "artwork:missing:$idx" },
                     ) { page ->
                         ExpressiveArtworkCardPage(
                             state = state,
