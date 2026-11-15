@@ -9,6 +9,7 @@ import java.net.URI
 import java.security.MessageDigest
 import java.util.Properties
 import java.util.zip.ZipInputStream
+import java.util.Base64
 
 val isFullBuild: Boolean =
     try {
@@ -36,6 +37,30 @@ plugins {
 compose.resources {
     generateResClass = always
     packageOfResClass = "simpmusic.composeapp.generated.resources"
+}
+
+/**
+ * The font is kept as base64 text because the repository edit API only accepts UTF-8 files.
+ * Decode it before Compose Multiplatform copies/generates resource accessors.
+ */
+val decodeInterFont by tasks.registering {
+    val encoded = layout.projectDirectory.file("src/commonMain/composeResources/font/inter_variable.ttf.b64")
+    val decoded = layout.projectDirectory.file("src/commonMain/composeResources/font/inter_variable.ttf")
+    inputs.file(encoded)
+    outputs.file(decoded)
+    doLast {
+        decoded.asFile.writeBytes(Base64.getMimeDecoder().decode(encoded.asFile.readText()))
+    }
+}
+
+tasks.configureEach {
+    if (
+        name.startsWith("generateResourceAccessorsFor") ||
+        name.startsWith("copyNonXmlValueResourcesFor") ||
+        name.startsWith("prepareComposeResourcesTaskFor")
+    ) {
+        dependsOn(decodeInterFont)
+    }
 }
 
 kotlin {
