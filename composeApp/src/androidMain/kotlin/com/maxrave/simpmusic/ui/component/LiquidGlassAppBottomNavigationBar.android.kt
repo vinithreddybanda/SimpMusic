@@ -287,7 +287,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                     if (constraints.hasFixedHeight) {
                         constraints.maxHeight
                     } else {
-                        BarHeight.roundToPx().coerceIn(constraints.minHeight, constraints.maxHeight)
+                        (if (liquidGlass) BarHeight.roundToPx() else 64.dp.roundToPx()).coerceIn(constraints.minHeight, constraints.maxHeight)
                     }
                 val progress = ((width - folded).toFloat() / (expanded - folded).coerceAtLeast(1)).coerceIn(0f, 1f)
                 val bar = measurables[0].measure(Constraints.fixed(lerp(folded, capsule, progress), height))
