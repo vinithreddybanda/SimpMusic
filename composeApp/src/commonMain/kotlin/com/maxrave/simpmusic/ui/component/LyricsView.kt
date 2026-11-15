@@ -559,6 +559,23 @@ fun LyricsView(
     // so a new song's first line counts as the next line rather than as a jump.
     val stagger = remember(displayLines) { LyricsStagger() }
 
+    // Timed lyrics use their timestamp as identity; unsynced/repeated lines use their text
+    // plus an occurrence suffix. This keeps a chorus row's composition stable when the source
+    // inserts a timed interlude, without changing the index-based playhead/scroll contract.
+    val lyricLineKeys =
+        remember(displayLines.lines) {
+            val occurrences = mutableMapOf<String, Int>()
+            displayLines.lines.mapIndexed { index, line ->
+                val identity =
+                    line.startTimeMs.takeIf { it.isNotBlank() }?.let { "time:$it" }
+                        ?: line.words.takeIf { it.isNotBlank() }?.let { "text:$it" }
+                        ?: "blank:$index"
+                val occurrence = occurrences[identity] ?: 0
+                occurrences[identity] = occurrence + 1
+                "lyric:$identity:$occurrence"
+            }
+        }
+
     LaunchedEffect(currentLineIndex, lyricsData.lyrics.syncType, appleStyle, stagger) {
         if (currentLineIndex > -1 &&
             (lyricsData.lyrics.syncType == "LINE_SYNCED" || lyricsData.lyrics.syncType == "RICH_SYNCED")
@@ -588,7 +605,11 @@ fun LyricsView(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = tailPadding),
         ) {
-            items(displayLines.lines.size) { index ->
+            items(
+                count = displayLines.lines.size,
+                key = { index -> lyricLineKeys.getOrNull(index) ?: "lyric:$index" },
+                contentType = { "lyric-line" },
+            ) { index ->
                 val line = displayLines.lines.getOrNull(index)
                 // A dots line stands for silence, so it has nothing to translate or romanize. Worth
                 // saying out loud for the translation: that map matches by TIME, and the silence
