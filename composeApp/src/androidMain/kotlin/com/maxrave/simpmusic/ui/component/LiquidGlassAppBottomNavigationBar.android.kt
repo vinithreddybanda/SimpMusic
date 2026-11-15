@@ -58,9 +58,9 @@ import com.maxrave.simpmusic.viewModel.SharedViewModel
 import kotlin.reflect.KClass
 
 private const val BAR_MORPH_MS = 260
-private val BarEdgePadding = 16.dp
-private val SearchGap = 12.dp
-private val SearchSize = 56.dp
+private val BarEdgePadding = 12.dp
+private val SearchGap = 8.dp
+private val SearchSize = 48.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -148,8 +148,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
         isExpanded = !isInSearchDestination
     }
 
-    val miniPlayerPadding = if (liquidGlass) 12.dp else 16.dp
-    val miniPlayerGap = if (liquidGlass) 12.dp else 8.dp
+    val miniPlayerPadding = if (liquidGlass) 10.dp else 12.dp
+    val miniPlayerGap = if (liquidGlass) 8.dp else 6.dp
     val constraintSet =
         remember(isShowMiniPlayer, isExpanded, liquidGlass) {
             decoupledConstraints(isShowMiniPlayer, isExpanded, miniPlayerPadding, miniPlayerGap)
@@ -207,7 +207,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 .padding(
                     WindowInsets.navigationBars.asPaddingValues(),
                 ).padding(
-                    bottom = 8.dp,
+                    bottom = 4.dp,
                 )
                 .then(if (liquidGlass) Modifier.imePadding() else Modifier),
     ) {
@@ -248,6 +248,10 @@ actual fun LiquidGlassAppBottomNavigationBar(
                                         { luminance.value },
                                         CircleShape,
                                         searchFabInteraction,
+                                        pressedScale = 1.04f,
+                                        blurScale = 0.55f,
+                                        minScrim = 0.18f,
+                                        maxScrim = 0.36f,
                                     ).clickable { selectTab(BottomNavScreen.Search.ordinal) },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -304,7 +308,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 Modifier
                     .fillMaxWidth()
                     .padding(horizontal = miniPlayerPadding)
-                    .height(56.dp)
+                    .height(52.dp)
                     .layoutId("miniPlayer"),
                 backdrop = backdrop,
                 isVisible = isShowMiniPlayer,
