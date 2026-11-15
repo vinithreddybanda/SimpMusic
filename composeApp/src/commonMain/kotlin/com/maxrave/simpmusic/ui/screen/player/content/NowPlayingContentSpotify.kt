@@ -214,6 +214,11 @@ fun NowPlayingContentSpotify(
     val uriHandler = LocalUriHandler.current
 
     val isRepeatOne = state.controllerState.repeatState is RepeatState.One
+    val artworkPageKeys =
+        remember(state.artworkQueue) {
+            state.artworkQueue.stableArtworkPageKeys("artwork")
+        }
+
 
     var showShareLyricsSheet by rememberSaveable { mutableStateOf(false) }
     var showLyricsOffsetBar by rememberSaveable { mutableStateOf(false) }
@@ -339,10 +344,7 @@ fun NowPlayingContentSpotify(
                                 .fillMaxWidth(),
                         beyondViewportPageCount = 1,
                         userScrollEnabled = !isRepeatOne && state.artworkQueue.isNotEmpty(),
-                        key = { idx ->
-                            val vid = state.artworkQueue.getOrNull(idx)?.videoId.orEmpty()
-                            "artwork_${vid}_$idx"
-                        },
+                        key = { idx -> artworkPageKeys.getOrNull(idx) ?: "artwork:missing:$idx" },
                     ) { page ->
                         val pageTrack = state.artworkQueue.getOrNull(page)
                         val isCurrentArtworkPage = page == state.currentOrderIndex
