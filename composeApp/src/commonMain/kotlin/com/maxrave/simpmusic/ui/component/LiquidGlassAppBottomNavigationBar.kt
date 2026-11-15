@@ -1,15 +1,10 @@
 package com.maxrave.simpmusic.ui.component
 
 import androidx.compose.material3.Icon
+import com.adamglin.PhosphorIcons
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
-import com.maxrave.simpmusic.ui.icon.AutoGraph
-import com.maxrave.simpmusic.ui.icon.Home
-import com.maxrave.simpmusic.ui.icon.LibraryMusic
-import com.maxrave.simpmusic.ui.icon.Search
-import com.maxrave.simpmusic.ui.icon.Sensors
-import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.navigation.destination.home.AnalyticsDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination
@@ -52,7 +47,7 @@ sealed class BottomNavScreen(
         title = Res.string.home,
         icon = {
             Icon(
-                SimpIcons.Home,
+                PhosphorIcons.Regular.House,
                 contentDescription = null,
             )
         },
@@ -64,7 +59,7 @@ sealed class BottomNavScreen(
         title = Res.string.search,
         icon = {
             Icon(
-                SimpIcons.Search,
+                PhosphorIcons.Regular.MagnifyingGlass,
                 contentDescription = null,
             )
         },
@@ -76,7 +71,7 @@ sealed class BottomNavScreen(
         title = Res.string.library,
         icon = {
             Icon(
-                imageVector = SimpIcons.LibraryMusic,
+                imageVector = PhosphorIcons.Regular.Books,
                 contentDescription = null,
             )
         },
@@ -89,7 +84,7 @@ sealed class BottomNavScreen(
         title = Res.string.analytics,
         icon = {
             Icon(
-                imageVector = SimpIcons.AutoGraph,
+                imageVector = PhosphorIcons.Regular.ChartLineUp,
                 contentDescription = null,
             )
         },
@@ -104,7 +99,7 @@ sealed class BottomNavScreen(
         title = Res.string.mix,
         icon = {
             Icon(
-                imageVector = SimpIcons.Sensors,
+                imageVector = PhosphorIcons.Regular.Waveform,
                 contentDescription = null,
             )
         },
