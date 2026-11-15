@@ -146,6 +146,8 @@ okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 androidx-room-migration = { module = "androidx.room:room-migration", version.ref = "room" }
