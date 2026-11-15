@@ -206,11 +206,8 @@ import simpmusic.composeapp.generated.resources.top_artists
 import simpmusic.composeapp.generated.resources.what_is_best_choice_today
 import simpmusic.composeapp.generated.resources.workout
 
-// The height the first item lost with the old app bar (64dp + the 50dp chip row, now one 56dp row) and
-// the Welcome back row (81dp), which Home's top glow still has to cover.
 private val HomeGlowOverflow = 140.dp
 
-// The moods behind the Mood chip, each with the Home params it loads.
 private val homeMoods =
     listOf(
         Res.string.relax to HOME_PARAMS_RELAX,
@@ -241,9 +238,6 @@ fun HomeScreen(
     val isScrollingUp by scrollState.isScrollingUp()
     val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     val homeData by viewModel.homeItemList.collectAsStateWithLifecycle()
-    // Any shelf YouTube heads with the listener's own avatar over its title (Listen again is one of
-    // several). Home's header already shows the avatar, so those shelves drop it and keep their name
-    // and title. Matched on the name rather than on any shelf title, the way the old Welcome back row did.
     val homeShelves =
         remember(homeData, accountInfo) {
             val accountName = accountInfo?.first
@@ -269,17 +263,10 @@ fun HomeScreen(
     val homeListState by viewModel.homeListState.collectAsStateWithLifecycle()
     val continuation by viewModel.continuation.collectAsStateWithLifecycle()
 
-    // The language part of the BCP 47 tag: Android's Locale.language still reports the legacy "in"
-    // for Indonesian and "iw" for Hebrew, while the config is keyed "id" and "he".
     val language = Locale.current.toLanguageTag().substringBefore('-')
 
     val backgroundColor = MaterialTheme.colorScheme.background
     val isLightTheme = backgroundColor.luminance() > 0.5f
-    // What is ACTUALLY painted behind this screen. The desktop shell wraps content in a rounded
-    // panel (App.kt: surfaceContainer on light, desktopPanelDark on dark) — deliberately not
-    // colorScheme.background — so a gradient tail aimed at colorScheme.background ends on the
-    // wrong colour and draws a seam where the first item stops. Same light check as App.kt's
-    // isLightScheme.
     val pageBackground =
         if (getPlatform() == Platform.Desktop) {
             if (isLightTheme) MaterialTheme.colorScheme.surfaceContainer else desktopPanelDark
@@ -291,9 +278,6 @@ fun HomeScreen(
     }
     val animatedColor by animateColorAsState(topHeaderColor, tween(500))
     val mainHomeThumbnail by viewModel.mainHomeThumbnail.collectAsStateWithLifecycle()
-    // YouTube's Home backdrop, drawn over the tint taken from the first card's artwork. A response
-    // that carries none keeps the tint alone, and a failed load drops the image and its scrim,
-    // leaving the tint as it was.
     val headerImage by viewModel.homeBackground.collectAsStateWithLifecycle()
     var headerImageFailed by remember(headerImage) { mutableStateOf(false) }
     val imageHttpClient = remember { HttpClient(CIO) }
@@ -316,8 +300,6 @@ fun HomeScreen(
 
     LaunchedEffect(dominantColorState, isLightTheme) {
         snapshotFlow { dominantColorState.color }.collect {
-            // Light theme: pull the artwork color toward white for a soft pastel header;
-            // dark theme keeps the original darkened tone.
             topHeaderColor = if (isLightTheme) lerp(it, Color.White, 0.85f) else it.rgbFactor(0.3f)
         }
     }
@@ -329,14 +311,11 @@ fun HomeScreen(
     var moodExpanded by rememberSaveable {
         mutableStateOf(false)
     }
-    // Derived, so scrolling recomposes only when the page reaches or leaves its very top.
     val atTop by remember {
         derivedStateOf { scrollState.firstVisibleItemIndex == 0 && scrollState.firstVisibleItemScrollOffset == 0 }
     }
     val hazeState =
         rememberHazeState()
-    // The floating chip row refracts the page scrolling under it, so the page is the glass source and
-    // the row its sibling (nesting the row inside the source is the RuntimeShader feedback loop).
     val chipBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
 
     LaunchedEffect(scrollState) {
@@ -376,7 +355,6 @@ fun HomeScreen(
             }
         }
     }
-    // Home does not schedule promotional, review, or contribution prompts.
 
     val shouldStartPaginate =
         remember {
@@ -400,15 +378,6 @@ fun HomeScreen(
             )
         }
     }
-
-//    if (shouldShowGetDataSyncIdBottomSheet) {
-//        GetDataSyncIdBottomSheet(
-//            cookie = youTubeCookie,
-//            onDismissRequest = {
-//                shouldShowGetDataSyncIdBottomSheet = false
-//            },
-//        )
-//    }
 
     Box {
         PullToRefreshBox(
@@ -472,19 +441,7 @@ fun HomeScreen(
                                     Box(
                                         modifier =
                                             Modifier
-                                                // matchParentSize, not height(300.dp): 300 is the
-                                                // height of this shelf ON A PHONE. On a desktop
-                                                // window the first item is taller, the gradient
-                                                // stopped mid-item and everything below it fell
-                                                // back to the flat background — a hard colour seam
-                                                // straight across Home. Sized by the item, the
-                                                // bottom scrim always lands on the item's edge.
                                                 .matchParentSize()
-                                                // The glow used to reach down past the old app bar and
-                                                // the Welcome back row, both gone with the Spotify
-                                                // header. It keeps that reach by running on below the
-                                                // first item instead of making the item taller; what
-                                                // runs over is the scrim's tail, already faded out.
                                                 .layout { measurable, constraints ->
                                                     val height = constraints.maxHeight + HomeGlowOverflow.roundToPx()
                                                     val placeable =
@@ -505,10 +462,6 @@ fun HomeScreen(
                                                 onError = { headerImageFailed = true },
                                                 modifier = Modifier.fillMaxSize(),
                                             )
-                                            // Always over the image, which can be very bright: a layer of the
-                                            // page's own colour tones it down in either theme and fades it
-                                            // into the page along the tint's own 25° line, not in a flat
-                                            // band at the bottom.
                                             Box(
                                                 Modifier
                                                     .fillMaxSize()
@@ -519,9 +472,6 @@ fun HomeScreen(
                                             modifier =
                                                 Modifier
                                                     .fillMaxWidth()
-                                                    // A share of the glow, not a fixed 180dp: on a glow
-                                                    // ~560dp tall, 180dp made a long flat field that
-                                                    // dropped off in one short step.
                                                     .fillMaxHeight(0.6f)
                                                     .align(Alignment.BottomCenter)
                                                     .background(artworkScrimBrush(pageBackground)),
@@ -534,8 +484,6 @@ fun HomeScreen(
                                             .padding(horizontal = 15.dp),
                                 ) {
                                     if (index == 0) {
-                                        // The header's own height plus 8dp, so the first section does not
-                                        // sit right under the chips.
                                         Spacer(
                                             Modifier.height(
                                                 with(LocalDensity.current) { topAppBarHeightPx.toDp() } + 8.dp,
@@ -718,9 +666,6 @@ fun HomeScreen(
                 }
             }
         }
-        // Spotify's header: the avatar, the chips and Create on one row, with no app bar. At the
-        // top of the page it sits straight on the artwork glow; once the page scrolls under it, the blurred
-        // bar fades in behind it.
         AnimatedContent(
             targetState = atTop,
             transitionSpec = {
@@ -750,16 +695,9 @@ fun HomeScreen(
                                 WindowInsets.statusBars,
                             ),
                 )
-                // The avatar stays put and the chips scroll only to its right, clipped there instead of
-                // passing over it, each end faded while chips wait past that edge. On a phone held
-                // upright Create rides at the end of the chip row: the row is at least as wide as its
-                // strip, so at rest Create sits at the right edge, and a Mood that opens wide pushes it
-                // along instead of sliding under it. On Desktop and in landscape Create stays put at the
-                // right edge, like the avatar.
                 val createPinned = getPlatform() == Platform.Desktop || getScreenSizeInfo().let { it.wDP >= it.hDP }
                 val chipHeadFade by animateFloatAsState(if (chipRowState.canScrollBackward) 1f else 0f)
                 val chipTailFade by animateFloatAsState(if (chipRowState.canScrollForward) 1f else 0f)
-                // Notifications moved into the avatar menu, Listen Together into the Create sheet.
                 val createActions: @Composable () -> Unit = {
                     CreateActions(
                         backdrop = chipBackdrop,
@@ -839,11 +777,6 @@ fun HomeScreen(
     }
 }
 
-/**
- * Fades each end of the chip strip out (a DstIn mask) while chips wait past that edge, so the row
- * reads as running on rather than cut off. [start] and [end] ease each fade in and out and are read
- * at draw time. Smoothstep, like every fade in the app: a linear ramp shows a line where it begins.
- */
 internal fun Modifier.chipStripEdgeFades(
     width: Dp,
     start: () -> Float,
@@ -874,8 +807,6 @@ internal fun Modifier.chipStripEdgeFades(
             }
         }
 
-// Opaque → transparent left to right when [fadingOut], the other way round otherwise; [fade] scales
-// how far towards transparent the far end goes.
 private fun chipFadeStops(
     fade: Float,
     fadingOut: Boolean,
@@ -888,11 +819,6 @@ private fun chipFadeStops(
 
 private const val CHIP_FADE_STEPS = 24
 
-/**
- * The avatar at the start of Home's header. It opens a menu showing who is signed in and the
- * greeting the old app bar used to show. Signed out, the avatar is a person glyph and the menu
- * offers the log-in.
- */
 @Composable
 private fun HomeAccountButton(
     accountName: String?,
@@ -900,7 +826,6 @@ private fun HomeAccountButton(
     navController: NavController,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
-    // Sign-out blanks the stored account name, so a blank name is the signed-out state.
     val signedIn = !accountName.isNullOrBlank()
     val displayName = if (signedIn) accountName.orEmpty() else stringResource(Res.string.guest)
     val hour = remember { now().time.hour }
@@ -917,7 +842,6 @@ private fun HomeAccountButton(
         AccountAvatar(
             signedIn = signedIn,
             thumbnailUrl = thumbnailUrl,
-            // The Create pill's height, as Apple sizes an avatar like the glass buttons beside it.
             size = 44.dp,
             contentDescription = displayName,
             modifier = Modifier.clickable { menuOpen = true },
@@ -925,9 +849,6 @@ private fun HomeAccountButton(
         DropdownMenu(
             expanded = menuOpen,
             onDismissRequest = { menuOpen = false },
-            // The draft's 280dp (also Material's widest menu item) instead of wrapping its content,
-            // which left the menu as narrow as its longest row. Capped, not fixed: a window narrower
-            // than that gets a menu as wide as the window instead of one that runs off it.
             modifier =
                 Modifier
                     .widthIn(max = 280.dp)
@@ -1020,13 +941,8 @@ private fun AccountAvatar(
     }
 }
 
-// Portrait fills the width with one column (the next one peeking in). On a landscape window that one
-// column stretched across the whole screen, so every row there is capped instead.
 private val LandscapeGridItemMaxWidth = 400.dp
 
-// A card shelf of songs only that leads to no page of its own ("Your daily discover"). List shelves
-// (Quick picks, Heard in Shorts) carry itemsPerColumn and keep their own look; a shelf with a More
-// page (Listen again can be all songs) keeps its cards; videos draw as wide cards, so never match.
 private fun HomeItem.isSongCardShelf(): Boolean =
     itemsPerColumn == null &&
         moreEndpoint == null &&
@@ -1148,10 +1064,6 @@ fun MoodMomentAndGenre(
             text = stringResource(Res.string.let_s_pick_a_playlist_for_you),
             style = typo().bodyMedium,
         )
-        // One block per section YouTube returned, headed by ITS OWN title. Hard-coding
-        // "Moods & moment" / "Genre" here (and reading mood.moodsMoments / mood.genres by
-        // index) mislabelled every row as soon as a signed-in account got an extra
-        // "For you" section, and hid the real Genres section altogether.
         mood.sections.forEach { section ->
             val gridState = rememberLazyGridState()
             val flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = gridState))
@@ -1224,7 +1136,6 @@ fun ChartData(
     val density = LocalDensity.current
 
     val lazyListState2 = rememberLazyGridState()
-    // Start, not the default Center: a centred column leaves the one before it cut through its rank.
     val snapperFlingBehavior2 =
         rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = lazyListState2, snapPosition = SnapPosition.Start))
     val isPortrait = getScreenSizeInfo().let { it.wDP < it.hDP }
@@ -1311,7 +1222,6 @@ fun ChartData(
             scrollState = lazyListState2,
             flingBehavior = snapperFlingBehavior2,
         )
-        // Ranked podcast shows, laid out exactly like the artist chart above.
         chart.podcasts?.let { podcasts ->
             Text(
                 text = podcasts.title,
