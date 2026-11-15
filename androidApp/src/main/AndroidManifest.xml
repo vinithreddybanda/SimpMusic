@@ -10,30 +10,26 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Only Android 9 and older need this: there MediaStore still writes through shared
-         storage. From Android 10 an app writing its own new image needs no permission, and
-         SaveImagePermission grants without asking — so the declaration stops at 28 to match. -->
+
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="androidx.car.app.MEDIA_TEMPLATES" />
-    <!-- Login sync: scanning the QR shown by SimpMusic Desktop. -->
+
     <uses-permission android:name="android.permission.CAMERA" />
-    <!-- Login sync reaches the computer by its LAN address. Only enforced for apps targeting
-         Android 17 (API 37) and up, where it is a runtime permission; LoginSync.android.kt asks
-         for it then. Declared now so a targetSdk bump cannot make the connection silently time out. -->
+
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
-    <!-- Song recognition in Search: a few seconds of microphone audio, fingerprinted for Shazam. -->
+
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <uses-feature
         android:name="android.hardware.type.automotive"
         android:required="false" />
-    <!-- Requesting CAMERA implies a required camera, which would hide the app from TVs and cars. -->
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-    <!-- Likewise RECORD_AUDIO implies a required microphone. -->
+
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="false" />
@@ -100,15 +96,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <!-- Car App Library: host asks to surface the media playback screen
-                 (minimized control panel tap, system media surfaces) -->
             <intent-filter>
                 <action android:name="androidx.car.app.media.action.SHOW_MEDIA_PLAYBACK" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <!-- Youtube filter -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
@@ -123,15 +116,15 @@
                 <data android:host="m.youtube.com" />
                 <data android:host="www.youtube.com" />
                 <data android:host="music.youtube.com" />
-                <!-- video prefix -->
+
                 <data android:pathPrefix="/v/" />
                 <data android:pathPrefix="/embed/" />
                 <data android:pathPrefix="/watch" />
-                <!-- channel prefix -->
+
                 <data android:pathPrefix="/channel/" />
                 <data android:pathPrefix="/user/" />
                 <data android:pathPrefix="/c/" />
-                <!-- playlist prefix -->
+
                 <data android:pathPrefix="/playlist" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
@@ -159,7 +152,6 @@
                 <data android:scheme="vnd.youtube.launch" />
             </intent-filter>
 
-            <!-- SimpMusic deep link filter (https) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -171,7 +163,6 @@
                 <data android:pathPrefix="/app/" />
             </intent-filter>
 
-            <!-- SimpMusic deep link filter (custom scheme) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -182,8 +173,6 @@
                 <data android:scheme="simpmusic" />
             </intent-filter>
 
-            <!-- Last.fm auth callback. The scheme is fixed by the callback URL registered on the
-                 Last.fm API account, so it is not "simpmusic". -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -195,7 +184,6 @@
                     android:scheme="wordbyword" />
             </intent-filter>
 
-            <!-- Share filter -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -292,12 +280,10 @@
             </intent-filter>
         </service>
 
-
         <meta-data
             android:name="io.sentry.auto-init"
             android:value="false" />
 
-        <!-- Quick Settings tile: a shortcut to the song recognition sheet (simpmusic://recognize). -->
         <service
             android:name=".service.RecognitionTileService"
             android:exported="true"
@@ -308,7 +294,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
-
 
         <receiver android:name=".ui.widget.TurntableWidgetReceiver"
             android:label="@string/widget_turntable_label"
