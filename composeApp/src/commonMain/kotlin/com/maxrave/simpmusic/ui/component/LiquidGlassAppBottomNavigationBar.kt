@@ -2,6 +2,18 @@ package com.maxrave.simpmusic.ui.component
 
 import androidx.compose.material3.Icon
 import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Fill
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.fill.Books
+import com.adamglin.phosphoricons.fill.ChartLineUp
+import com.adamglin.phosphoricons.fill.House
+import com.adamglin.phosphoricons.fill.MagnifyingGlass
+import com.adamglin.phosphoricons.fill.Waveform
+import com.adamglin.phosphoricons.regular.Books as RegularBooks
+import com.adamglin.phosphoricons.regular.ChartLineUp as RegularChartLineUp
+import com.adamglin.phosphoricons.regular.House as RegularHouse
+import com.adamglin.phosphoricons.regular.MagnifyingGlass as RegularMagnifyingGlass
+import com.adamglin.phosphoricons.regular.Waveform as RegularWaveform
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
@@ -39,15 +51,15 @@ sealed class BottomNavScreen(
     val ordinal: Int,
     val destination: Any,
     val title: StringResource,
-    val icon: @Composable () -> Unit,
+    val icon: @Composable (selected: Boolean) -> Unit,
 ) {
     data object Home : BottomNavScreen(
         ordinal = 0,
         destination = HomeDestination,
         title = Res.string.home,
-        icon = {
+        icon = { selected ->
             Icon(
-                PhosphorIcons.Regular.House,
+                if (selected) PhosphorIcons.Fill.House else PhosphorIcons.Regular.House,
                 contentDescription = null,
             )
         },
@@ -57,9 +69,9 @@ sealed class BottomNavScreen(
         ordinal = 1,
         destination = SearchDestination,
         title = Res.string.search,
-        icon = {
+        icon = { selected ->
             Icon(
-                PhosphorIcons.Regular.MagnifyingGlass,
+                if (selected) PhosphorIcons.Fill.MagnifyingGlass else PhosphorIcons.Regular.MagnifyingGlass,
                 contentDescription = null,
             )
         },
@@ -69,9 +81,9 @@ sealed class BottomNavScreen(
         ordinal = 2,
         destination = LibraryDestination,
         title = Res.string.library,
-        icon = {
+        icon = { selected ->
             Icon(
-                imageVector = PhosphorIcons.Regular.Books,
+                imageVector = if (selected) PhosphorIcons.Fill.Books else PhosphorIcons.Regular.Books,
                 contentDescription = null,
             )
         },
@@ -82,9 +94,9 @@ sealed class BottomNavScreen(
         ordinal = 3,
         destination = AnalyticsDestination,
         title = Res.string.analytics,
-        icon = {
+        icon = { selected ->
             Icon(
-                imageVector = PhosphorIcons.Regular.ChartLineUp,
+                imageVector = if (selected) PhosphorIcons.Fill.ChartLineUp else PhosphorIcons.Regular.ChartLineUp,
                 contentDescription = null,
             )
         },
@@ -97,9 +109,9 @@ sealed class BottomNavScreen(
         ordinal = 4,
         destination = MixForYouDestination,
         title = Res.string.mix,
-        icon = {
+        icon = { selected ->
             Icon(
-                imageVector = PhosphorIcons.Regular.Waveform,
+                imageVector = if (selected) PhosphorIcons.Fill.Waveform else PhosphorIcons.Regular.Waveform,
                 contentDescription = null,
             )
         },
