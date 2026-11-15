@@ -79,6 +79,8 @@ import com.maxrave.simpmusic.getPlatform
 import com.maxrave.simpmusic.utils.LyricsPromo
 import com.maxrave.simpmusic.utils.VersionManager
 import com.maxrave.simpmusic.utils.decodeLyricsPromos
+import com.maxrave.simpmusic.utils.shownPromoIds
+import com.maxrave.simpmusic.utils.withShownPromo
 import com.maxrave.simpmusic.viewModel.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -730,6 +732,22 @@ class SharedViewModel(
             .getString(Promo.cacheKey(appIdentity.isDevBuild))
             .distinctUntilChanged()
             .map(::decodeLyricsPromos)
+
+    fun shownPromosFlow(): Flow<Set<String>> =
+        dataStoreManager
+            .getString(Promo.shownKey(appIdentity.isDevBuild))
+            .distinctUntilChanged()
+            .map { shownPromoIds(stored = it, appVersion = VersionManager.getVersionName()) }
+
+    fun markPromoShown(id: String) {
+        viewModelScope.launch {
+            val key = Promo.shownKey(appIdentity.isDevBuild)
+            dataStoreManager.putString(
+                key,
+                withShownPromo(dataStoreManager.getString(key).first(), VersionManager.getVersionName(), id),
+            )
+        }
+    }
 
     // A Library tab asked for from outside the Library screen (a deep link); the screen selects it
     // the next time it composes and clears the request.
