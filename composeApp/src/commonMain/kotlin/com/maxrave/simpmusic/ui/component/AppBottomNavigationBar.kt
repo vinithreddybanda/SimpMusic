@@ -256,7 +256,7 @@ internal fun FlatTabBar(
                             verticalArrangement = Arrangement.Center,
                         ) {
                             CompositionLocalProvider(LocalContentColor provides contentColor) {
-                                screen.icon()
+                                screen.icon(selected)
                             }
                             Text(
                                 stringResource(screen.title),
