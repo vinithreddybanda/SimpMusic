@@ -457,9 +457,16 @@ fun HomeScreen(
                         state = scrollState,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        itemsIndexed(homeShelves, key = { _, item ->
-                            item.hashCode().toString() + (mainHomeThumbnail ?: "nothumb")
-                        }) { index, item ->
+                        itemsIndexed(
+                            homeShelves,
+                            key = { _, item ->
+                                val firstContentId =
+                                    item.contents.firstNotNullOfOrNull { content ->
+                                        content?.videoId ?: content?.browseId ?: content?.playlistId
+                                    }.orEmpty()
+                                "${item.title}:${item.moreEndpoint?.browseId.orEmpty()}:${item.channelId.orEmpty()}:$firstContentId"
+                            },
+                        ) { index, item ->
                             Box {
                                 if (index == 0) {
                                     Box(
