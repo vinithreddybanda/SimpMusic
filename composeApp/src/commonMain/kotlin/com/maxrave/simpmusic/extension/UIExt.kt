@@ -726,11 +726,13 @@ fun barBlurStyle(
         fallbackColorEffect(HazeColorEffect.tint(tint.copy(alpha = 1f)))
     }
 
-/** [HazeMaterials.ultraThin] for the plain top bars, with the same opaque fallback as [barBlurStyle]. */
+/** [HazeMaterials.ultraThin] with a translucent fallback, never a solid top-bar slab. */
 @Composable
 fun ultraThinBarStyle(): HazeBlurStyle {
     val surface = MaterialTheme.colorScheme.surface
-    return HazeMaterials.ultraThin(surface).then { fallbackColorEffect(HazeColorEffect.tint(surface)) }
+    return HazeMaterials.ultraThin(surface).then {
+        fallbackColorEffect(HazeColorEffect.tint(surface.copy(alpha = 0.18f)))
+    }
 }
 
 /**
