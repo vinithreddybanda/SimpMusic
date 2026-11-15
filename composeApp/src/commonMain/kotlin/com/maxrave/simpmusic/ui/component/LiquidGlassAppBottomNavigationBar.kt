@@ -59,7 +59,7 @@ sealed class BottomNavScreen(
         title = Res.string.home,
         icon = { selected ->
             Icon(
-                if (selected) PhosphorIcons.Fill.House else PhosphorIcons.Regular.House,
+                if (selected) PhosphorIcons.Fill.House else PhosphorIcons.Regular.RegularHouse,
                 contentDescription = null,
             )
         },
@@ -71,7 +71,7 @@ sealed class BottomNavScreen(
         title = Res.string.search,
         icon = { selected ->
             Icon(
-                if (selected) PhosphorIcons.Fill.MagnifyingGlass else PhosphorIcons.Regular.MagnifyingGlass,
+                if (selected) PhosphorIcons.Fill.MagnifyingGlass else PhosphorIcons.Regular.RegularMagnifyingGlass,
                 contentDescription = null,
             )
         },
@@ -83,7 +83,7 @@ sealed class BottomNavScreen(
         title = Res.string.library,
         icon = { selected ->
             Icon(
-                imageVector = if (selected) PhosphorIcons.Fill.Books else PhosphorIcons.Regular.Books,
+                imageVector = if (selected) PhosphorIcons.Fill.Books else PhosphorIcons.Regular.RegularBooks,
                 contentDescription = null,
             )
         },
@@ -96,7 +96,7 @@ sealed class BottomNavScreen(
         title = Res.string.analytics,
         icon = { selected ->
             Icon(
-                imageVector = if (selected) PhosphorIcons.Fill.ChartLineUp else PhosphorIcons.Regular.ChartLineUp,
+                imageVector = if (selected) PhosphorIcons.Fill.ChartLineUp else PhosphorIcons.Regular.RegularChartLineUp,
                 contentDescription = null,
             )
         },
@@ -111,7 +111,7 @@ sealed class BottomNavScreen(
         title = Res.string.mix,
         icon = { selected ->
             Icon(
-                imageVector = if (selected) PhosphorIcons.Fill.Waveform else PhosphorIcons.Regular.Waveform,
+                imageVector = if (selected) PhosphorIcons.Fill.Waveform else PhosphorIcons.Regular.RegularWaveform,
                 contentDescription = null,
             )
         },
