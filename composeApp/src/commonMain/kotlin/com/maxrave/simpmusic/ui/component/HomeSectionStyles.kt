@@ -90,6 +90,8 @@ fun HomeDiscoverSection(
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             // A phone narrower than two targets still gets one large card with neighbours beside it.
             val heroWidth = (maxWidth * 0.74f).coerceAtMost(HERO_TARGET_WIDTH)
+            // Phones keep a near-square card; wider windows can use the full hero height.
+            val heroHeight = (heroWidth * 0.92f).coerceIn(256.dp, 320.dp)
             HorizontalCenteredHeroCarousel(
                 state = state,
                 maxItemWidth = heroWidth,
@@ -101,7 +103,7 @@ fun HomeDiscoverSection(
                         .fillMaxWidth()
                         // The gap other shelves get from their cards' own 10dp top padding.
                         .padding(top = 10.dp)
-                        .height(320.dp)
+                        .height(heroHeight)
                         .mouseDragScroll(state, flingBehavior),
             ) { index ->
                 val song = songs[index]
