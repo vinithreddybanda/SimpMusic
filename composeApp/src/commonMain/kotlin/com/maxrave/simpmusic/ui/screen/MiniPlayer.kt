@@ -292,7 +292,15 @@ fun MiniPlayer(
                 modifier
                     .then(
                         if (isLiquidGlassEnabled == DataStoreManager.TRUE) {
-                            Modifier.liquidGlass(backdrop, layer, luminance, RoundedCornerShape(16.dp))
+                            Modifier.liquidGlass(
+                                backdrop,
+                                layer,
+                                luminance,
+                                RoundedCornerShape(16.dp),
+                                blurScale = 0.55f,
+                                minScrim = 0.16f,
+                                maxScrim = 0.36f,
+                            )
                         } else {
                             Modifier
                         },
