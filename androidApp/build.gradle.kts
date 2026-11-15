@@ -111,7 +111,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    // enable view binding
     buildFeatures {
         viewBinding = true
         compose = true
@@ -135,17 +134,7 @@ android {
             )
         resources {
             excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
-            // kuromoji ships the SAME META-INF/CONTRIBUTORS.md and META-INF/LICENSE.md in both
-            // kuromoji-ipadic and the kuromoji-core it depends on, and mergeDebugJavaResource
-            // refuses to pick between two files at one path. Excluded by pattern rather than by
-            // name: dropping only CONTRIBUTORS.md moves the failure to LICENSE.md on the next
-            // build. Nothing here is code — these are documentation files.
             excludes += "META-INF/*.md"
-            // kuromoji's ipadic dictionary is ~13 MB of .bin resources — the whole reason the APK
-            // grew by 14.4 MB. Android fetches the same eight files on demand instead (see
-            // KuromojiDictionary in lyricsService androidMain), so the classpath copies are
-            // dropped here. Desktop is untouched: its jars keep the resources and kuromoji's
-            // default classpath resolver keeps working there.
             excludes += "com/atilika/kuromoji/ipadic/*.bin"
         }
     }
@@ -161,18 +150,13 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     implementation(libs.activity.compose)
 
-    // Custom Activity On Crash
     implementation(libs.customactivityoncrash)
 
-    // Easy Permissions
     implementation(libs.easypermissions)
 
-    // Legacy Support
     implementation(libs.legacy.support.v4)
-    // Coroutines
     implementation(libs.coroutines.android)
 
-    // Glance
     implementation(libs.glance)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
@@ -206,7 +190,6 @@ sentry {
             }
         authToken.set(token ?: "")
         includeProguardMapping.set(true)
-        // Pull requests from forks get no secrets: build without uploading instead of failing on a 401.
         autoUploadProguardMapping.set(!token.isNullOrBlank())
     } else {
         includeProguardMapping.set(false)
@@ -215,7 +198,6 @@ sentry {
         includeDependenciesReport.set(false)
         includeSourceContext.set(false)
         includeNativeSources.set(false)
-        // FOSS ships no Sentry SDK: injected AppStartMetrics calls crash it at launch.
         tracingInstrumentation.enabled.set(false)
     }
     telemetry.set(false)
@@ -270,8 +252,6 @@ if (!isFullBuild) {
             assetDirectories.from(android.sourceSets.flatMap { it.assets.directories })
             buildDirectory.set(layout.buildDirectory)
         }
-    // Lazy on purpose: whenTaskAdded creates every task as it is registered, and AGP 9.5.0's
-    // Compose Preview task throws while it is created unless unit tests include Android resources.
     tasks.named { it.contains("injectSentryDebugMetaPropertiesIntoAssetsRelease") }.configureEach {
         finalizedBy(cleanSentryMetaTask)
     }
