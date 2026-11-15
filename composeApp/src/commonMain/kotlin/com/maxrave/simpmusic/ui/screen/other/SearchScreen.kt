@@ -440,7 +440,11 @@ fun SearchScreen(
                         state = suggestionsState,
                         contentPadding = PaddingValues(top = searchBarHeight, bottom = 10.dp),
                     ) {
-                        items(searchScreenState.suggestYTItems) { item ->
+                        items(
+                            items = searchScreenState.suggestYTItems,
+                            key = { it.toString() },
+                            contentType = { it::class },
+                        ) { item ->
                             SuggestItemRow(
                                 searchResult = item,
                                 onItemClick = { item ->
@@ -484,7 +488,11 @@ fun SearchScreen(
                                 },
                             )
                         }
-                        items(searchScreenState.suggestQueries) { suggestion ->
+                        items(
+                            items = searchScreenState.suggestQueries,
+                            key = { it },
+                            contentType = { "query-suggestion" },
+                        ) { suggestion ->
                             Row(
                                 modifier =
                                     Modifier
@@ -574,7 +582,11 @@ fun SearchScreen(
                                     }
                                 }
                             }
-                            items(searchHistory) { historyItem ->
+                            items(
+                                items = searchHistory,
+                                key = { it },
+                                contentType = { "search-history" },
+                            ) { historyItem ->
                                 Row(
                                     modifier =
                                         Modifier
@@ -817,7 +829,11 @@ fun SearchScreen(
                                                             ),
                                                         state = resultsState,
                                                     ) {
-                                                        items(currentResults) { result ->
+                                                        items(
+                                                            items = currentResults,
+                                                            key = { it.toString() },
+                                                            contentType = { it::class },
+                                                        ) { result ->
                                                             when (result) {
                                                                 is SongsResult -> {
                                                                     SongFullWidthItems(
