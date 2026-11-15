@@ -318,7 +318,7 @@ fun MiniPlayer(
                                         if (offsetY.value + dragAmount > 0) {
                                             coroutineScope.launch {
                                                 change.consume()
-                                                offsetY.animateTo(offsetY.value + 2 * dragAmount)
+                                                offsetY.snapTo(offsetY.value + dragAmount)
                                                 Logger.w("MiniPlayer", "Dragged ${offsetY.value}")
                                             }
                                         }
@@ -364,16 +364,16 @@ fun MiniPlayer(
                                                 ->
                                                 coroutineScope.launch {
                                                     change.consume()
-                                                    offsetX.animateTo(offsetX.value + dragAmount * 2)
+                                                    offsetX.snapTo(offsetX.value + dragAmount)
                                                     Logger.w("MiniPlayer", "Dragged ${offsetX.value}")
                                                 }
                                             },
                                             onDragCancel = {
                                                 Logger.w("MiniPlayer", "Drag Cancelled")
                                                 coroutineScope.launch {
-                                                    if (offsetX.value > 200) {
+                                                    if (offsetX.value > size.width * 0.22f) {
                                                         sharedViewModel.onUIEvent(UIEvent.Previous)
-                                                    } else if (offsetX.value < -120) {
+                                                    } else if (offsetX.value < -size.width * 0.22f) {
                                                         sharedViewModel.onUIEvent(UIEvent.Next)
                                                     }
                                                     offsetX.animateTo(0f)
