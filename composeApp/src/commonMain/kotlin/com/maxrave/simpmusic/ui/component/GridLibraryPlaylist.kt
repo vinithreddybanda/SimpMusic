@@ -96,7 +96,8 @@ internal object LibraryGridCells : GridCells {
     }
 }
 
-private fun PlaylistType.stableLibraryGridKey(): String =
+@PublishedApi
+internal fun PlaylistType.stableLibraryGridKey(): String =
     when (this) {
         is ChartItem -> "chart:$ytPlaylistId"
         is LocalPlaylistEntity -> "local-playlist:$id"
