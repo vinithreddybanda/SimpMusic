@@ -78,8 +78,8 @@ import kotlin.math.roundToInt
  * size and a wider window adds columns instead of stretching them. `Adaptive(minSize = 120.dp)`
  * treated 120 as a floor instead, which on a 1404dp window meant eleven columns of ~108dp artwork.
  *
- * Narrow windows are allowed two columns rather than forcing three undersized covers.
- * Wider windows grow naturally to three, four, and more columns while keeping artwork near 150dp.
+ * Narrow split windows can fall back to one column rather than forcing undersized covers.
+ * Common phone widths use two columns; wider windows grow naturally to three, four, and more.
  */
 internal object LibraryGridCells : GridCells {
     // The artwork plus the 10dp start + 10dp end padding every item in these grids carries.
@@ -90,7 +90,7 @@ internal object LibraryGridCells : GridCells {
         spacing: Int,
     ): List<Int> {
         val target = TargetCellWidth.roundToPx() + spacing
-        val count = ((availableSize + spacing).toFloat() / target).roundToInt().coerceAtLeast(2)
+        val count = ((availableSize + spacing).toFloat() / target).roundToInt().coerceAtLeast(1)
         // The same split GridCells.Fixed makes: leftover pixels go one each to the first columns.
         val usable = availableSize - spacing * (count - 1)
         return List(count) { usable / count + if (it < usable % count) 1 else 0 }
