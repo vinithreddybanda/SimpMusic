@@ -278,14 +278,14 @@ fun LibraryScreen(
                             ),
                         state = state,
                     ) {
-                        item {
+                        item(key = "library-overview", contentType = "library-overview") {
                             LibraryTilingBox(navController, libraryOverview, cachedPreview)
                         }
 
                         // The reading is drawn from playback_event, so the card follows the same
                         // setting the Wrapped chip and the Analytics tab do.
                         if (localTrackingEnabled) {
-                            item(key = "taste") {
+                            item(key = "taste", contentType = "taste-card") {
                                 val tasteState by tasteViewModel.uiState.collectAsStateWithLifecycle()
                                 if (tasteState != TasteUiState.Hidden) {
                                     TasteCard(
@@ -300,7 +300,7 @@ fun LibraryScreen(
                         }
 
                         if (!listCanvasSong.data.isNullOrEmpty()) {
-                            item {
+                            item(key = "canvas-songs", contentType = "library-song-shelf") {
                                 LibraryItem(
                                     state =
                                         LibraryItemState(
@@ -313,7 +313,7 @@ fun LibraryScreen(
                             }
                         }
 
-                        item {
+                        item(key = "recently-added", contentType = "library-song-shelf") {
                             LibraryItem(
                                 state =
                                     LibraryItemState(
@@ -328,7 +328,7 @@ fun LibraryScreen(
                                 selectionState = selectionState,
                             )
                         }
-                        item {
+                        item(key = "library-end", contentType = "footer") {
                             EndOfPage()
                         }
                     }
