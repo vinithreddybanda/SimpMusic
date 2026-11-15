@@ -212,12 +212,8 @@ fun SearchScreen(
     // The bar floats OVER the content (a Box, not a Column) so there is something behind it to
     // blur — same arrangement HomeScreen uses. Each branch owns a scroll state, hoisted here so
     // the bar can tell whether the branch currently on screen is scrolled away from the top.
-    // Two columns only on a phone held upright. Anywhere wider — tablet, landscape, desktop — two
-    // columns stretch each tile to half the window, and since the tile keeps a 2:1 ratio it grows
-    // absurdly tall with it.
-    val screenInfo = getScreenSizeInfo()
-    val isMobilePortrait = getPlatform() == Platform.Android && screenInfo.wDP < screenInfo.hDP
-    val moodGridColumns = if (isMobilePortrait) 2 else 4
+    // Keep mood tiles near a consistent width. Adaptive cells give narrow phones two
+    // readable columns and let landscape/tablet windows add columns without stretching tiles.
 
     val hazeState = rememberHazeState()
     // The floating chip row refracts the page scrolling under it, so the page is the glass source and
@@ -661,7 +657,7 @@ fun SearchScreen(
                             contentAlignment = Alignment.TopCenter,
                         ) {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(moodGridColumns),
+                            columns = GridCells.Adaptive(minSize = 150.dp),
                             modifier =
                                 Modifier
                                     .fillMaxHeight()
