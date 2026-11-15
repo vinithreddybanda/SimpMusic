@@ -154,7 +154,7 @@ fun AppTheme(
     val colorScheme =
         generatedScheme.copy(
             primary = Color(0xFF30D158),
-            onPrimary = Color(0xFF071A0C),
+            onPrimary = Color.White,
             primaryContainer = Color(0xFF174D2A),
             onPrimaryContainer = Color(0xFFD8FBE0),
         )
@@ -173,7 +173,7 @@ fun AppTheme(
     val forcedDarkScheme =
         forcedDarkGenerated.copy(
             primary = Color(0xFF30D158),
-            onPrimary = Color(0xFF071A0C),
+            onPrimary = Color.White,
             primaryContainer = Color(0xFF174D2A),
             onPrimaryContainer = Color(0xFFD8FBE0),
         )
