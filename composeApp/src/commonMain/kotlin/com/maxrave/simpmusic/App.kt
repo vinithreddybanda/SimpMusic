@@ -426,7 +426,7 @@ fun App(
                     ): Offset {
                         when {
                             consumed.y < -1f -> isScrolledToTop = false
-                            consumed.y > 1f -> isScrolledToTop = true
+                            consumed.y > 1f || available.y > 1f -> isScrolledToTop = true
                         }
                         return Offset.Zero
                     }
