@@ -107,6 +107,7 @@ internal fun PlaylistType.stableLibraryGridKey(): String =
         is PlaylistEntity -> "playlist:$id"
         is PodcastsEntity -> "podcast:$podcastId"
         is MonthlyRecapItem -> "recap:$year-$month"
+        else -> "other:${this::class.simpleName}:$this"
     }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -241,7 +242,7 @@ internal inline fun <reified T> GridLibraryPlaylist(
                         key = { index, item ->
                             (item as? PlaylistType)?.stableLibraryGridKey() ?: "unsupported:$index"
                         },
-                        contentType = { _, item -> item::class },
+                        contentType = { _, item -> item?.let { it::class } ?: "empty-library-item" },
                     ) { _, item ->
                         if (item !is PlaylistType) {
                             return@itemsIndexed
