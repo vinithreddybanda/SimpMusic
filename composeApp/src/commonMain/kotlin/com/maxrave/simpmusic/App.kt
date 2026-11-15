@@ -168,12 +168,6 @@ fun App(
         if (sleepTimerState.isDone) viewModel.stopSleepTimer()
     }
 
-    // Every dialog this file raises on its own. Home's launch banner waits until none is up; see
-    // LocalAppDialogOpen. (The banner waits for a running update check by itself.)
-    val appDialogOpen =
-        shouldShowUpdateDialog || showNotificationPermissionDialog ||
-            showDesktopNotificationPermissionDialog || sleepTimerState.isDone
-
     // Set by the first press or wheel scroll anywhere in the app this launch, or by opening Now
     // Playing. A launch banner that has not had its turn yet then waits for a later launch.
     var userStarted by remember {
