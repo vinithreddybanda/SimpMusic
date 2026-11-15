@@ -46,7 +46,6 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.maxrave.domain.data.player.GenericMediaItem
-import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
 import com.maxrave.simpmusic.ui.navigation.destination.home.AnalyticsDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
@@ -58,10 +57,8 @@ import com.maxrave.simpmusic.ui.theme.LocalIsDarkTheme
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import kotlin.reflect.KClass
 
-private const val TAG = "LiquidGlassAppBottomNavigationBar"
-
 // How long the bar takes to morph between the tab bar and the collapsed pill.
-private const val BAR_MORPH_MS = 300
+private const val BAR_MORPH_MS = 260
 private val BarEdgePadding = 16.dp
 private val SearchGap = 12.dp
 private val SearchSize = 56.dp
@@ -107,21 +104,25 @@ actual fun LiquidGlassAppBottomNavigationBar(
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val bottomNavScreens =
-        listOfNotNull(
-            BottomNavScreen.Home,
-            BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-            BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
-            BottomNavScreen.Library,
-            BottomNavScreen.Search,
-        )
+        remember(showAnalyticsTab, showMixForYouTab) {
+            listOfNotNull(
+                BottomNavScreen.Home,
+                BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
+                BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
+                BottomNavScreen.Library,
+                BottomNavScreen.Search,
+            )
+        }
     // Tabs shown in the sliding bar (Apple Music style); Search lives in its own FAB.
     val barTabs =
-        listOfNotNull(
-            BottomNavScreen.Home,
-            BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-            BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
-            BottomNavScreen.Library,
-        )
+        remember(showAnalyticsTab, showMixForYouTab) {
+            listOfNotNull(
+                BottomNavScreen.Home,
+                BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
+                BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
+                BottomNavScreen.Library,
+            )
+        }
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
             when (startDestination) {
@@ -152,10 +153,12 @@ actual fun LiquidGlassAppBottomNavigationBar(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(currentBackStackEntry) {
+    LaunchedEffect(currentBackStackEntry, bottomNavScreens) {
         currentBackStackEntry?.destination?.let { current ->
-            Logger.d(TAG, "LiquidGlassAppBottomNavigationBar: current route: ${current.route}")
             isInSearchDestination = current.hasRoute(SearchDestination::class)
+            bottomNavScreens.firstOrNull { screen ->
+                current.hierarchy.any { it.hasRoute(screen.destination::class) }
+            }?.let { selectedIndex = it.ordinal }
         }
     }
 
@@ -172,7 +175,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
         }
 
     LaunchedEffect(isScrolledToTop) {
-        Logger.d(TAG, "isScrolledToTop: $isScrolledToTop")
         if (!isInSearchDestination) {
             isExpanded = isScrolledToTop
         }
