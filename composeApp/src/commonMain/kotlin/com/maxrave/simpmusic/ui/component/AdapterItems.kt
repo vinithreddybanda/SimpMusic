@@ -1646,6 +1646,31 @@ fun MoodAndGenresContentItem(
                     ).fillMaxWidth(),
         )
         val rowState = rememberLazyListState()
+        // Resolve the list and stable keys in the composable scope. LazyListScope is a
+        // DSL builder, not a @Composable context, so remember() cannot be called inside it.
+        val itemList =
+            when (data) {
+                is ItemsPlaylist -> (data).contents
+                is Item -> (data).contents
+                else -> listOf()
+            }
+        val itemKeys =
+            remember(itemList) {
+                val occurrences = mutableMapOf<String, Int>()
+                itemList.mapIndexed { index, item ->
+                    val identity =
+                        when (item) {
+                            is com.maxrave.domain.data.model.mood.moodmoments.Content ->
+                                item.videoId?.takeIf { it.isNotBlank() } ?: item.playlistBrowseId
+                            is com.maxrave.domain.data.model.mood.genre.Content ->
+                                item.playlistBrowseId
+                            else -> item?.toString() ?: "empty:$index"
+                        }
+                    val occurrence = occurrences[identity] ?: 0
+                    occurrences[identity] = occurrence + 1
+                    "mood-content:$identity:$occurrence"
+                }
+            }
         LazyRow(
             modifier =
                 Modifier
@@ -1654,29 +1679,6 @@ fun MoodAndGenresContentItem(
                     ).mouseDragScroll(rowState),
             state = rowState,
         ) {
-            val itemList =
-                when (data) {
-                    is ItemsPlaylist -> (data).contents
-                    is Item -> (data).contents
-                    else -> listOf()
-                }
-            val itemKeys =
-                remember(itemList) {
-                    val occurrences = mutableMapOf<String, Int>()
-                    itemList.mapIndexed { index, item ->
-                        val identity =
-                            when (item) {
-                                is com.maxrave.domain.data.model.mood.moodmoments.Content ->
-                                    item.videoId?.takeIf { it.isNotBlank() } ?: item.playlistBrowseId
-                                is com.maxrave.domain.data.model.mood.genre.Content ->
-                                    item.playlistBrowseId
-                                else -> item?.toString() ?: "empty:$index"
-                            }
-                        val occurrence = occurrences[identity] ?: 0
-                        occurrences[identity] = occurrence + 1
-                        "mood-content:$identity:$occurrence"
-                    }
-                }
             itemsIndexed(
                 items = itemList,
                 key = { index, _ -> itemKeys.getOrElse(index) { "mood-content:$index" } },
