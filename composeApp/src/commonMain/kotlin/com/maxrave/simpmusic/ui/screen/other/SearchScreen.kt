@@ -267,11 +267,14 @@ fun SearchScreen(
 
     var currentPlaceholderIndex by remember { mutableIntStateOf(0) }
 
-    // Animate placeholder - pause when focused
-    LaunchedEffect(isFocused) {
-        while (!isFocused) {
-            delay(3000) // Change every 3 seconds
-            currentPlaceholderIndex = (currentPlaceholderIndex + 1) % placeholderTexts.size
+    // Cycle placeholder copy only while it is actually visible. Typing or submitting a
+    // query cancels the timer instead of continuing invisible state updates.
+    LaunchedEffect(isFocused, searchText) {
+        if (!isFocused && searchText.isEmpty()) {
+            while (true) {
+                delay(3000)
+                currentPlaceholderIndex = (currentPlaceholderIndex + 1) % placeholderTexts.size
+            }
         }
     }
 
