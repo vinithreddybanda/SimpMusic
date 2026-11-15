@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -235,16 +236,15 @@ internal inline fun <reified T> GridLibraryPlaylist(
                             }
                         }
                     }
-                    items(
+                    itemsIndexed(
                         items = list,
-                        key = { item ->
-                            (item as? PlaylistType)?.stableLibraryGridKey()
-                                ?: "unsupported:${item::class.simpleName}:${item.hashCode()}"
+                        key = { index, item ->
+                            (item as? PlaylistType)?.stableLibraryGridKey() ?: "unsupported:$index"
                         },
-                        contentType = { item -> item::class },
-                    ) { item ->
+                        contentType = { _, item -> item::class },
+                    ) { _, item ->
                         if (item !is PlaylistType) {
-                            return@items
+                            return@itemsIndexed
                         }
                         HomeItemContentPlaylist(
                             onClick = {
