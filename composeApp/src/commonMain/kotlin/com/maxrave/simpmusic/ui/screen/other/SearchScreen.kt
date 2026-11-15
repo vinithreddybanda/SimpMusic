@@ -718,7 +718,11 @@ fun SearchScreen(
                                 // Key must include the section: every section lives in this ONE
                                 // grid, and "For you" repeats categories that also appear under
                                 // Moods or Genres, so params alone collides.
-                                items(section.items, key = { "${section.title}/${it.params}" }) { item ->
+                                items(
+                                    items = section.items,
+                                    key = { "${section.title}/${it.params}" },
+                                    contentType = { "mood-category" },
+                                ) { item ->
                                     // LazyVerticalGrid only composes tiles inside the viewport, so
                                     // putting the request here IS the laziness — a category the
                                     // user never scrolls to never costs a browse.
