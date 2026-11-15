@@ -1381,6 +1381,9 @@ private fun SearchResultType.stableSearchResultKey(): String =
         is AlbumsResult -> "album:$browseId"
         is ArtistsResult -> "artist:$browseId"
         is PlaylistsResult -> "${if (resultType == "Podcast") "podcast" else "playlist"}:$browseId"
+        // SearchResultType also contains non-rendered provider result variants. Keep them valid
+        // without weakening the IDs used by the five result rows shown by this screen.
+        else -> "other:${this::class.simpleName}:$this"
     }
 
 enum class SearchUIType {
