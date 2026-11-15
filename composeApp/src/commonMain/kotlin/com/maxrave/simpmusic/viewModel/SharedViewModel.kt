@@ -79,9 +79,6 @@ import com.maxrave.simpmusic.getPlatform
 import com.maxrave.simpmusic.utils.LyricsPromo
 import com.maxrave.simpmusic.utils.VersionManager
 import com.maxrave.simpmusic.utils.decodeLyricsPromos
-import com.maxrave.simpmusic.utils.decodePromos
-import com.maxrave.simpmusic.utils.shownPromoIds
-import com.maxrave.simpmusic.utils.withShownPromo
 import com.maxrave.simpmusic.viewModel.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -134,8 +131,6 @@ import kotlin.time.Duration.Companion.days
 
 // DataStore key for the kotlin-footguns star prompt. Cleared on every version bump,
 // so the ask comes back after an update - same policy as OPEN_APP_TIME.
-const val FOOTGUNS_STAR_KEY = "footguns_starred"
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class SharedViewModel(
     private val dataStoreManager: DataStoreManager,
@@ -285,21 +280,13 @@ class SharedViewModel(
         _lastPlayerViewTab.value = tabName
     }
 
-    val openAppTime: StateFlow<Int> = dataStoreManager.openAppTime.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), 0)
-    private val _shareSavedLyrics: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    val shareSavedLyrics: StateFlow<Boolean> get() = _shareSavedLyrics
 
     init {
         viewModelScope.launch {
             log("SharedViewModel init")
             if (dataStoreManager.appVersion.first() != VersionManager.getVersionName()) {
-                dataStoreManager.resetOpenAppTime()
-                dataStoreManager.putString(FOOTGUNS_STAR_KEY, "false")
-                dataStoreManager.setAppVersion(
-                    VersionManager.getVersionName(),
-                )
+                dataStoreManager.setAppVersion(VersionManager.getVersionName())
             }
-            dataStoreManager.openApp()
             val timeLineJob =
                 launch {
                     nowPlayingState
@@ -349,12 +336,6 @@ class SharedViewModel(
                         setLyricsProvider()
                     }
                 }
-            val shareSavedLyricsJob =
-                launch {
-                    dataStoreManager.helpBuildLyricsDatabase.distinctUntilChanged().collectLatest {
-                        _shareSavedLyrics.value = it == TRUE
-                    }
-                }
 //            val controllerStateJob =
 //                launch {
 //                    controllerState.map { it.isLiked }.distinctUntilChanged().collectLatest {
@@ -368,7 +349,6 @@ class SharedViewModel(
             timeLineJob.join()
             checkGetVideoJob.join()
             lyricsProviderJob.join()
-            shareSavedLyricsJob.join()
 //            controllerStateJob.join()
         }
 
@@ -744,44 +724,12 @@ class SharedViewModel(
 
     fun getString(key: String): String? = runBlocking { dataStoreManager.getString(key).first() }
 
-    /**
-     * The `promos` block the last config fetch saved, as it changes. Every DataStore write re-emits
-     * the whole settings file (the playback position is saved every few seconds), so only a change
-     * to this block's own text gets through.
-     */
-    fun cachedPromos(): Flow<List<Promo>> =
-        dataStoreManager
-            .getString(Promo.cacheKey(appIdentity.isDevBuild))
-            .distinctUntilChanged()
-            .map(::decodePromos)
-
     /** The same block's entries placed under the lyrics, as it changes. */
     fun cachedLyricsPromos(): Flow<List<LyricsPromo>> =
         dataStoreManager
             .getString(Promo.cacheKey(appIdentity.isDevBuild))
             .distinctUntilChanged()
             .map(::decodeLyricsPromos)
-
-    /** The ids of the launch banners this app version has already shown. */
-    suspend fun shownPromos(): Set<String> = shownPromosFlow().first()
-
-    /** The same ids as they change: the lyrics line stays on screen, and on two pages at once. */
-    fun shownPromosFlow(): Flow<Set<String>> =
-        dataStoreManager
-            .getString(Promo.shownKey(appIdentity.isDevBuild))
-            .distinctUntilChanged()
-            .map { shownPromoIds(stored = it, appVersion = VersionManager.getVersionName()) }
-
-    /** Each banner once per app version, however it was closed. */
-    fun markPromoShown(id: String) {
-        viewModelScope.launch {
-            val key = Promo.shownKey(appIdentity.isDevBuild)
-            dataStoreManager.putString(
-                key,
-                withShownPromo(dataStoreManager.getString(key).first(), VersionManager.getVersionName(), id),
-            )
-        }
-    }
 
     // A Library tab asked for from outside the Library screen (a deep link); the screen selects it
     // the next time it composes and clears the request.
@@ -2201,25 +2149,6 @@ class SharedViewModel(
 
     fun downloadFileDone() {
         _downloadFileProgress.value = DownloadProgress.INIT
-    }
-
-    fun onDoneReview(isDismissOnly: Boolean = true) {
-        viewModelScope.launch {
-            if (!isDismissOnly) {
-                dataStoreManager.doneOpenAppTime()
-            } else {
-                dataStoreManager.openApp()
-            }
-        }
-    }
-
-    fun onDoneRequestingShareLyrics(contributor: Pair<String, String>? = null) {
-        viewModelScope.launch {
-            dataStoreManager.setHelpBuildLyricsDatabase(true)
-            dataStoreManager.setContributorLyricsDatabase(
-                contributor,
-            )
-        }
     }
 
     fun setBitmap(bitmap: ImageBitmap?) {
