@@ -16,8 +16,10 @@ android {
 
     buildTypes {
         create("benchmark") {
-            // The test APK is debuggable; the target app resolves to its
-            // profileable, non-debuggable release variant.
+            // The tested release app is R8-minified. The instrumentation APK
+            // must also be minified, otherwise AGP's
+            // checkTestedAppObfuscationBenchmark task rejects the variant.
+            isMinifyEnabled = true
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
