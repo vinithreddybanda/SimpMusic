@@ -160,7 +160,7 @@ fun AppTheme(
         )
     // Immersive screens stay dark even at light theme (see [ForceDarkContent]). Resolve their scheme
     // once here instead of letting every such subtree build a palette of its own.
-    val forcedDarkScheme =
+    val forcedDarkGenerated =
         if (isDark) {
             colorScheme
         } else {
@@ -170,6 +170,13 @@ fun AppTheme(
                 style = PaletteStyle.TonalSpot,
             )
         }
+    val forcedDarkScheme =
+        forcedDarkGenerated.copy(
+            primary = Color(0xFF30D158),
+            onPrimary = Color(0xFF071A0C),
+            primaryContainer = Color(0xFF174D2A),
+            onPrimaryContainer = Color(0xFFD8FBE0),
+        )
     SystemBarAppearanceEffect(isDark)
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
