@@ -1660,7 +1660,28 @@ fun MoodAndGenresContentItem(
                     is Item -> (data).contents
                     else -> listOf()
                 }
-            items(itemList) { item ->
+            val itemKeys =
+                remember(itemList) {
+                    val occurrences = mutableMapOf<String, Int>()
+                    itemList.mapIndexed { index, item ->
+                        val identity =
+                            when (item) {
+                                is com.maxrave.domain.data.model.mood.moodmoments.Content ->
+                                    item.videoId?.takeIf { it.isNotBlank() } ?: item.playlistBrowseId
+                                is com.maxrave.domain.data.model.mood.genre.Content ->
+                                    item.playlistBrowseId
+                                else -> item?.toString() ?: "empty:$index"
+                            }
+                        val occurrence = occurrences[identity] ?: 0
+                        occurrences[identity] = occurrence + 1
+                        "mood-content:$identity:$occurrence"
+                    }
+                }
+            itemsIndexed(
+                items = itemList,
+                key = { index, _ -> itemKeys.getOrElse(index) { "mood-content:$index" } },
+                contentType = { _, item -> item?.let { it::class } ?: "empty-mood-content" },
+            ) { _, item ->
                 HomeItemContentPlaylist(onClick = {
                     // The "Songs" shelf mixes tracks into a list that is otherwise all playlists,
                     // so route by videoId: a track starts its radio, everything else opens a page.
