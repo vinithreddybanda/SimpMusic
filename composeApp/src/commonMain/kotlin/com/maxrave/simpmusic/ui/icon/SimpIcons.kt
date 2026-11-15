@@ -174,9 +174,9 @@ private val phosphorRegularIcons by lazy {
 }
 
 internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
-    val legacyName = build().name
-    val phosphorName = phosphorIconAliases[legacyName] ?: legacyName
-    return phosphorRegularIcons[phosphorName.lowercase()] ?: build()
+    val legacy = build()
+    val phosphorName = phosphorIconAliases[legacy.name] ?: legacy.name
+    return phosphorRegularIcons[phosphorName.lowercase()] ?: legacy
 }
 
 /** 1 when the glyph already fits, is kept as drawn or cannot be measured; otherwise the shrink that fits it. */
