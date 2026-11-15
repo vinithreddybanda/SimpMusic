@@ -44,7 +44,7 @@ compose.resources {
  * Decode it before Compose Multiplatform copies/generates resource accessors.
  */
 val decodeInterFont by tasks.registering {
-    val encoded = layout.projectDirectory.file("src/commonMain/composeResources/font/inter_variable.ttf.b64")
+    val encoded = layout.projectDirectory.file("fontSources/inter_variable.ttf.b64")
     val decoded = layout.projectDirectory.file("src/commonMain/composeResources/font/inter_variable.ttf")
     inputs.file(encoded)
     outputs.file(decoded)
