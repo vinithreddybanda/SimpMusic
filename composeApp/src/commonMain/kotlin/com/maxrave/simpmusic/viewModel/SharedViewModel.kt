@@ -103,7 +103,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
-import org.koin.core.component.inject
 import org.simpmusic.lastfm.completeLogin
 import simpmusic.composeapp.generated.resources.Res
 import simpmusic.composeapp.generated.resources.added_local_playlist
