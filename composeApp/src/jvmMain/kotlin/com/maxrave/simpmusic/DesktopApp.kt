@@ -197,7 +197,7 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
     startKoin {
         loadAllModules(
             AppIdentity(
-                applicationId = "com.maxrave.simpmusic",
+                applicationId = "com.pluto.music",
                 versionName = BuildKonfig.versionName,
                 platform = "${System.getProperty("os.name")} ${System.getProperty("os.version")}",
                 // Set by desktopApp's JavaExec tasks (run, hotRunJvm); a packaged install never has it.
@@ -223,7 +223,7 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
         val installationId = machineId()
         Sentry.init { options ->
             options.dsn = BuildKonfig.sentryDsn
-            options.release = "simpmusic-desktop@${VersionManager.getVersionName()}"
+            options.release = "pluto-desktop@${VersionManager.getVersionName()}"
             options.setDiagnosticLevel(SentryLevel.ERROR)
             options.distinctId = installationId
             options.isSendDefaultPii = true
