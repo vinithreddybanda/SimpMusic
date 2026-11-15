@@ -216,6 +216,19 @@ fun PlaylistScreen(
         }
     }
 
+    // Precompute stable lazy keys once per filtered result set. The occurrence suffix keeps
+    // duplicate video IDs valid without tying identity to the row's current position.
+    val filteredTrackKeys =
+        remember(filteredTrack) {
+            val occurrences = mutableMapOf<String, Int>()
+            filteredTrack.mapIndexed { index, track ->
+                val videoId = track.videoId.ifBlank { "missing:$index" }
+                val occurrence = occurrences[videoId] ?: 0
+                occurrences[videoId] = occurrence + 1
+                "$videoId#$occurrence"
+            }
+        }
+
     LaunchedEffect(uiState) {
         Logger.d(tag, "uiState hash: ${uiState.hashCode()}")
         Logger.d(tag, "uiState data: ${uiState.data}")
@@ -1050,10 +1063,11 @@ fun PlaylistScreen(
                             )
                         }
                     }
-                    items(count = filteredTrack.size, key = { index ->
-                        val item = filteredTrack.getOrNull(index)
-                        (item?.videoId ?: "") + "item_$index"
-                    }) { index ->
+                    items(
+                        count = filteredTrack.size,
+                        key = { index -> filteredTrackKeys.getOrNull(index) ?: "playlist-track:$index" },
+                        contentType = { "playlist-track" },
+                    ) { index ->
                         val item = filteredTrack.getOrNull(index)
                         if (item != null) {
                             Column(modifier = Modifier.animateItem()) {
