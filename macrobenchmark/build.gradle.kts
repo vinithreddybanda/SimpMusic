@@ -15,9 +15,12 @@ android {
     }
 
     buildTypes {
-        release {
+        create("benchmark") {
+            // The test APK is debuggable; the target app resolves to its
+            // profileable, non-debuggable release variant.
             isDebuggable = true
-            signingConfig = getByName("debug").signingConfig
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
         }
     }
 }
