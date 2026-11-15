@@ -98,7 +98,6 @@ class HomeViewModel(
             exploreChart(regionCodeChart.value ?: "ZZ")
 
             val cookieFlow = dataStoreManager.cookie.distinctUntilChanged()
-            val initialCookie = cookieFlow.first()
             _accountInfo.emit(
                 Pair(
                     dataStoreManager.getString("AccountName").first(),
