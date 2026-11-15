@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Shape
@@ -147,6 +148,23 @@ fun HomeItem(
 
     val lazyListState = rememberLazyListState()
     val snapperFlingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyListState = lazyListState))
+    // Keep card identity tied to the underlying media/page, not its current position.
+    // The occurrence suffix keeps duplicate entries legal (radio and mixed shelves can repeat).
+    val contentKeys =
+        remember(data.contents) {
+            val occurrences = mutableMapOf<String, Int>()
+            data.contents.mapIndexed { index, content ->
+                val identity =
+                    content?.videoId?.takeIf { it.isNotBlank() }
+                        ?: content?.browseId?.takeIf { it.isNotBlank() }
+                        ?: content?.playlistId?.takeIf { it.isNotBlank() }
+                        ?: content?.title?.takeIf { it.isNotBlank() }
+                        ?: "empty:$index"
+                val occurrence = occurrences[identity] ?: 0
+                occurrences[identity] = occurrence + 1
+                "home-content:$identity:$occurrence"
+            }
+        }
 
     var track by remember { mutableStateOf<Track?>(null) }
 
@@ -165,7 +183,18 @@ fun HomeItem(
             state = lazyListState,
             flingBehavior = snapperFlingBehavior,
         ) {
-            items(data.contents) { temp ->
+            itemsIndexed(
+                items = data.contents,
+                key = { index, _ -> contentKeys.getOrElse(index) { "home-content:$index" } },
+                contentType = { _, content ->
+                    when {
+                        content == null -> "empty-home-card"
+                        !content.videoId.isNullOrBlank() -> "home-media-card"
+                        content.browseId != null || content.playlistId != null -> "home-destination-card"
+                        else -> "home-content-card"
+                    }
+                },
+            ) { _, temp ->
                 if (temp != null) {
                     HomeContentCard(
                         temp = temp,
