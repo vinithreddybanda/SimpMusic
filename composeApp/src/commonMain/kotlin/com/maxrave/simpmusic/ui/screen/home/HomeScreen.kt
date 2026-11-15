@@ -591,7 +591,7 @@ fun HomeScreen(
                                     ) {
                                         HomeItem(
                                             navController = navController,
-                                            data = it,
+                                            data = item,
                                         )
                                     }
                                 }
