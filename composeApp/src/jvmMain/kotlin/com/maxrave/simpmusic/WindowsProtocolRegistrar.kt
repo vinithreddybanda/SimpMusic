@@ -9,7 +9,7 @@ import com.maxrave.logger.Logger
  * Registry structure:
  * ```
  * HKCU\Software\Classes\simpmusic
- *     (Default) = "URL:SimpMusic Protocol"
+ *     (Default) = "URL:Pluto Protocol"
  *     URL Protocol = ""
  *     \DefaultIcon
  *         (Default) = "\"<exe_path>\",0"
@@ -40,7 +40,7 @@ object WindowsProtocolRegistrar {
 
         register(SCHEME, "URL:Pluto Protocol", exePath)
         register(LEGACY_SCHEME, "URL:Pluto Legacy Protocol", exePath)
-        register(LASTFM_SCHEME, "URL:SimpMusic Last.fm Callback", exePath)
+        register(LASTFM_SCHEME, "URL:Pluto Last.fm Callback", exePath)
     }
 
     private fun register(
@@ -79,7 +79,7 @@ object WindowsProtocolRegistrar {
     ): Boolean {
         return try {
             val result = regQuery("${regKeyOf(scheme)}\\shell\\open\\command", null)
-            // Registry stores path with quotes: "C:\path\to\SimpMusic.exe" "%1"
+            // Registry stores path with quotes: "C:\path\to\Pluto.exe" "%1"
             // Normalize both for comparison
             val normalizedExe = currentExePath.replace("\\", "/").lowercase()
             result?.replace("\\", "/")?.lowercase()?.contains(normalizedExe) == true
@@ -91,8 +91,8 @@ object WindowsProtocolRegistrar {
     private fun resolveExePath(): String? {
         // JPackage directory structure:
         //   <app>/runtime/...  (java.home points here)
-        //   <app>/SimpMusic.exe
-        // So we go: java.home → parent (runtime) → parent (app) → SimpMusic.exe
+        //   <app>/Pluto.exe
+        // So we go: java.home → parent (runtime) → parent (app) → Pluto.exe
         val javaHome = System.getProperty("java.home") ?: return null
         val javaHomeDir = java.io.File(javaHome)
 
@@ -107,7 +107,7 @@ object WindowsProtocolRegistrar {
         }
 
         if (appDir != null) {
-            val exeFile = java.io.File(appDir, "SimpMusic.exe")
+            val exeFile = java.io.File(appDir, "Pluto.exe")
             if (exeFile.exists()) {
                 return exeFile.absolutePath
             }
