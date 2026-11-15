@@ -32,6 +32,9 @@ jobs:
       - name: Build installable APK
         run: ./gradlew --no-daemon androidApp:assembleDebug
 
+      - name: Compile Macrobenchmark instrumentation
+        run: ./gradlew --no-daemon :macrobenchmark:assembleBenchmark
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
