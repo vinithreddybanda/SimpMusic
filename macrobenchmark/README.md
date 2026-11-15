@@ -6,7 +6,7 @@ Run on a physical device or emulator with API 29 or newer:
 ./gradlew :macrobenchmark:connectedCheck
 ```
 
-The benchmark target is the profileable `release` variant of `:androidApp`.
+The instrumentation module uses a debuggable `benchmark` build type, which falls back to the profileable `release` variant of `:androidApp`.
 Results are written by AndroidX Benchmark as instrumentation output; compare runs on
 the same device, Android version, and power state.
 
