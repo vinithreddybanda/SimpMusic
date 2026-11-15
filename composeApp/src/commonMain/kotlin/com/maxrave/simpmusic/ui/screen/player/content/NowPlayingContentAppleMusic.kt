@@ -365,6 +365,11 @@ private fun AppleMusicMainView(
 ) {
     val localDensity = LocalDensity.current
     val isRepeatOne = state.controllerState.repeatState is RepeatState.One
+    val artworkPageKeys =
+        remember(state.artworkQueue) {
+            state.artworkQueue.stableArtworkPageKeys("artwork")
+        }
+
 
     val canvasData = state.screenData.canvasData
     val animatedArtwork = canvasData?.takeIf { it.isAnimatedArtwork() }
@@ -447,10 +452,7 @@ private fun AppleMusicMainView(
                 modifier = Modifier.fillMaxSize(),
                 beyondViewportPageCount = 1,
                 userScrollEnabled = !isRepeatOne && state.artworkQueue.isNotEmpty(),
-                key = { idx ->
-                    val vid = state.artworkQueue.getOrNull(idx)?.videoId.orEmpty()
-                    "appleMusicArtwork_${vid}_$idx"
-                },
+                key = { idx -> artworkPageKeys.getOrNull(idx) ?: "artwork:missing:$idx" },
             ) { page ->
                 AppleMusicArtworkPage(
                     state = state,
