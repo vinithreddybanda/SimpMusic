@@ -117,7 +117,7 @@ dependencies {
     windowsAmd64(libs.compose.windows.x64)
 }
 
-// Append SimpMusic-specific keys to Conveyor's generated config file and
+// Append Pluto-specific keys to Conveyor's generated config file and
 // — crucially — replace the auto-detected `app.inputs` classpath with
 // ProGuard's shrunk jar directory so the packaged AppImage carries
 // obfuscated + size-reduced bytecode instead of raw Gradle output.
@@ -294,7 +294,7 @@ afterEvaluate {
             jvmArgs("--add-opens", "java.desktop/sun.lwawt.macosx=ALL-UNNAMED")
         }
 
-        // forceLinuxWmClass() in Main.kt needs this to rename the window "SimpMusic"; without it
+        // forceLinuxWmClass() in Main.kt needs this to rename the window "Pluto"; without it
         // the dock falls back to the class name. Packaged builds get it from conveyor.conf.
         if (System.getProperty("os.name").contains("Linux")) {
             jvmArgs("--add-opens", "java.desktop/sun.awt.X11=ALL-UNNAMED")
@@ -431,9 +431,9 @@ tasks.register("packageConveyorAppImage") {
             |
             |# Install icon into XDG dirs so GNOME/KDE pick it up the first time.
             |ICON_DIR="${'$'}HOME/.local/share/icons/hicolor/256x256/apps"
-            |if [ ! -f "${'$'}ICON_DIR/pluto.png" ] || [ "${'$'}HERE/simpmusic.png" -nt "${'$'}ICON_DIR/simpmusic.png" ]; then
+            |if [ ! -f "${'$'}ICON_DIR/pluto.png" ] || [ "${'$'}HERE/pluto.png" -nt "${'$'}ICON_DIR/pluto.png" ]; then
             |    mkdir -p "${'$'}ICON_DIR"
-            |    cp "${'$'}HERE/simpmusic.png" "${'$'}ICON_DIR/simpmusic.png"
+            |    cp "${'$'}HERE/pluto.png" "${'$'}ICON_DIR/pluto.png"
             |    gtk-update-icon-cache -f -t "${'$'}HOME/.local/share/icons/hicolor" 2>/dev/null || true
             |fi
             |
@@ -441,7 +441,7 @@ tasks.register("packageConveyorAppImage") {
             |DESKTOP_DIR="${'$'}HOME/.local/share/applications"
             |mkdir -p "${'$'}DESKTOP_DIR"
             |APPIMAGE_PATH="${'$'}{APPIMAGE:-${'$'}SELF}"
-            |sed "s|Exec=bin/pluto|Exec=${'$'}APPIMAGE_PATH|" "${'$'}HERE/pluto.desktop" > "${'$'}DESKTOP_DIR/com-maxrave-simpmusic-MainKt.desktop"
+            |sed "s|Exec=bin/pluto|Exec=${'$'}APPIMAGE_PATH|" "${'$'}HERE/pluto.desktop" > "${'$'}DESKTOP_DIR/com-pluto-music-MainKt.desktop"
             |update-desktop-database "${'$'}DESKTOP_DIR" 2>/dev/null || true
             |
             |# Cap glibc's per-thread malloc arenas.
@@ -465,7 +465,7 @@ tasks.register("packageConveyorAppImage") {
         appRun.setExecutable(true, false)
 
         // Conveyor's launcher lives at output/bin/pluto (lowercase).
-        val appExecutable = appDir.resolve("bin/simpmusic")
+        val appExecutable = appDir.resolve("bin/pluto")
         if (appExecutable.exists() && !appExecutable.canExecute()) {
             appExecutable.setExecutable(true)
         }
@@ -493,7 +493,7 @@ tasks.register("packageConveyorAppImage") {
 // Single command for users: `./gradlew :desktopApp:buildLinuxAppImage --no-configuration-cache`
 tasks.register("buildLinuxAppImage") {
     group = "distribution"
-    description = "Full SimpMusic Desktop Linux AppImage build pipeline (mpvSetupAll → conveyor → AppImage)."
+    description = "Full Pluto Desktop Linux AppImage build pipeline (mpvSetupAll → conveyor → AppImage)."
     dependsOn(conveyorMakeLinuxApp)
     finalizedBy("packageConveyorAppImage")
 }
@@ -537,13 +537,13 @@ val conveyorMakeMacZipAarch64 =
 
 tasks.register("buildMacZipAmd64") {
     group = "distribution"
-    description = "Full SimpMusic Desktop macOS Intel .zip pipeline (mpvSetupAll → conveyor)."
+    description = "Full Pluto Desktop macOS Intel .zip pipeline (mpvSetupAll → conveyor)."
     dependsOn(conveyorMakeMacZipAmd64)
 }
 
 tasks.register("buildMacZipAarch64") {
     group = "distribution"
-    description = "Full SimpMusic Desktop macOS Apple Silicon .zip pipeline (mpvSetupAll → conveyor)."
+    description = "Full Pluto Desktop macOS Apple Silicon .zip pipeline (mpvSetupAll → conveyor)."
     dependsOn(conveyorMakeMacZipAarch64)
 }
 
@@ -569,7 +569,7 @@ val conveyorMakeWindowsMsix =
 
 tasks.register("buildWindowsMsix") {
     group = "distribution"
-    description = "Full SimpMusic Desktop Windows .msix pipeline (mpvSetupAll → conveyor)."
+    description = "Full Pluto Desktop Windows .msix pipeline (mpvSetupAll → conveyor)."
     dependsOn(conveyorMakeWindowsMsix)
 }
 
