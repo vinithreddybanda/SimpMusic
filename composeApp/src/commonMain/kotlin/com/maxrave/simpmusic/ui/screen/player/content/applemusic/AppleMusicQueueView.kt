@@ -257,10 +257,11 @@ internal fun AppleMusicQueueView(
                         },
             ) {
                 itemsIndexed(
-                    upcoming,
+                    items = upcoming,
                     // Absolute index in the key: `upcoming` is a sublist, so a bare local index
                     // shifts on every track change and invalidates every row.
                     key = { _, item -> rowKeys.getOrElse(item.index) { item.value.videoId } },
+                    contentType = { _, _ -> "queue-track" },
                 ) { localIndex, item ->
                     val track = item.value
                     // The queue-wide index this row actually has. Everything the PLAYER is told
