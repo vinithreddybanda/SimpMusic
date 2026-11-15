@@ -94,6 +94,9 @@ fun LibraryItem(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var songEntity by remember { mutableStateOf<SongEntity?>(null) }
+    // Filtering this history feed is linear in its size. Cache the projection when the source
+    // collection changes, not every time a row's playback/selection state recomposes.
+    val recentlyAddedItems = remember(state.data) { state.data.filterIsInstance<RecentlyType>() }
     val title =
         when (state.type) {
             is LibraryItemType.RecentlyAdded -> stringResource(Res.string.recently_added)
@@ -148,7 +151,7 @@ fun LibraryItem(
                 if (!isLoading) {
                     if (state.type is LibraryItemType.RecentlyAdded) {
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            state.data.filterIsInstance<RecentlyType>().forEach { item ->
+                            recentlyAddedItems.forEach { item ->
                                 when (item.objectType()) {
                                     RecentlyType.Type.SONG -> {
                                         SongFullWidthItems(
