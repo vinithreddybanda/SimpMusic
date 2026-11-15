@@ -272,6 +272,34 @@ fun HomeScreen(
             }
         }
     val newRelease by viewModel.newRelease.collectAsStateWithLifecycle()
+    val homeShelfKeys =
+        remember(homeShelves) {
+            val occurrences = mutableMapOf<String, Int>()
+            homeShelves.map { shelf ->
+                val firstContentId =
+                    shelf.contents.firstNotNullOfOrNull { content ->
+                        content?.videoId ?: content?.browseId ?: content?.playlistId
+                    }.orEmpty()
+                val identity = "${shelf.title}:${shelf.moreEndpoint?.browseId.orEmpty()}:${shelf.channelId.orEmpty()}:$firstContentId"
+                val occurrence = occurrences[identity] ?: 0
+                occurrences[identity] = occurrence + 1
+                "home-shelf:$identity:$occurrence"
+            }
+        }
+    val newReleaseShelfKeys =
+        remember(newRelease) {
+            val occurrences = mutableMapOf<String, Int>()
+            newRelease.map { shelf ->
+                val firstContentId =
+                    shelf.contents.firstNotNullOfOrNull { content ->
+                        content?.videoId ?: content?.browseId ?: content?.playlistId
+                    }.orEmpty()
+                val identity = "${shelf.title}:${shelf.moreEndpoint?.browseId.orEmpty()}:${shelf.channelId.orEmpty()}:$firstContentId"
+                val occurrence = occurrences[identity] ?: 0
+                occurrences[identity] = occurrence + 1
+                "new-release-shelf:$identity:$occurrence"
+            }
+        }
     val chart by viewModel.chart.collectAsStateWithLifecycle()
     val moodMomentAndGenre by viewModel.exploreMoodItem.collectAsStateWithLifecycle()
     val chartLoading by viewModel.loadingChart.collectAsStateWithLifecycle()
@@ -450,13 +478,7 @@ fun HomeScreen(
                     ) {
                         itemsIndexed(
                             items = homeShelves,
-                            key = { _, item ->
-                                val firstContentId =
-                                    item.contents.firstNotNullOfOrNull { content ->
-                                        content?.videoId ?: content?.browseId ?: content?.playlistId
-                                    }.orEmpty()
-                                "${item.title}:${item.moreEndpoint?.browseId.orEmpty()}:${item.channelId.orEmpty()}:$firstContentId"
-                            },
+                            key = { index, _ -> homeShelfKeys.getOrElse(index) { "home-shelf:$index" } },
                             contentType = { _, _ -> "home-shelf" },
                         ) { index, item ->
                             Box {
@@ -554,17 +576,11 @@ fun HomeScreen(
                             }
                         }
                         if (homeListState == ListState.PAGINATION_EXHAUST) {
-                            items(
+                            itemsIndexed(
                                 items = newRelease,
-                                key = { item ->
-                                    val firstContentId =
-                                        item.contents.firstNotNullOfOrNull { content ->
-                                            content?.videoId ?: content?.browseId ?: content?.playlistId
-                                        }.orEmpty()
-                                    "${item.title}:${item.moreEndpoint?.browseId.orEmpty()}:${item.channelId.orEmpty()}:$firstContentId"
-                                },
-                                contentType = { "home-shelf" },
-                            ) {
+                                key = { index, _ -> newReleaseShelfKeys.getOrElse(index) { "new-release-shelf:$index" } },
+                                contentType = { _, _ -> "home-shelf" },
+                            ) { _, item ->
                                 AnimatedVisibility(
                                     visible = newRelease.isNotEmpty(),
                                 ) {
