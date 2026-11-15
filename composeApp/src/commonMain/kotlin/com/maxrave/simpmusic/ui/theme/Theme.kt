@@ -141,7 +141,7 @@ fun AppTheme(
         }
     // Light pins the neutrals to a neutral-grey ramp (the seed otherwise tints them warm/cream);
     // dark keeps the generated neutrals as they are.
-    val colorScheme =
+    val generatedScheme =
         wallpaperScheme
             ?: rememberDynamicColorScheme(
                 seedColor = seedColor,
@@ -149,6 +149,15 @@ fun AppTheme(
                 style = PaletteStyle.TonalSpot,
                 modifyColorScheme = { cs -> if (isDark) cs else cs.withNeutralLightSurfaces() },
             )
+    // iOS system-green semantics for active controls and focus states. This prevents
+    // wallpaper/custom palettes from reintroducing the default blue focus treatment.
+    val colorScheme =
+        generatedScheme.copy(
+            primary = Color(0xFF30D158),
+            onPrimary = Color(0xFF071A0C),
+            primaryContainer = Color(0xFF174D2A),
+            onPrimaryContainer = Color(0xFFD8FBE0),
+        )
     // Immersive screens stay dark even at light theme (see [ForceDarkContent]). Resolve their scheme
     // once here instead of letting every such subtree build a palette of its own.
     val forcedDarkScheme =
