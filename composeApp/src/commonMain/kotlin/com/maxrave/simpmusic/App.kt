@@ -232,7 +232,8 @@ fun App(
         val data = intent.data
         Logger.d("MainActivity", "onCreate: $data")
         if (data != null) {
-            if (data.scheme == "simpmusic" && data.host == "notification") {
+            val isPlutoScheme = data.scheme == "pluto" || data.scheme == "simpmusic"
+            if (isPlutoScheme && data.host == "notification") {
                 viewModel.setIntent(null)
                 navController.navigate(
                     NotificationDestination,
@@ -249,14 +250,14 @@ fun App(
                 // of it. The token is handed straight to the shared view model, and the screen
                 // closes itself when it sees a session key appear.
                 token?.let { viewModel.completeLastfmLogin(it) }
-            } else if (data.scheme == "simpmusic" && data.host == "discord-auth") {
+            } else if (isPlutoScheme && data.host == "discord-auth") {
                 // Discord sends the user back here after they approve SimpMusic (Full builds):
                 // simpmusic://discord-auth?code=…&state=…. No navigation, as with Last.fm: the login
                 // screen is already open and closes itself once the login is stored.
                 Logger.d("MainActivity", "Discord callback, code present: ${!data.getQueryParameter("code").isNullOrEmpty()}")
                 viewModel.setIntent(null)
                 viewModel.completeDiscordLogin(data.toString())
-            } else if (data.host == "simpmusic.org" || data.scheme == "simpmusic") {
+            } else if (data.host == "simpmusic.org" || isPlutoScheme) {
                 // https://simpmusic.org/app/watch?v=VIDEO_ID
                 // https://simpmusic.org/app/playlist?list=PLAYLIST_ID
                 // https://simpmusic.org/app/channel/CHANNEL_ID
@@ -267,7 +268,7 @@ fun App(
                 // For simpmusic.org: segments = ["app", "watch"] → appPath = segments[1]
                 // For simpmusic://: host IS the appPath (e.g. host="watch"), segments = []
                 val appPath =
-                    if (data.scheme == "simpmusic") {
+                    if (isPlutoScheme) {
                         data.host
                     } else {
                         segments.getOrNull(1)
