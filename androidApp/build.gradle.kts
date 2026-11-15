@@ -85,6 +85,7 @@ android {
 
     buildTypes {
         release {
+            isProfileable = true
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
