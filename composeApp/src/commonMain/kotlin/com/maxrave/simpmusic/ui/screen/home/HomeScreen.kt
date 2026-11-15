@@ -1042,13 +1042,13 @@ fun QuickPicks(
                 if (item != null) {
                     QuickPicksItem(
                         onClick = {
-                            val firstQueue: Track = it.toTrack()
+                            val firstQueue: Track = item.toTrack()
                             viewModel.setQueueData(
                                 QueueData.Data(
                                     listTracks = arrayListOf(firstQueue),
                                     firstPlayedTrack = firstQueue,
-                                    playlistId = "RDAMVM${it.videoId}",
-                                    playlistName = "\"${it.title}\" Radio",
+                                    playlistId = "RDAMVM${item.videoId}",
+                                    playlistName = "\"${item.title}\" Radio",
                                     playlistType = PlaylistType.RADIO,
                                     continuation = null,
                                 ),
@@ -1059,10 +1059,10 @@ fun QuickPicks(
                             )
                         },
                         onLongClick = {
-                            track = it.toTrack()
+                            track = item.toTrack()
                             bottomSheetShow = true
                         },
-                        data = it,
+                        data = item,
                         widthDp = if (isPortrait) widthDp else minOf(widthDp, LandscapeGridItemMaxWidth + 30.dp),
                     )
                 }
