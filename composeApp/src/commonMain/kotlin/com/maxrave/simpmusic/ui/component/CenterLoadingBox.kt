@@ -1,57 +1,64 @@
 package com.maxrave.simpmusic.ui.component
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicatorDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import androidx.compose.material3.MaterialTheme
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+/**
+ * Quiet iOS-style activity indicator: eight fading graphite/foreground beads rotating
+ * continuously, without a Material loading container or color-filled polygon.
+ */
 @Composable
 fun CenterLoadingBox(modifier: Modifier) {
-    var containerShape by remember {
-        mutableStateOf(LoadingIndicatorDefaults.IndeterminateIndicatorPolygons.first())
-    }
-
-    LaunchedEffect(Unit) {
-        while (isActive) {
-            containerShape = LoadingIndicatorDefaults.IndeterminateIndicatorPolygons.random()
-            delay(500)
-        }
-    }
+    val transition = rememberInfiniteTransition(label = "ios-loading")
+    val rotation by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 900, easing = LinearEasing),
+        ),
+        label = "ios-loading-rotation",
+    )
 
     Box(modifier = modifier) {
-        Crossfade(
-            containerShape,
-            modifier =
-                Modifier
-                    .wrapContentSize()
-                    .align(Alignment.Center),
-        ) { shape ->
-            ContainedLoadingIndicator(
-                modifier =
-                    Modifier
-                        .size(56.dp),
-                polygons = LoadingIndicatorDefaults.IndeterminateIndicatorPolygons,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                indicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                containerShape = shape.toShape(),
-            )
+        Canvas(
+            Modifier
+                .size(28.dp)
+                .wrapContentSize()
+                .align(Alignment.Center)
+                .rotate(rotation),
+        ) {
+            val beadRadius = size.minDimension * 0.065f
+            val orbitRadius = size.minDimension * 0.36f
+            repeat(8) { index ->
+                val angle = index * (2.0 * PI / 8.0)
+                drawCircle(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = (index + 1) / 8f),
+                    radius = beadRadius,
+                    center = androidx.compose.ui.geometry.Offset(
+                        x = center.x + cos(angle).toFloat() * orbitRadius,
+                        y = center.y + sin(angle).toFloat() * orbitRadius,
+                    ),
+                )
+            }
         }
     }
 }
