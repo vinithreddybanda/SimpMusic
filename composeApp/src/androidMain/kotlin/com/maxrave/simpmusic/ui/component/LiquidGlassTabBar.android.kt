@@ -294,7 +294,7 @@ private fun LiquidGlassTab(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CompositionLocalProvider(LocalContentColor provides color) {
-            screen.icon()
+            screen.icon(selected)
             Text(
                 text = stringResource(screen.title),
                 style = typo().bodySmall,
