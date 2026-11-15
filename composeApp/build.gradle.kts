@@ -30,37 +30,34 @@ plugins {
     alias(libs.plugins.packagedeps)
 }
 
+/**
+ * The Inter source is stored as base64 text so it can be versioned through text-only repository
+ * editing APIs. Decode it into a generated Compose resource directory; customDirectory wires the
+ * producer task into resource accessor generation and every platform's resource packaging.
+ */
+val generatedInterFontDir = layout.buildDirectory.dir("generated/composeResources/commonMain")
+val generatedInterFont = generatedInterFontDir.map { it.file("font/inter_variable.ttf") }
+val decodeInterFont by tasks.registering {
+    val encoded = layout.projectDirectory.file("fontSources/inter_variable.ttf.b64")
+    inputs.file(encoded)
+    outputs.file(generatedInterFont)
+    doLast {
+        val output = generatedInterFont.get().asFile
+        output.parentFile.mkdirs()
+        output.writeBytes(Base64.getMimeDecoder().decode(encoded.asFile.readText()))
+    }
+}
+
 // composeApp uses the `android.kotlin.multiplatform.library` plugin, so with the
-// default `generateResClass = auto` Compose skips generating the `Res` class
-// (it treats a KMP *library* module as not owning the public resource class).
-// Force it to `always` so `Res` is generated for this app module.
+// default `generateResClass = auto` Compose skips generating the `Res` class.
+// Force it to `always`, and register the task-produced font directory as commonMain resources.
 compose.resources {
     generateResClass = always
     packageOfResClass = "simpmusic.composeapp.generated.resources"
-}
-
-/**
- * The font is kept as base64 text because the repository edit API only accepts UTF-8 files.
- * Decode it before Compose Multiplatform copies/generates resource accessors.
- */
-val decodeInterFont by tasks.registering {
-    val encoded = layout.projectDirectory.file("fontSources/inter_variable.ttf.b64")
-    val decoded = layout.projectDirectory.file("src/commonMain/composeResources/font/inter_variable.ttf")
-    inputs.file(encoded)
-    outputs.file(decoded)
-    doLast {
-        decoded.asFile.writeBytes(Base64.getMimeDecoder().decode(encoded.asFile.readText()))
-    }
-}
-
-tasks.configureEach {
-    if (
-        name.startsWith("generateResourceAccessorsFor") ||
-        name.startsWith("copyNonXmlValueResourcesFor") ||
-        name.startsWith("prepareComposeResourcesTaskFor")
-    ) {
-        dependsOn(decodeInterFont)
-    }
+    customDirectory(
+        sourceSetName = "commonMain",
+        directoryProvider = decodeInterFont.map { generatedInterFontDir.get() },
+    )
 }
 
 kotlin {
