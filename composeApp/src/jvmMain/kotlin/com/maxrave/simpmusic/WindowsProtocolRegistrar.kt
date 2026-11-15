@@ -19,7 +19,8 @@ import com.maxrave.logger.Logger
  */
 object WindowsProtocolRegistrar {
     private const val TAG = "WindowsProtocolRegistrar"
-    private const val SCHEME = "simpmusic"
+    private const val SCHEME = "pluto"
+    private const val LEGACY_SCHEME = "simpmusic"
 
     /**
      * The Last.fm auth callback. Its scheme is fixed by the callback URL registered on the Last.fm
@@ -37,7 +38,8 @@ object WindowsProtocolRegistrar {
             return
         }
 
-        register(SCHEME, "URL:SimpMusic Protocol", exePath)
+        register(SCHEME, "URL:Pluto Protocol", exePath)
+        register(LEGACY_SCHEME, "URL:Pluto Legacy Protocol", exePath)
         register(LASTFM_SCHEME, "URL:SimpMusic Last.fm Callback", exePath)
     }
 
