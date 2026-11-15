@@ -156,6 +156,19 @@ fun AlbumScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    // Repeated tracks can occur in an album's imported track list. Use the video ID plus
+    // its occurrence number so keys stay unique and independent of the current row index.
+    val albumTrackKeys =
+        remember(uiState.listTrack) {
+            val occurrences = mutableMapOf<String, Int>()
+            uiState.listTrack.mapIndexed { index, track ->
+                val videoId = track.videoId.ifBlank { "missing:$index" }
+                val occurrence = occurrences[videoId] ?: 0
+                occurrences[videoId] = occurrence + 1
+                "$videoId#$occurrence"
+            }
+        }
+
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var albumBottomSheetShow by rememberSaveable { mutableStateOf(false) }
     var chosenSong: Track? by remember { mutableStateOf(null) }
@@ -851,10 +864,11 @@ fun AlbumScreen(
                             }
                         }
                     }
-                    items(count = uiState.trackCount, key = { index ->
-                        val item = uiState.listTrack.getOrNull(index)
-                        item?.videoId + "item_$index"
-                    }) { index ->
+                    items(
+                        count = uiState.trackCount,
+                        key = { index -> albumTrackKeys.getOrNull(index) ?: "album-track:$index" },
+                        contentType = { "album-track" },
+                    ) { index ->
                         val item = uiState.listTrack.getOrNull(index)
                         if (item != null) {
                             Column(modifier = Modifier.animateItem()) {
@@ -910,7 +924,11 @@ fun AlbumScreen(
                                     modifier = Modifier.padding(horizontal = 12.dp).mouseDragScroll(otherVersionRowState),
                                     state = otherVersionRowState,
                                 ) {
-                                    items(uiState.otherVersion) { album ->
+                                    items(
+                                        items = uiState.otherVersion,
+                                        key = { album -> "other-album:${album.browseId}" },
+                                        contentType = { "other-album" },
+                                    ) { album ->
                                         HomeItemContentPlaylist(
                                             forceDark = true,
                                             onClick = {
