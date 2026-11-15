@@ -1108,7 +1108,11 @@ fun MoodMomentAndGenre(
                 state = gridState,
                 flingBehavior = flingBehavior,
             ) {
-                items(section.items, key = { it.params }) { item ->
+                items(
+                    items = section.items,
+                    key = { item -> item.params },
+                    contentType = { "mood-category" },
+                ) { item ->
                     MoodMomentAndGenreHomeItem(
                         title = item.title,
                         stripeColor = item.stripeColor,
