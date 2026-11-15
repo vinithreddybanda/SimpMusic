@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -410,6 +411,9 @@ fun App(
 
         val backdrop = rememberBackdrop(if (isDesktopShell) desktopPanel else MaterialTheme.colorScheme.background)
         Scaffold(
+            // Draw the app surface edge-to-edge behind the status bar/notch. Individual
+            // top bars retain their own safe insets for readable controls.
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             modifier =
                 Modifier.pointerInput(Unit) {
                     awaitPointerEventScope {
