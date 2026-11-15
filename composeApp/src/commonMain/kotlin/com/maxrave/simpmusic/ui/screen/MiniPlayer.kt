@@ -382,9 +382,9 @@ fun MiniPlayer(
                                             onDragEnd = {
                                                 Logger.w("MiniPlayer", "Drag Ended")
                                                 coroutineScope.launch {
-                                                    if (offsetX.value > 200) {
+                                                    if (offsetX.value > size.width * 0.22f) {
                                                         sharedViewModel.onUIEvent(UIEvent.Previous)
-                                                    } else if (offsetX.value < -120) {
+                                                    } else if (offsetX.value < -size.width * 0.22f) {
                                                         sharedViewModel.onUIEvent(UIEvent.Next)
                                                     }
                                                     offsetX.animateTo(0f)
