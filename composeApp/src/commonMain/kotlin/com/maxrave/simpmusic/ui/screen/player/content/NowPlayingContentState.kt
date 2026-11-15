@@ -20,6 +20,17 @@ import com.maxrave.simpmusic.viewModel.UIEvent
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.math.roundToInt
 
+/** Stable, unique page identities for the artwork pagers shared by all player styles. */
+internal fun List<Track>.stableArtworkPageKeys(prefix: String): List<String> {
+    val occurrences = mutableMapOf<String, Int>()
+    return mapIndexed { index, track ->
+        val videoId = track.videoId.ifBlank { "missing:$index" }
+        val occurrence = occurrences[videoId] ?: 0
+        occurrences[videoId] = occurrence + 1
+        "$prefix:$videoId:$occurrence"
+    }
+}
+
 /**
  * Whether the lyrics currently on screen can be rated.
  *
