@@ -240,6 +240,25 @@ fun HomeScreen(
     val isScrollingUp by scrollState.isScrollingUp()
     val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     val homeData by viewModel.homeItemList.collectAsStateWithLifecycle()
+    val quickPicksTitle = stringResource(Res.string.quick_picks)
+    // Build the transformed Quick Picks shelf once per feed update, not once per shelf
+    // recomposition. The original list remains the source of truth.
+    val quickPicksShelf =
+        remember(homeData, quickPicksTitle) {
+            homeData.firstOrNull { it.title == quickPicksTitle }?.let { shelf ->
+                shelf.copy(
+                    contents =
+                        shelf.contents.mapNotNull { content ->
+                            content?.copy(
+                                artists =
+                                    content.artists?.let { artists ->
+                                        if (artists.size > 1) artists.dropLast(1) else artists
+                                    },
+                            )
+                        },
+                )
+            }
+        }
     val homeShelves =
         remember(homeData, accountInfo) {
             val accountName = accountInfo?.first
@@ -493,45 +512,15 @@ fun HomeScreen(
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    if (item.title == stringResource(Res.string.quick_picks)) {
-                                        AnimatedVisibility(
-                                            visible =
-                                                homeData.find {
-                                                    it.title ==
-                                                        stringResource(
-                                                            Res.string.quick_picks,
-                                                        )
-                                                } != null,
-                                        ) {
-                                            QuickPicks(
-                                                homeItem =
-                                                    (
-                                                        homeData.find {
-                                                            it.title ==
-                                                                stringResource(
-                                                                    Res.string.quick_picks,
-                                                                )
-                                                        } ?: return@AnimatedVisibility
-                                                    ).let { content ->
-                                                        content.copy(
-                                                            contents =
-                                                                content.contents.mapNotNull { ct ->
-                                                                    ct?.copy(
-                                                                        artists =
-                                                                            ct.artists?.let { art ->
-                                                                                if (art.size > 1) {
-                                                                                    art.dropLast(1)
-                                                                                } else {
-                                                                                    art
-                                                                                }
-                                                                            },
-                                                                    )
-                                                                },
-                                                        )
-                                                    },
-                                                navController = navController,
-                                                viewModel = viewModel,
-                                            )
+                                    if (item.title == quickPicksTitle) {
+                                        AnimatedVisibility(visible = quickPicksShelf != null) {
+                                            quickPicksShelf?.let { shelf ->
+                                                QuickPicks(
+                                                    homeItem = shelf,
+                                                    navController = navController,
+                                                    viewModel = viewModel,
+                                                )
+                                            }
                                         }
                                     } else if (item.isSongCardShelf()) {
                                         HomeDiscoverSection(
