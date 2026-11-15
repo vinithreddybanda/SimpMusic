@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.vector.VectorPath
 import androidx.compose.ui.graphics.vector.path
 import com.maxrave.logger.Logger
 import com.adamglin.PhosphorIcons
-import com.adamglin.phosphoricons.AllIcons
+import com.adamglin.phosphoricons.regular.*
 import com.adamglin.phosphoricons.Regular
 import kotlin.math.abs
 import kotlin.math.max
@@ -59,124 +59,133 @@ internal val KEEP_AS_DRAWN = setOf("Groups")
  * the glyph as generated, so a bad measurement can only leave an icon unfitted, never break it.
  */
 /**
- * Compatibility names for the old generated Material Symbols call sites. All 119 legacy icon
- * entry points now resolve to Phosphor Regular vectors, so screens can migrate without changing
- * playback, navigation, or feature code in each screen.
+ * All legacy icon entry points now resolve directly to Phosphor Regular vectors.
+ * Direct references keep startup lean: we never instantiate the library's 1,500-icon catalogue.
  */
-private val phosphorIconAliases =
-    mapOf(
-        "AccessAlarm" to "Alarm",
-        "Add" to "Plus",
-        "AddCircleOutline" to "PlusCircle",
-        "AddPhotoAlternate" to "Image",
-        "Album" to "Disc",
-        "ArrowBackIosNew" to "CaretLeft",
-        "ArrowForwardIos" to "CaretRight",
-        "ArrowOutward" to "ArrowUpRight",
-        "AutoGraph" to "ChartLineUp",
-        "AvTimer" to "Timer",
-        "CalendarToday" to "CalendarBlank",
-        "Close" to "X",
-        "CloudOff" to "CloudSlash",
-        "CommentOutline" to "ChatCircle",
-        "ContentCopy" to "Copy",
-        "Delete" to "Trash",
-        "Done" to "Check",
-        "DownloadForOffline" to "DownloadSimple",
-        "DownloadForOfflineOutlined" to "DownloadSimple",
-        "Downloading" to "DownloadSimple",
-        "DragHandle" to "DotsSixVertical",
-        "Edit" to "PencilSimple",
-        "Error" to "WarningCircle",
-        "Explicit" to "TextT",
-        "FastRewind" to "Rewind",
-        "Favorite" to "Heart",
-        "FavoriteBorder" to "Heart",
-        "FormatListBulleted" to "ListBullets",
-        "Forward5" to "ArrowClockwise",
-        "Fullscreen" to "ArrowsOut",
-        "FullscreenExit" to "ArrowsIn",
-        "GraphicEq" to "Waveform",
-        "Groups" to "UsersThree",
-        "Help" to "Question",
-        "History" to "ClockCounterClockwise",
-        "Home" to "House",
-        "Insights" to "ChartLineUp",
-        "IosShare" to "ShareNetwork",
-        "KeyboardArrowDown" to "CaretDown",
-        "KeyboardDoubleArrowDown" to "CaretDoubleDown",
-        "KeyboardDoubleArrowLeft" to "CaretDoubleLeft",
-        "KeyboardDoubleArrowRight" to "CaretDoubleRight",
-        "KeyboardDoubleArrowUp" to "CaretDoubleUp",
-        "LeftPanelClose" to "Sidebar",
-        "LeftPanelOpen" to "SidebarSimple",
-        "LibraryMusic" to "Books",
-        "LogoDev" to "DevToLogo",
-        "Logout" to "SignOut",
-        "Lyrics" to "TextAlignLeft",
-        "MicOff" to "MicrophoneSlash",
-        "MoreVert" to "DotsThreeVertical",
-        "Movie" to "FilmStrip",
-        "MovieOff" to "FilmSlate",
-        "MusicCast" to "Airplay",
-        "MusicOff" to "MusicNote",
-        "Notifications" to "Bell",
-        "OpenInFull" to "ArrowsOut",
-        "OpenInNew" to "ArrowSquareOut",
-        "PeopleAlt" to "Users",
-        "PersonAdd" to "UserPlus",
-        "PictureInPictureAlt" to "PictureInPicture",
-        "PlayArrow" to "Play",
-        "PlaylistAdd" to "Playlist",
-        "QueueMusic" to "Queue",
-        "ReceiptLong" to "Receipt",
-        "Refresh" to "ArrowClockwise",
-        "Remove" to "Minus",
-        "RepeatOne" to "RepeatOnce",
-        "Replay" to "ArrowCounterClockwise",
-        "Replay5" to "ArrowCounterClockwise",
-        "RestartAlt" to "ArrowCounterClockwise",
-        "RssFeed" to "Rss",
-        "Search" to "MagnifyingGlass",
-        "SelectAll" to "SelectionAll",
-        "Send" to "PaperPlaneTilt",
-        "Sensors" to "Waveform",
-        "Settings" to "Gear",
-        "SkipNext" to "SkipForward",
-        "SkipPrevious" to "SkipBack",
-        "Smartphone" to "DeviceMobile",
-        "Sort" to "SortAscending",
-        "Speaker" to "SpeakerHigh",
-        "Speed" to "Gauge",
-        "StarBorder" to "Star",
-        "Subtitles" to "ClosedCaptioning",
-        "SubtitlesOff" to "ClosedCaptioning",
-        "Sync" to "ArrowsClockwise",
-        "SyncDisabled" to "ArrowsClockwise",
-        "ThumbDown" to "ThumbsDown",
-        "ThumbDownOutline" to "ThumbsDown",
-        "ThumbUp" to "ThumbsUp",
-        "ThumbUpOutline" to "ThumbsUp",
-        "ThumbsUpDown" to "ThumbsUp",
-        "TipsAndUpdates" to "Lightbulb",
-        "TrendingUp" to "TrendUp",
-        "Tune" to "SlidersHorizontal",
-        "UnfoldLess" to "CaretUp",
-        "UnfoldMore" to "CaretDown",
-        "Update" to "ArrowClockwise",
-        "VolumeDown" to "SpeakerLow",
-        "VolumeOff" to "SpeakerSlash",
-        "VolumeUp" to "SpeakerHigh",
-    )
-
-private val phosphorRegularIcons by lazy {
-    PhosphorIcons.Regular.AllIcons.associateBy { it.name.lowercase() }
-}
-
 internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
     val legacy = build()
-    val phosphorName = phosphorIconAliases[legacy.name] ?: legacy.name
-    return phosphorRegularIcons[phosphorName.lowercase()] ?: legacy
+    return when (legacy.name) {
+        "AccessAlarm" -> PhosphorIcons.Regular.Alarm
+        "Add" -> PhosphorIcons.Regular.Plus
+        "AddCircleOutline" -> PhosphorIcons.Regular.PlusCircle
+        "AddPhotoAlternate" -> PhosphorIcons.Regular.Image
+        "Album" -> PhosphorIcons.Regular.Disc
+        "ArrowBackIosNew" -> PhosphorIcons.Regular.CaretLeft
+        "ArrowForwardIos" -> PhosphorIcons.Regular.CaretRight
+        "ArrowOutward" -> PhosphorIcons.Regular.ArrowUpRight
+        "AutoGraph" -> PhosphorIcons.Regular.ChartLineUp
+        "AvTimer" -> PhosphorIcons.Regular.Timer
+        "CalendarToday" -> PhosphorIcons.Regular.CalendarBlank
+        "Check" -> PhosphorIcons.Regular.Check
+        "CheckCircle" -> PhosphorIcons.Regular.CheckCircle
+        "Close" -> PhosphorIcons.Regular.X
+        "CloudOff" -> PhosphorIcons.Regular.CloudSlash
+        "CommentOutline" -> PhosphorIcons.Regular.ChatCircle
+        "ContentCopy" -> PhosphorIcons.Regular.Copy
+        "Cookie" -> PhosphorIcons.Regular.Cookie
+        "Delete" -> PhosphorIcons.Regular.Trash
+        "Done" -> PhosphorIcons.Regular.Check
+        "Download" -> PhosphorIcons.Regular.Download
+        "DownloadForOffline" -> PhosphorIcons.Regular.DownloadSimple
+        "DownloadForOfflineOutlined" -> PhosphorIcons.Regular.DownloadSimple
+        "Downloading" -> PhosphorIcons.Regular.DownloadSimple
+        "DragHandle" -> PhosphorIcons.Regular.DotsSixVertical
+        "Edit" -> PhosphorIcons.Regular.PencilSimple
+        "Error" -> PhosphorIcons.Regular.WarningCircle
+        "Explicit" -> PhosphorIcons.Regular.TextT
+        "FastForward" -> PhosphorIcons.Regular.FastForward
+        "FastRewind" -> PhosphorIcons.Regular.Rewind
+        "Favorite" -> PhosphorIcons.Regular.Heart
+        "FavoriteBorder" -> PhosphorIcons.Regular.Heart
+        "FormatListBulleted" -> PhosphorIcons.Regular.ListBullets
+        "Forward5" -> PhosphorIcons.Regular.ArrowClockwise
+        "Fullscreen" -> PhosphorIcons.Regular.ArrowsOut
+        "FullscreenExit" -> PhosphorIcons.Regular.ArrowsIn
+        "GraphicEq" -> PhosphorIcons.Regular.Waveform
+        "Groups" -> PhosphorIcons.Regular.UsersThree
+        "Headphones" -> PhosphorIcons.Regular.Headphones
+        "Help" -> PhosphorIcons.Regular.Question
+        "History" -> PhosphorIcons.Regular.ClockCounterClockwise
+        "Home" -> PhosphorIcons.Regular.House
+        "Info" -> PhosphorIcons.Regular.Info
+        "Insights" -> PhosphorIcons.Regular.ChartLineUp
+        "IosShare" -> PhosphorIcons.Regular.ShareNetwork
+        "KeyboardArrowDown" -> PhosphorIcons.Regular.CaretDown
+        "KeyboardDoubleArrowDown" -> PhosphorIcons.Regular.CaretDoubleDown
+        "KeyboardDoubleArrowLeft" -> PhosphorIcons.Regular.CaretDoubleLeft
+        "KeyboardDoubleArrowRight" -> PhosphorIcons.Regular.CaretDoubleRight
+        "KeyboardDoubleArrowUp" -> PhosphorIcons.Regular.CaretDoubleUp
+        "LeftPanelClose" -> PhosphorIcons.Regular.Sidebar
+        "LeftPanelOpen" -> PhosphorIcons.Regular.SidebarSimple
+        "LibraryMusic" -> PhosphorIcons.Regular.Books
+        "LogoDev" -> PhosphorIcons.Regular.DevToLogo
+        "Logout" -> PhosphorIcons.Regular.SignOut
+        "Lyrics" -> PhosphorIcons.Regular.TextAlignLeft
+        "MicOff" -> PhosphorIcons.Regular.MicrophoneSlash
+        "MoreVert" -> PhosphorIcons.Regular.DotsThreeVertical
+        "Movie" -> PhosphorIcons.Regular.FilmStrip
+        "MovieOff" -> PhosphorIcons.Regular.FilmSlate
+        "MusicCast" -> PhosphorIcons.Regular.Airplay
+        "MusicNote" -> PhosphorIcons.Regular.MusicNote
+        "MusicOff" -> PhosphorIcons.Regular.MusicNote
+        "Notifications" -> PhosphorIcons.Regular.Bell
+        "OpenInFull" -> PhosphorIcons.Regular.ArrowsOut
+        "OpenInNew" -> PhosphorIcons.Regular.ArrowSquareOut
+        "Pause" -> PhosphorIcons.Regular.Pause
+        "PauseCircle" -> PhosphorIcons.Regular.PauseCircle
+        "PeopleAlt" -> PhosphorIcons.Regular.Users
+        "Person" -> PhosphorIcons.Regular.Person
+        "PersonAdd" -> PhosphorIcons.Regular.UserPlus
+        "PictureInPictureAlt" -> PhosphorIcons.Regular.PictureInPicture
+        "PlayArrow" -> PhosphorIcons.Regular.Play
+        "PlayCircle" -> PhosphorIcons.Regular.PlayCircle
+        "PlaylistAdd" -> PhosphorIcons.Regular.Playlist
+        "PushPin" -> PhosphorIcons.Regular.PushPin
+        "QueueMusic" -> PhosphorIcons.Regular.Queue
+        "ReceiptLong" -> PhosphorIcons.Regular.Receipt
+        "Refresh" -> PhosphorIcons.Regular.ArrowClockwise
+        "Remove" -> PhosphorIcons.Regular.Minus
+        "Repeat" -> PhosphorIcons.Regular.Repeat
+        "RepeatOne" -> PhosphorIcons.Regular.RepeatOnce
+        "Replay" -> PhosphorIcons.Regular.ArrowCounterClockwise
+        "Replay5" -> PhosphorIcons.Regular.ArrowCounterClockwise
+        "RestartAlt" -> PhosphorIcons.Regular.ArrowCounterClockwise
+        "RssFeed" -> PhosphorIcons.Regular.Rss
+        "Search" -> PhosphorIcons.Regular.MagnifyingGlass
+        "SelectAll" -> PhosphorIcons.Regular.SelectionAll
+        "Send" -> PhosphorIcons.Regular.PaperPlaneTilt
+        "Sensors" -> PhosphorIcons.Regular.Waveform
+        "Settings" -> PhosphorIcons.Regular.Gear
+        "Share" -> PhosphorIcons.Regular.Share
+        "Shuffle" -> PhosphorIcons.Regular.Shuffle
+        "SkipNext" -> PhosphorIcons.Regular.SkipForward
+        "SkipPrevious" -> PhosphorIcons.Regular.SkipBack
+        "Smartphone" -> PhosphorIcons.Regular.DeviceMobile
+        "Sort" -> PhosphorIcons.Regular.SortAscending
+        "Speaker" -> PhosphorIcons.Regular.SpeakerHigh
+        "Speed" -> PhosphorIcons.Regular.Gauge
+        "Star" -> PhosphorIcons.Regular.Star
+        "StarBorder" -> PhosphorIcons.Regular.Star
+        "Subtitles" -> PhosphorIcons.Regular.ClosedCaptioning
+        "SubtitlesOff" -> PhosphorIcons.Regular.ClosedCaptioning
+        "Sync" -> PhosphorIcons.Regular.ArrowsClockwise
+        "SyncDisabled" -> PhosphorIcons.Regular.ArrowsClockwise
+        "ThumbDown" -> PhosphorIcons.Regular.ThumbsDown
+        "ThumbDownOutline" -> PhosphorIcons.Regular.ThumbsDown
+        "ThumbUp" -> PhosphorIcons.Regular.ThumbsUp
+        "ThumbUpOutline" -> PhosphorIcons.Regular.ThumbsUp
+        "ThumbsUpDown" -> PhosphorIcons.Regular.ThumbsUp
+        "TipsAndUpdates" -> PhosphorIcons.Regular.Lightbulb
+        "TrendingUp" -> PhosphorIcons.Regular.TrendUp
+        "Tune" -> PhosphorIcons.Regular.SlidersHorizontal
+        "UnfoldLess" -> PhosphorIcons.Regular.CaretUp
+        "UnfoldMore" -> PhosphorIcons.Regular.CaretDown
+        "Update" -> PhosphorIcons.Regular.ArrowClockwise
+        "VolumeDown" -> PhosphorIcons.Regular.SpeakerLow
+        "VolumeOff" -> PhosphorIcons.Regular.SpeakerSlash
+        "VolumeUp" -> PhosphorIcons.Regular.SpeakerHigh
+        else -> legacy
+    }
 }
 
 /** 1 when the glyph already fits, is kept as drawn or cannot be measured; otherwise the shrink that fits it. */
