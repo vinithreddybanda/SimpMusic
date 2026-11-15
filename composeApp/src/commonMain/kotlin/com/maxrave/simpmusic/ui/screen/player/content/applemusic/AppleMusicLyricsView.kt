@@ -78,12 +78,6 @@ import simpmusic.composeapp.generated.resources.rich_synced
 import simpmusic.composeapp.generated.resources.spotify_lyrics_provider
 import simpmusic.composeapp.generated.resources.unsynced
 
-/**
- * The LYRICS body: compact header, the app's own [LyricsView] — the SAME renderer the other
- * styles' lyrics card embeds (owner's rule: reuse the existing component, never rebuild it) —
- * two floating action buttons, the sync-type and provider caption lines, and the shared bottom cluster.
- * The top-level composable falls back to MAIN when lyrics disappear mid-session.
- */
 @Composable
 internal fun AppleMusicLyricsView(
     state: NowPlayingContentState,
@@ -97,9 +91,6 @@ internal fun AppleMusicLyricsView(
     outputName: String?,
     onOpenOutput: () -> Unit,
     modifier: Modifier = Modifier,
-    // The SoundCloud style borrows this page without the bottom cluster (owner's call): it has its
-    // own transport on its card, so it returns there through a back button in the header instead of
-    // the Lyrics pill.
     showBottomCluster: Boolean = true,
     onBack: (() -> Unit)? = null,
     dataStoreManager: DataStoreManager = koinInject(),
@@ -107,22 +98,11 @@ internal fun AppleMusicLyricsView(
     val localDensity = LocalDensity.current
     val lyricsData = state.screenData.lyricsData
 
-    // LyricsView applies AppleMusicLyricPaddingX ITSELF, but only on its Apple Music branch — its
-    // Classic branch renders LyricsLineItem, which has no horizontal padding of its own. So this
-    // tab, which contributes no gutter, left Classic lyrics flush against the screen edge while
-    // the header right above them sits at 20dp. Same split the fullscreen sheet already does:
-    // the caller contributes whatever the renderer does not, so the TOTAL is the same either way.
     val lyricsStyle by dataStoreManager.lyricsStyle.collectAsStateWithLifecycle(DataStoreManager.LYRICS_STYLE_CLASSIC)
     val rendererOwnsGutter = lyricsStyle == DataStoreManager.LYRICS_STYLE_APPLE_MUSIC && isLyricsBlurSupported()
 
-    // Apple hands the whole page to the lyrics once you stop touching it, and brings the transport
-    // back the moment you touch it again. rememberSaveable so a rotation does not yank the
-    // controls back into view.
     var showCluster by rememberSaveable { mutableStateOf(true) }
     var showShareSheet by rememberSaveable { mutableStateOf(false) }
-    // Bumped on every interaction, and keyed into the timer below, so ANY touch restarts the
-    // countdown. Without it a scroll while the cluster is already shown leaves showCluster
-    // unchanged, the LaunchedEffect never restarts, and the controls vanish mid-gesture.
     var interactionTick by remember { mutableIntStateOf(0) }
     LaunchedEffect(showCluster, interactionTick) {
         if (showCluster) {
@@ -131,9 +111,6 @@ internal fun AppleMusicLyricsView(
         }
     }
 
-    // Scrolling the lyrics counts as reaching for the player, exactly like tapping does — and the
-    // scroll happens inside LyricsView's own LazyColumn, which owns a list state this file cannot
-    // see. A nested-scroll connection catches it on the way past without reaching in.
     val scrollWakesControls =
         remember {
             object : NestedScrollConnection {
@@ -145,16 +122,12 @@ internal fun AppleMusicLyricsView(
                         showCluster = true
                         interactionTick++
                     }
-                    // Zero: this only observes. Consuming any of it would fight the list's scroll.
                     return Offset.Zero
                 }
             }
         }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // statusBars + 20dp, not a bare status-bar offset: the grabber that
-        // NowPlayingContentAppleMusic draws above the view Crossfade floats over this column, and
-        // without the extra room the header's title slides underneath it.
         Spacer(
             modifier =
                 Modifier.height(
@@ -168,9 +141,6 @@ internal fun AppleMusicLyricsView(
                 Modifier
                     .weight(1f)
                     .nestedScroll(scrollWakesControls)
-                    // The lyric LINES consume their own taps to seek, so this only ever fires on
-                    // the gutter and the gaps between lines — which is exactly the "tap the page,
-                    // not a lyric" gesture. No ripple: this is a whole page, not a button.
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
@@ -180,11 +150,6 @@ internal fun AppleMusicLyricsView(
                     },
         ) {
             if (lyricsData != null) {
-                // Transparent background: the page's artwork-tinted gradient is the backdrop,
-                // not LyricsView's own dark card color.
-                // The app's own renderer, with its own line sizes/animations. The provider caption
-                // rides as its LAST list item so it scrolls with the lyrics, per the owner's
-                // original spec.
                 LyricsView(
                     lyricsData = lyricsData,
                     timeLine = state.timelineFlow,
@@ -194,23 +159,10 @@ internal fun AppleMusicLyricsView(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            // The lines dissolve at both edges instead of being guillotined by
-                            // the header/cluster — applied from OUTSIDE the component.
-                            // Softer bottom fade than the top: a lyric line is ~54dp tall, and a
-                            // 44dp fade dissolved most of the last visible line.
                             .appleMusicVerticalFadeEdges(topFade = 28.dp, bottomFade = 18.dp)
-                            // Zero under the Apple Music renderer, which insets its own lines so
-                            // its blur has margin to spill into; the full gutter under Classic,
-                            // which insets nothing. Applied AFTER the fade so the fade still spans
-                            // the full width.
                             .padding(horizontal = if (rendererOwnsGutter) 0.dp else AppleMusicLyricPaddingX),
                     backgroundColor = Color.Transparent,
                     footerContent = {
-                        // Right-aligned, and stacked: plain text rather than the AIBadge pill the
-                        // other styles use. Classic puts that badge beside a "Lyrics" heading where
-                        // it has a row to itself; here it would sit inline with the provider
-                        // caption, which is already the quietest thing on the page — a filled pill
-                        // next to it shouts. Two right-anchored lines read as one footnote block.
                         Column(
                             horizontalAlignment = Alignment.End,
                             modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 8.dp),
@@ -223,14 +175,6 @@ internal fun AppleMusicLyricsView(
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }
-                            // One line per fact, not one line joined by a bullet. "Word by word"
-                            // and "Lyrics provided by SimpMusic Lyrics" are two different things,
-                            // and glued together they make a single line long enough to run the
-                            // width of the screen.
-                            //
-                            // fillMaxWidth + TextAlign.End on each, not just the Column's
-                            // alignment: Column alignment places a whole text block, so a line that
-                            // wraps still ends up left-aligned within itself.
                             Text(
                                 text = appleMusicLyricsSyncText(lyricsData),
                                 style = typography.footer,
@@ -249,8 +193,6 @@ internal fun AppleMusicLyricsView(
                         }
                     },
                 )
-                // Bottom-end, inside the list's own bottom fade so they sit over the dimmest
-                // lyrics rather than over a bright active line.
                 androidx.compose.animation.AnimatedVisibility(
                     visible = showCluster,
                     enter = fadeIn(),
@@ -260,8 +202,6 @@ internal fun AppleMusicLyricsView(
                     Column(
                         modifier = Modifier.padding(end = 20.dp, bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                        // End: the timing bar opens to the left of its button and widens this
-                        // column, which must not drag the buttons below it off the edge.
                         horizontalAlignment = Alignment.End,
                     ) {
                         if (lyricsData.hasTiming()) {
@@ -269,16 +209,11 @@ internal fun AppleMusicLyricsView(
                                 offsetMs = state.lyricsOffsetMs.toInt(),
                                 onOffsetChange = actions.onLyricsOffsetChange,
                                 backdrop = null,
-                                // Adjusting counts as touching the page, or the cluster hides mid-tap.
                                 onInteraction = { interactionTick++ },
                             ) { onClick ->
                                 AppleMusicFloatingCircleButton(icon = SimpIcons.AvTimer, onClick = onClick)
                             }
                         }
-                        // Only when the lyrics (or the translation) actually came from SimpMusic
-                        // Lyrics — the sole provider that accepts a vote. Classic and M3E have
-                        // always gated theirs; this one did not, so it invited a rating on
-                        // YouTube/LRCLIB/Spotify lyrics that had nowhere to go.
                         if (lyricsData.canVote()) {
                             AppleMusicFloatingCircleButton(icon = SimpIcons.ThumbsUpDown, onClick = { actions.onShowVoteDialog() })
                         }
@@ -294,8 +229,6 @@ internal fun AppleMusicLyricsView(
                 lines = lyricsData.toShareLyricsLines(),
                 songTitle = state.screenData.nowPlayingTitle,
                 artistName = state.screenData.artistName,
-                // The track's already-decoded artwork. A URL would still be loading at the moment
-                // the card is captured, and would come out blank.
                 artwork = state.screenData.bitmap,
                 seedColor = state.startColor.value,
                 initialLineIndex = state.currentLyricLineIndex,
@@ -303,13 +236,9 @@ internal fun AppleMusicLyricsView(
             )
         }
 
-        // Without the cluster, only the gesture bar's room is kept under the lyrics.
         if (!showBottomCluster) {
             Spacer(modifier = Modifier.height(with(localDensity) { WindowInsets.systemBars.getBottom(localDensity).toDp() }))
         }
-        // expand/shrink, not just fade: the Box above holds weight(1f), so removing the cluster
-        // from the layout is what lets the lyrics grow into the freed space — a fade alone would
-        // leave an empty band where the transport used to be.
         androidx.compose.animation.AnimatedVisibility(
             visible = showCluster && showBottomCluster,
             enter = expandVertically() + fadeIn(),
@@ -331,8 +260,6 @@ internal fun AppleMusicLyricsView(
     }
 }
 
-// Long enough to read a line or two and reach for a control, short enough that the page clears
-// itself while you are just listening.
 private const val CLUSTER_AUTO_HIDE_MS = 8_000L
 
 @Composable
@@ -354,7 +281,6 @@ internal fun AppleMusicFloatingCircleButton(
     }
 }
 
-/** The sync-type half of the caption: "Word by word", "Line Synced" or "Unsynced". Its own line. */
 @Composable
 private fun appleMusicLyricsSyncText(lyricsData: NowPlayingScreenData.LyricsData): String {
     val syncTypeText =
@@ -366,7 +292,6 @@ private fun appleMusicLyricsSyncText(lyricsData: NowPlayingScreenData.LyricsData
     return syncTypeText
 }
 
-/** The provider half of the caption. Its own line — see the footer for why. */
 @Composable
 private fun appleMusicLyricsProviderText(lyricsData: NowPlayingScreenData.LyricsData): String =
     when (lyricsData.lyricsProvider) {
