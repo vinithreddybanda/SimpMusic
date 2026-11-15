@@ -728,7 +728,16 @@ fun HomeScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(if (getPlatform() == Platform.Android) 50.dp else 56.dp),
+                            // Keep the feed edge-to-edge while scrolling: the full filter row is
+                            // only present at the top; the scrolled state is a compact glass rail.
+                            .height(
+                                when {
+                                    target && getPlatform() == Platform.Android -> 50.dp
+                                    target -> 56.dp
+                                    getPlatform() == Platform.Android -> 38.dp
+                                    else -> 42.dp
+                                },
+                            ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(Modifier.padding(start = if (getPlatform() == Platform.Android) 12.dp else 16.dp, end = 8.dp)) {
@@ -743,51 +752,56 @@ fun HomeScreen(
                             .weight(1f)
                             .fillMaxHeight(),
                     ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxHeight()
-                                    .chipStripEdgeFades(32.dp, start = { chipHeadFade }, end = { chipTailFade })
-                                    .mouseDragScroll(chipRowState)
-                                    .horizontalScroll(chipRowState)
-                                    .widthIn(min = maxWidth)
-                                    .padding(end = if (createPinned) 0.dp else 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                        AnimatedVisibility(
+                            visible = target,
+                            enter = fadeIn(tween(180)),
+                            exit = fadeOut(tween(120)),
+                            modifier = Modifier.fillMaxHeight(),
                         ) {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .chipStripEdgeFades(32.dp, start = { chipHeadFade }, end = { chipTailFade })
+                                        .mouseDragScroll(chipRowState)
+                                        .horizontalScroll(chipRowState)
+                                        .widthIn(min = maxWidth),
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Chip(
-                                    isAnimated = loading,
-                                    isSelected = params == null && !moodExpanded,
-                                    text = stringResource(Res.string.all),
-                                    backdrop = chipBackdrop,
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    moodExpanded = false
-                                    viewModel.setParams(null)
-                                }
-                                ExpandableChip(
-                                    text = stringResource(Res.string.mood),
-                                    options = homeMoods.map { stringResource(it.first) },
-                                    selectedIndex = homeMoods.indexOfFirst { it.second == params }.takeIf { it >= 0 },
-                                    expanded = moodExpanded,
-                                    onExpandedChange = { moodExpanded = it },
-                                    onSelect = { index ->
+                                    Chip(
+                                        isAnimated = loading,
+                                        isSelected = params == null && !moodExpanded,
+                                        text = stringResource(Res.string.all),
+                                        backdrop = chipBackdrop,
+                                    ) {
                                         moodExpanded = false
-                                        viewModel.setParams(homeMoods[index].second)
-                                    },
-                                    isAnimated = loading,
-                                    backdrop = chipBackdrop,
-                                )
-                            }
-                            if (!createPinned) {
-                                Box(Modifier.padding(start = 8.dp)) { createActions() }
+                                        viewModel.setParams(null)
+                                    }
+                                    ExpandableChip(
+                                        text = stringResource(Res.string.mood),
+                                        options = homeMoods.map { stringResource(it.first) },
+                                        selectedIndex = homeMoods.indexOfFirst { it.second == params }.takeIf { it >= 0 },
+                                        expanded = moodExpanded,
+                                        onExpandedChange = { moodExpanded = it },
+                                        onSelect = { index ->
+                                            moodExpanded = false
+                                            viewModel.setParams(homeMoods[index].second)
+                                        },
+                                        isAnimated = loading,
+                                        backdrop = chipBackdrop,
+                                    )
+                                }
                             }
                         }
                     }
-                    if (createPinned) {
+                    if (!createPinned) {
+                        Box(Modifier.padding(start = 8.dp, end = 12.dp)) { createActions() }
+                    } else {
                         Box(Modifier.padding(start = 8.dp, end = 16.dp)) { createActions() }
                     }
                 }
