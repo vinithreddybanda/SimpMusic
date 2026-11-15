@@ -425,7 +425,7 @@ fun HomeScreen(
                     }
                     LazyColumn(
                         state = scrollState,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(if (getPlatform() == Platform.Android) 6.dp else 8.dp),
                     ) {
                         itemsIndexed(
                             homeShelves,
@@ -482,7 +482,7 @@ fun HomeScreen(
                                 Column(
                                     modifier =
                                         Modifier
-                                            .padding(horizontal = 15.dp),
+                                            .padding(horizontal = if (getPlatform() == Platform.Android) 12.dp else 15.dp),
                                 ) {
                                     if (index == 0) {
                                         Spacer(
@@ -569,7 +569,7 @@ fun HomeScreen(
                                     Box(
                                         modifier =
                                             Modifier
-                                                .padding(horizontal = 15.dp),
+                                                .padding(horizontal = if (getPlatform() == Platform.Android) 12.dp else 15.dp),
                                     ) {
                                         HomeItem(
                                             navController = navController,
@@ -585,7 +585,7 @@ fun HomeScreen(
                                     Box(
                                         modifier =
                                             Modifier
-                                                .padding(horizontal = 15.dp),
+                                                .padding(horizontal = if (getPlatform() == Platform.Android) 12.dp else 15.dp),
                                     ) {
                                         moodMomentAndGenre?.let {
                                             MoodMomentAndGenre(
@@ -600,7 +600,7 @@ fun HomeScreen(
                                 Column(
                                     Modifier
                                         .padding(vertical = 10.dp)
-                                        .padding(horizontal = 15.dp),
+                                        .padding(horizontal = if (getPlatform() == Platform.Android) 12.dp else 15.dp),
                                     verticalArrangement = Arrangement.SpaceBetween,
                                 ) {
                                     ChartTitle()
@@ -703,17 +703,17 @@ fun HomeScreen(
                     CreateActions(
                         backdrop = chipBackdrop,
                         navController = navController,
-                        onSettings = { navController.navigate(SettingsDestination) },
+                        onSettings = null,
                     )
                 }
                 Row(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
+                            .height(if (getPlatform() == Platform.Android) 50.dp else 56.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.padding(start = 16.dp, end = 8.dp)) {
+                    Box(Modifier.padding(start = if (getPlatform() == Platform.Android) 12.dp else 16.dp, end = 8.dp)) {
                         HomeAccountButton(
                             accountName = accountInfo?.first,
                             thumbnailUrl = accountInfo?.second,
@@ -843,7 +843,7 @@ private fun HomeAccountButton(
         AccountAvatar(
             signedIn = signedIn,
             thumbnailUrl = thumbnailUrl,
-            size = 44.dp,
+            size = if (getPlatform() == Platform.Android) 36.dp else 44.dp,
             contentDescription = displayName,
             modifier = Modifier.clickable { menuOpen = true },
         )
@@ -878,6 +878,14 @@ private fun HomeAccountButton(
                 onClick = {
                     menuOpen = false
                     navController.navigate(NotificationDestination)
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.settings), style = typo().bodyMedium) },
+                leadingIcon = { Icon(SimpIcons.Settings, contentDescription = null) },
+                onClick = {
+                    menuOpen = false
+                    navController.navigate(SettingsDestination)
                 },
             )
             if (!signedIn) {
