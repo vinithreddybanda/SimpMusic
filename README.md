@@ -1,8 +1,6 @@
 # Pluto
 
-Pluto is a Kotlin Multiplatform music client focused on a fluid, distraction-free listening experience.
-
-This repository is a fork of [SimpMusic](https://github.com/maxrave-dev/SimpMusic). It retains the upstream project's license and required notices in [LICENSE](LICENSE), while developing a distinct Pluto identity and interface.
+A Kotlin Multiplatform music player with streaming, synced lyrics, downloads, playlists and a personal library.
 
 ## Development
 
@@ -14,8 +12,6 @@ Build the Android debug app:
 ./gradlew :androidApp:assembleDebug
 ```
 
-The playback engine, music discovery and recommendation behavior are being preserved while the interface and app experience are refined.
-
 ## License
 
-See [LICENSE](LICENSE). Upstream copyright and license notices are intentionally retained.
+See [LICENSE](LICENSE).
