@@ -74,10 +74,10 @@ import kotlin.math.roundToInt
 import kotlin.math.sign
 
 private val CapsuleShape = RoundedCornerShape(percent = 50)
-private val TabWidth = 96.dp
-internal val BarHeight = 64.dp
-private val BlobHeight = 56.dp
-private val BarInset = 6.dp
+private val TabWidth = 84.dp
+internal val BarHeight = 56.dp
+private val BlobHeight = 48.dp
+private val BarInset = 4.dp
 
 @Composable
 fun LiquidGlassTabBar(
@@ -113,7 +113,7 @@ fun LiquidGlassTabBar(
                 valueRange = 0f..(tabsCount - 1).toFloat(),
                 visibilityThreshold = 0.001f,
                 initialScale = 1f,
-                pressedScale = 76f / 56f,
+                pressedScale = 1.05f,
                 onDragStarted = { draggedFlag[0] = false },
                 onDragStopped = {
                     if (draggedFlag[0]) {
@@ -152,7 +152,22 @@ fun LiquidGlassTabBar(
                 .pointerInput(barInteraction) { barInteraction.detectPress(this) },
         contentAlignment = Alignment.CenterStart,
     ) {
-        Box(Modifier.matchParentSize().drawInteractiveGlass(isDark, backdrop, layer, { luminance.value }, CapsuleShape, barInteraction))
+        Box(
+            Modifier
+                .matchParentSize()
+                .drawInteractiveGlass(
+                    isDark,
+                    backdrop,
+                    layer,
+                    { luminance.value },
+                    CapsuleShape,
+                    barInteraction,
+                    pressedScale = 1.04f,
+                    blurScale = 0.55f,
+                    minScrim = 0.18f,
+                    maxScrim = 0.36f,
+                ),
+        )
 
         Box(Modifier.matchParentSize().unfoldingTabs(fullWidth, CapsuleShape)) {
             Box(
@@ -180,10 +195,10 @@ fun LiquidGlassTabBar(
                                     saturation = 1.5f,
                                 )
                                 blur(
-                                    (if (l > 0f) lerp(6f.dp.toPx(), 12f.dp.toPx(), l) else lerp(6f.dp.toPx(), 2f.dp.toPx(), -l)) +
-                                        12f.dp.toPx(),
+                                    (if (l > 0f) lerp(4f.dp.toPx(), 8f.dp.toPx(), l) else lerp(4f.dp.toPx(), 2f.dp.toPx(), -l)) +
+                                        3f.dp.toPx() * progress,
                                 )
-                                lens(8f.dp.toPx() * progress, 10f.dp.toPx() * progress, chromaticAberration = false)
+                                lens(3f.dp.toPx() * progress, 4f.dp.toPx() * progress, chromaticAberration = false)
                             },
                             highlight = { Highlight.Default.copy(alpha = 0.6f) },
                             shadow = { Shadow(radius = 4f.dp, alpha = 0.4f) },
