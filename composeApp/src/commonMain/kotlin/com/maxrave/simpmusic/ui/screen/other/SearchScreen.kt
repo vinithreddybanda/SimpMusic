@@ -445,7 +445,7 @@ fun SearchScreen(
                     ) {
                         items(
                             items = searchScreenState.suggestYTItems,
-                            key = { it.toString() },
+                            key = { it.stableSearchResultKey() },
                             contentType = { it::class },
                         ) { item ->
                             SuggestItemRow(
@@ -834,7 +834,7 @@ fun SearchScreen(
                                                     ) {
                                                         items(
                                                             items = currentResults,
-                                                            key = { it.toString() },
+                                                            key = { it.stableSearchResultKey() },
                                                             contentType = { it::class },
                                                         ) { result ->
                                                             when (result) {
@@ -1377,6 +1377,15 @@ fun SuggestItemRow(
         }
     }
 }
+
+private fun SearchResultType.stableSearchResultKey(): String =
+    when (this) {
+        is SongsResult -> "song:$videoId"
+        is VideosResult -> "video:$videoId"
+        is AlbumsResult -> "album:$browseId"
+        is ArtistsResult -> "artist:$browseId"
+        is PlaylistsResult -> "${if (resultType == "Podcast") "podcast" else "playlist"}:$browseId"
+    }
 
 enum class SearchUIType {
     EMPTY,
