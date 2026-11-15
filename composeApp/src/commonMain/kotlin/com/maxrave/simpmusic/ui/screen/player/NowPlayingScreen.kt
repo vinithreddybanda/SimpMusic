@@ -100,8 +100,6 @@ import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
 import com.maxrave.simpmusic.ui.navigation.destination.player.FullscreenDestination
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentActions
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentAppleMusic
-import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentSoundCloud
-import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentM3Expressive
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentSpotify
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentState
 import com.maxrave.simpmusic.ui.screen.player.content.PlayerBackdropColor
@@ -986,24 +984,14 @@ fun NowPlayingScreenContent(
     }
 
     when (nowPlayingStyle) {
-        DataStoreManager.NOW_PLAYING_STYLE_M3_EXPRESSIVE ->
-            NowPlayingContentM3Expressive(
-                state = state,
-                actions = actions,
-            )
-
         DataStoreManager.NOW_PLAYING_STYLE_APPLE_MUSIC ->
             NowPlayingContentAppleMusic(
                 state = state,
                 actions = actions,
             )
 
-        DataStoreManager.NOW_PLAYING_STYLE_SOUNDCLOUD ->
-            NowPlayingContentSoundCloud(
-                state = state,
-                actions = actions,
-            )
-
+        // Legacy M3 Expressive / SoundCloud preferences fall back to the supported Spotify
+        // treatment instead of keeping retired player UIs alive.
         else ->
             NowPlayingContentSpotify(
                 state = state,
