@@ -123,6 +123,8 @@ kotlin {
             // Compose
             implementation(libs.compose.material3.adaptive)
             implementation(libs.compose.material.ripple)
+            // Phosphor provides a consistent open-source, stroke-first icon language across KMP.
+            implementation("com.adamglin:phosphor-icon:1.0.0")
 
             implementation(libs.ui.tooling.preview)
 
