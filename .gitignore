@@ -27,7 +27,6 @@ ign.md
 # Sentry Config File
 sentry.properties
 /composeApp/build/
-/composeApp/src/commonMain/composeResources/font/inter_variable.ttf
 /composeApp/cache/
 /composeApp/kcef-bundle/
 /.mcp.json
