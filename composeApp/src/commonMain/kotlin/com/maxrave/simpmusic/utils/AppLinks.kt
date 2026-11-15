@@ -41,7 +41,7 @@ fun isAppLinkAvailable(
     youTubeLoggedIn: Boolean,
 ): Boolean {
     if (link.startsWith("https://", ignoreCase = true)) return true
-    if (!link.startsWith("simpmusic://")) return false
+    if (!link.startsWith("pluto://") && !link.startsWith("simpmusic://")) return false
     val uri = runCatching { Uri.parse(link) }.getOrNull() ?: return false
     return isAppLinkAvailable(uri.host, libraryTabOf(uri), localTrackingOn, youTubeLoggedIn)
 }
