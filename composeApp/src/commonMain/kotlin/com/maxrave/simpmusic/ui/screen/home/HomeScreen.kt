@@ -40,6 +40,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -968,6 +969,16 @@ fun QuickPicks(
 ) {
     val lazyListState = rememberLazyGridState()
     val snapperFlingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = lazyListState, snapPosition = SnapPosition.Start))
+    val quickPickKeys =
+        remember(homeItem.contents) {
+            val occurrences = mutableMapOf<String, Int>()
+            homeItem.contents.mapIndexed { index, item ->
+                val identity = item?.videoId?.takeIf { it.isNotBlank() } ?: "empty:$index"
+                val occurrence = occurrences[identity] ?: 0
+                occurrences[identity] = occurrence + 1
+                "quick-pick:$identity:$occurrence"
+            }
+        }
     val isPortrait = getScreenSizeInfo().let { it.wDP < it.hDP }
     val density = LocalDensity.current
     var widthDp by remember {
@@ -1023,8 +1034,12 @@ fun QuickPicks(
             state = lazyListState,
             flingBehavior = snapperFlingBehavior,
         ) {
-            items(homeItem.contents, key = { it.hashCode() }) {
-                if (it != null) {
+            itemsIndexed(
+                items = homeItem.contents,
+                key = { index, _ -> quickPickKeys.getOrElse(index) { "quick-pick:$index" } },
+                contentType = { _, item -> if (item == null) "empty-quick-pick" else "quick-pick" },
+            ) { _, item ->
+                if (item != null) {
                     QuickPicksItem(
                         onClick = {
                             val firstQueue: Track = it.toTrack()
@@ -1175,20 +1190,21 @@ fun ChartData(
                 state = lazyListState,
                 flingBehavior = snapperFlingBehavior,
             ) {
-                items(item.playlists.size, key = { index ->
-                    val data = item.playlists[index]
-                    data.id + data.title + index
-                }) {
+                items(
+                    items = item.playlists,
+                    key = { playlist -> "chart-playlist:${playlist.id}" },
+                    contentType = { "chart-playlist" },
+                ) { playlist ->
                     HomeItemContentPlaylist(
                         onClick = {
                             navController.navigate(
                                 PlaylistDestination(
-                                    playlistId = item.playlists[it].id,
+                                    playlistId = playlist.id,
                                     isYourYouTubePlaylist = false,
                                 ),
                             )
                         },
-                        data = item.playlists[it],
+                        data = playlist,
                     )
                 }
             }
@@ -1209,11 +1225,11 @@ fun ChartData(
             state = lazyListState2,
             flingBehavior = snapperFlingBehavior2,
         ) {
-            items(chart.artists.itemArtists.size, key = { index ->
-                val item = chart.artists.itemArtists[index]
-                item.title + item.browseId + index
-            }) {
-                val data = chart.artists.itemArtists[it]
+            items(
+                items = chart.artists.itemArtists,
+                key = { artist -> "chart-artist:${artist.browseId}" },
+                contentType = { "chart-artist" },
+            ) { data ->
                 ItemArtistChart(
                     onClick = {
                         navController.navigate(
@@ -1252,8 +1268,11 @@ fun ChartData(
                 state = podcastGridState,
                 flingBehavior = podcastFlingBehavior,
             ) {
-                items(podcasts.shows.size, key = { index -> podcasts.shows[index].browseId + index }) {
-                    val data = podcasts.shows[it]
+                items(
+                    items = podcasts.shows,
+                    key = { show -> "chart-podcast:${show.browseId}" },
+                    contentType = { "chart-podcast" },
+                ) { data ->
                     ItemArtistChart(
                         onClick = { navController.navigate(PodcastDestination(podcastId = data.browseId)) },
                         data = data,
