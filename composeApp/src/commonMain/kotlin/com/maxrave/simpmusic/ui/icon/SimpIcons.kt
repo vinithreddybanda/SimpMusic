@@ -2,7 +2,9 @@ package com.maxrave.simpmusic.ui.icon
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Fill
 import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.fill.*
 import com.adamglin.phosphoricons.regular.*
 
 /**
@@ -44,7 +46,7 @@ internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
         "Explicit" -> PhosphorIcons.Regular.TextT
         "FastForward" -> PhosphorIcons.Regular.FastForward
         "FastRewind" -> PhosphorIcons.Regular.Rewind
-        "Favorite" -> PhosphorIcons.Regular.Heart
+        "Favorite" -> PhosphorIcons.Fill.Heart
         "FavoriteBorder" -> PhosphorIcons.Regular.Heart
         "FormatListBulleted" -> PhosphorIcons.Regular.ListBullets
         "Forward5" -> PhosphorIcons.Regular.ArrowClockwise
@@ -76,18 +78,18 @@ internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
         "MovieOff" -> PhosphorIcons.Regular.FilmSlate
         "MusicCast" -> PhosphorIcons.Regular.Airplay
         "MusicNote" -> PhosphorIcons.Regular.MusicNote
-        "MusicOff" -> PhosphorIcons.Regular.MusicNote
+        "MusicOff" -> PhosphorIcons.Fill.SpeakerSlash
         "Notifications" -> PhosphorIcons.Regular.Bell
         "OpenInFull" -> PhosphorIcons.Regular.ArrowsOut
         "OpenInNew" -> PhosphorIcons.Regular.ArrowSquareOut
-        "Pause" -> PhosphorIcons.Regular.Pause
-        "PauseCircle" -> PhosphorIcons.Regular.PauseCircle
+        "Pause" -> PhosphorIcons.Fill.Pause
+        "PauseCircle" -> PhosphorIcons.Fill.PauseCircle
         "PeopleAlt" -> PhosphorIcons.Regular.Users
         "Person" -> PhosphorIcons.Regular.Person
         "PersonAdd" -> PhosphorIcons.Regular.UserPlus
         "PictureInPictureAlt" -> PhosphorIcons.Regular.PictureInPicture
-        "PlayArrow" -> PhosphorIcons.Regular.Play
-        "PlayCircle" -> PhosphorIcons.Regular.PlayCircle
+        "PlayArrow" -> PhosphorIcons.Fill.Play
+        "PlayCircle" -> PhosphorIcons.Fill.PlayCircle
         "PlaylistAdd" -> PhosphorIcons.Regular.Playlist
         "PushPin" -> PhosphorIcons.Regular.PushPin
         "QueueMusic" -> PhosphorIcons.Regular.Queue
@@ -113,15 +115,15 @@ internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
         "Sort" -> PhosphorIcons.Regular.SortAscending
         "Speaker" -> PhosphorIcons.Regular.SpeakerHigh
         "Speed" -> PhosphorIcons.Regular.Gauge
-        "Star" -> PhosphorIcons.Regular.Star
+        "Star" -> PhosphorIcons.Fill.Star
         "StarBorder" -> PhosphorIcons.Regular.Star
         "Subtitles" -> PhosphorIcons.Regular.ClosedCaptioning
         "SubtitlesOff" -> PhosphorIcons.Regular.ClosedCaptioning
         "Sync" -> PhosphorIcons.Regular.ArrowsClockwise
         "SyncDisabled" -> PhosphorIcons.Regular.ArrowsClockwise
-        "ThumbDown" -> PhosphorIcons.Regular.ThumbsDown
+        "ThumbDown" -> PhosphorIcons.Fill.ThumbsDown
         "ThumbDownOutline" -> PhosphorIcons.Regular.ThumbsDown
-        "ThumbUp" -> PhosphorIcons.Regular.ThumbsUp
+        "ThumbUp" -> PhosphorIcons.Fill.ThumbsUp
         "ThumbUpOutline" -> PhosphorIcons.Regular.ThumbsUp
         "ThumbsUpDown" -> PhosphorIcons.Regular.ThumbsUp
         "TipsAndUpdates" -> PhosphorIcons.Regular.Lightbulb
