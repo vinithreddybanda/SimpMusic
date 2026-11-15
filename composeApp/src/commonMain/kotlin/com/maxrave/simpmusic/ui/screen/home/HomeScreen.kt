@@ -67,7 +67,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -105,7 +104,6 @@ import com.maxrave.domain.data.model.home.HomeItem
 import com.maxrave.domain.data.model.home.chart.Chart
 import com.maxrave.domain.data.model.mood.Mood
 import com.maxrave.domain.extension.now
-import com.maxrave.domain.manager.DataStoreManager.Values.TRUE
 import com.maxrave.domain.mediaservice.handler.PlaylistType
 import com.maxrave.domain.mediaservice.handler.QueueData
 import com.maxrave.domain.utils.toSongEntity
@@ -138,9 +136,7 @@ import com.maxrave.simpmusic.ui.component.MoodMomentAndGenreHomeItem
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
 import com.maxrave.simpmusic.ui.component.OfflineErrorState
 import com.maxrave.simpmusic.ui.component.QuickPicksItem
-import com.maxrave.simpmusic.ui.component.ReviewDialog
 import com.maxrave.simpmusic.ui.component.SectionHeaderButton
-import com.maxrave.simpmusic.ui.component.ShareSavedLyricsDialog
 import com.maxrave.simpmusic.ui.component.homeCardAspectRatio
 import com.maxrave.simpmusic.ui.component.rememberHolderPainter
 import com.maxrave.simpmusic.ui.icon.Notifications
@@ -179,20 +175,16 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.http.Url
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import simpmusic.composeapp.generated.resources.Res
 import simpmusic.composeapp.generated.resources.all
-import simpmusic.composeapp.generated.resources.cancel
 import simpmusic.composeapp.generated.resources.chart
 import simpmusic.composeapp.generated.resources.commute
-import simpmusic.composeapp.generated.resources.do_not_show_again
 import simpmusic.composeapp.generated.resources.energize
 import simpmusic.composeapp.generated.resources.feel_good
 import simpmusic.composeapp.generated.resources.focus
-import simpmusic.composeapp.generated.resources.go_to_log_in_page
 import simpmusic.composeapp.generated.resources.good_afternoon
 import simpmusic.composeapp.generated.resources.good_evening
 import simpmusic.composeapp.generated.resources.good_morning
@@ -201,7 +193,6 @@ import simpmusic.composeapp.generated.resources.guest
 import simpmusic.composeapp.generated.resources.let_s_pick_a_playlist_for_you
 import simpmusic.composeapp.generated.resources.let_s_start_with_a_radio
 import simpmusic.composeapp.generated.resources.log_in_to_YouTube
-import simpmusic.composeapp.generated.resources.log_in_warning
 import simpmusic.composeapp.generated.resources.mood
 import simpmusic.composeapp.generated.resources.notification
 import simpmusic.composeapp.generated.resources.party
@@ -212,7 +203,6 @@ import simpmusic.composeapp.generated.resources.romance
 import simpmusic.composeapp.generated.resources.sad
 import simpmusic.composeapp.generated.resources.sleep
 import simpmusic.composeapp.generated.resources.top_artists
-import simpmusic.composeapp.generated.resources.warning
 import simpmusic.composeapp.generated.resources.what_is_best_choice_today
 import simpmusic.composeapp.generated.resources.workout
 
