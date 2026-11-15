@@ -32,9 +32,6 @@ jobs:
       - name: Build installable APK
         run: ./gradlew --no-daemon androidApp:assembleDebug
 
-      - name: Compile Macrobenchmark instrumentation
-        run: ./gradlew --no-daemon :macrobenchmark:assembleBenchmark
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -42,3 +39,7 @@ jobs:
           path: androidApp/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
+
+      # Keep APK delivery independent from optional benchmark instrumentation.
+      - name: Compile Macrobenchmark instrumentation
+        run: ./gradlew --no-daemon :macrobenchmark:assembleBenchmark
