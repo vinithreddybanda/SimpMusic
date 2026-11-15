@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -248,8 +249,12 @@ fun LibraryItem(
                                 ).mouseDragScroll(canvasRowState),
                             state = canvasRowState,
                         ) {
-                            items(state.data) { item ->
-                                val song = item as? SongEntity ?: return@items
+                            itemsIndexed(
+                                items = state.data,
+                                key = { index, item -> "canvas:${(item as? SongEntity)?.videoId ?: index}" },
+                                contentType = { _, _ -> "canvas-song" },
+                            ) { _, item ->
+                                val song = item as? SongEntity ?: return@itemsIndexed
                                 Box(
                                     Modifier
                                         .padding(horizontal = 10.dp)
@@ -347,7 +352,13 @@ fun LibraryItem(
                     } else {
                         if (state.data.isNotEmpty()) {
                             LazyRow {
-                                items(items = state.data) { item ->
+                                itemsIndexed(
+                                    items = state.data,
+                                    key = { index, item ->
+                                        (item as? PlaylistType)?.stableLibraryGridKey() ?: "library-item:$index"
+                                    },
+                                    contentType = { _, item -> item::class },
+                                ) { _, item ->
                                     Box(modifier = Modifier.animateItem()) {
                                         HomeItemContentPlaylist(
                                             onClick = {
@@ -394,7 +405,7 @@ fun LibraryItem(
                                                     }
                                                 }
                                             },
-                                            data = item as? PlaylistType ?: return@items,
+                                            data = item as? PlaylistType ?: return@itemsIndexed,
                                             thumbSize = 125.dp,
                                         )
                                     }
