@@ -8,7 +8,6 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,30 +16,21 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,13 +39,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -69,7 +53,6 @@ import com.maxrave.domain.manager.DataStoreManager.Values.TRUE
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.Orientation
 import com.maxrave.simpmusic.expect.currentOrientation
-import com.maxrave.simpmusic.expect.openUrl
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.extension.copy
@@ -104,43 +87,19 @@ import com.maxrave.simpmusic.ui.theme.ForceDarkContent
 import com.maxrave.simpmusic.ui.theme.desktopPanelDark
 import com.maxrave.simpmusic.ui.theme.desktopWindowDark
 import com.maxrave.simpmusic.ui.theme.desktopWindowLight
-import com.maxrave.simpmusic.ui.theme.fontFamily
 import com.maxrave.simpmusic.ui.theme.parseThemeColorHex
-import com.maxrave.simpmusic.ui.theme.typo
-import com.maxrave.simpmusic.utils.VersionManager
 import com.maxrave.simpmusic.utils.isAppLinkAvailable
 import com.maxrave.simpmusic.utils.libraryTabOf
 import com.maxrave.simpmusic.viewModel.SharedViewModel
-import com.mikepenz.markdown.m3.Markdown
-import com.mikepenz.markdown.m3.markdownTypography
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
-import kotlinx.datetime.format.MonthNames
-import kotlinx.datetime.format.char
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import simpmusic.composeapp.generated.resources.Res
-import simpmusic.composeapp.generated.resources.cancel
-import simpmusic.composeapp.generated.resources.do_not_show_again
-import simpmusic.composeapp.generated.resources.download
-import simpmusic.composeapp.generated.resources.good_night
 import simpmusic.composeapp.generated.resources.notification
-import simpmusic.composeapp.generated.resources.settings
-import simpmusic.composeapp.generated.resources.sleep_timer_off
-import simpmusic.composeapp.generated.resources.this_app_needs_to_access_your_notification
 import simpmusic.composeapp.generated.resources.this_link_is_not_supported
-import simpmusic.composeapp.generated.resources.unknown
-import simpmusic.composeapp.generated.resources.update_available
-import simpmusic.composeapp.generated.resources.update_message
-import simpmusic.composeapp.generated.resources.yes
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class, ExperimentalFoundationApi::class)
@@ -157,9 +116,7 @@ fun App(
 
     val sleepTimerState by viewModel.sleepTimerState.collectAsStateWithLifecycle()
     val nowPlayingData by viewModel.nowPlayingState.collectAsStateWithLifecycle()
-    val updateData by viewModel.updateResponse.collectAsStateWithLifecycle()
     val intent by viewModel.intent.collectAsStateWithLifecycle()
-    val showNotificationPermissionDialog by viewModel.showNotificationPermissionDialog.collectAsStateWithLifecycle()
 
     val isLiquidGlassEnabled = true
     // Analytics only makes sense with local tracking on, so its tab follows that setting.
@@ -205,8 +162,10 @@ fun App(
         mutableStateOf(true)
     }
 
-    var shouldShowUpdateDialog by rememberSaveable {
-        mutableStateOf(false)
+    val appDialogOpen = false
+
+    LaunchedEffect(sleepTimerState.isDone) {
+        if (sleepTimerState.isDone) viewModel.stopSleepTimer()
     }
 
     // Every dialog this file raises on its own. Home's launch banner waits until none is up; see
@@ -444,16 +403,6 @@ fun App(
                     }
                 }
             }
-        }
-    }
-
-    LaunchedEffect(updateData) {
-        val response = updateData ?: return@LaunchedEffect
-        // Only a NEWER release is offered. This used to compare the tags for inequality, which told a
-        // build ahead of the latest release (dev, beta) to "update" back down to it, and told every
-        // F-Droid-channel user to update on each launch: that channel's tag carries no leading "v".
-        if (viewModel.showedUpdateDialog && VersionManager.isBehind(response.tagName)) {
-            shouldShowUpdateDialog = true
         }
     }
 
@@ -871,248 +820,7 @@ fun App(
                     }
                 }
 
-                if (sleepTimerState.isDone) {
-                    Logger.w("MainActivity", "Sleep Timer Done: $sleepTimerState")
-                    AlertDialog(
-                        properties =
-                            DialogProperties(
-                                dismissOnBackPress = false,
-                                dismissOnClickOutside = false,
-                            ),
-                        onDismissRequest = {
-                            viewModel.stopSleepTimer()
-                        },
-                        confirmButton = {
-                            TextButton(onClick = {
-                                viewModel.stopSleepTimer()
-                            }) {
-                                Text(
-                                    stringResource(Res.string.yes),
-                                    style = typo().bodySmall,
-                                )
-                            }
-                        },
-                        text = {
-                            Text(
-                                stringResource(Res.string.sleep_timer_off),
-                                style = typo().labelSmall,
-                            )
-                        },
-                        title = {
-                            Text(
-                                stringResource(Res.string.good_night),
-                                style = typo().bodySmall,
-                            )
-                        },
-                    )
-                }
-
-                if (shouldShowUpdateDialog) {
-                    val response = updateData ?: return@Scaffold
-                    AlertDialog(
-                        properties =
-                            DialogProperties(
-                                dismissOnBackPress = false,
-                                dismissOnClickOutside = false,
-                            ),
-                        onDismissRequest = {
-                            shouldShowUpdateDialog = false
-                            viewModel.showedUpdateDialog = false
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    shouldShowUpdateDialog = false
-                                    viewModel.showedUpdateDialog = false
-                                    openUrl("https://simpmusic.org/download")
-                                },
-                            ) {
-                                Text(
-                                    stringResource(Res.string.download),
-                                    style = typo().bodySmall,
-                                )
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = {
-                                    shouldShowUpdateDialog = false
-                                    viewModel.showedUpdateDialog = false
-                                },
-                            ) {
-                                Text(
-                                    stringResource(Res.string.cancel),
-                                    style = typo().bodySmall,
-                                )
-                            }
-                        },
-                        title = {
-                            Text(
-                                stringResource(Res.string.update_available),
-                                style = typo().labelSmall,
-                            )
-                        },
-                        text = {
-                            val formatted =
-                                response.releaseTime?.let { input ->
-                                    try {
-                                        val instant = kotlin.time.Instant.parse(input)
-                                        val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                                        dateTime.format(
-                                            LocalDateTime.Format {
-                                                day()
-                                                char(' ')
-                                                monthName(MonthNames.ENGLISH_ABBREVIATED)
-                                                char(' ')
-                                                year()
-                                                char(' ')
-                                                hour()
-                                                char(':')
-                                                minute()
-                                                char(':')
-                                                second()
-                                            },
-                                        )
-                                    } catch (e: Exception) {
-                                        stringResource(Res.string.unknown)
-                                    }
-                                } ?: stringResource(Res.string.unknown)
-
-                            val updateMessage =
-                                runBlocking {
-                                    getString(
-                                        Res.string.update_message,
-                                        response.tagName,
-                                        formatted,
-                                        // values-iw/values-in still carry an old %3$s; Compose Resources indexes
-                                        // args without a bounds check, so omitting it crashes the dialog
-                                        "",
-                                    )
-                                }
-                            Column(
-                                Modifier
-                                    .heightIn(
-                                        max = 400.dp,
-                                    ).verticalScroll(
-                                        rememberScrollState(),
-                                    ),
-                            ) {
-                                Text(
-                                    text = updateMessage,
-                                    style = typo().labelMedium,
-                                    modifier =
-                                        Modifier.padding(
-                                            vertical = 8.dp,
-                                        ),
-                                )
-                                Markdown(
-                                    response.body,
-                                    typography =
-                                        markdownTypography(
-                                            h1 = typo().labelLarge,
-                                            h2 = typo().labelMedium,
-                                            h3 = typo().labelSmall,
-                                            text = typo().bodySmall,
-                                            bullet = typo().bodySmall,
-                                            paragraph = typo().bodySmall,
-                                            textLink =
-                                                TextLinkStyles(
-                                                    SpanStyle(
-                                                        fontSize = 11.sp,
-                                                        fontWeight = FontWeight.Normal,
-                                                        fontFamily = fontFamily(),
-                                                        textDecoration = TextDecoration.Underline,
-                                                    ),
-                                                ),
-                                        ),
-                                )
-                            }
-                        },
-                    )
-                }
-
-                if (showNotificationPermissionDialog || showDesktopNotificationPermissionDialog) {
-                    var doNotShowAgain by remember { mutableStateOf(false) }
-                    val dismissPermissionDialog = {
-                        if (showDesktopNotificationPermissionDialog) {
-                            onDismissDesktopNotificationPermissionDialog(doNotShowAgain)
-                        } else {
-                            viewModel.dismissNotificationPermissionDialog(doNotShowAgain)
-                        }
-                    }
-                    AlertDialog(
-                        onDismissRequest = {
-                            dismissPermissionDialog()
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    if (showDesktopNotificationPermissionDialog) {
-                                        onOpenDesktopNotificationSettings(doNotShowAgain)
-                                    } else {
-                                        viewModel.dismissNotificationPermissionDialog(doNotShowAgain)
-                                    }
-                                },
-                            ) {
-                                Text(
-                                    stringResource(
-                                        if (showDesktopNotificationPermissionDialog) {
-                                            Res.string.settings
-                                        } else {
-                                            Res.string.yes
-                                        },
-                                    ),
-                                    style = typo().bodySmall,
-                                )
-                            }
-                        },
-                        dismissButton =
-                            if (showDesktopNotificationPermissionDialog) {
-                                {
-                                    TextButton(onClick = dismissPermissionDialog) {
-                                        Text(
-                                            stringResource(Res.string.cancel),
-                                            style = typo().bodySmall,
-                                        )
-                                    }
-                                }
-                            } else {
-                                null
-                            },
-                        title = {
-                            Text(
-                                stringResource(Res.string.notification),
-                                style = typo().labelSmall,
-                            )
-                        },
-                        text = {
-                            Column {
-                                Text(
-                                    stringResource(Res.string.this_app_needs_to_access_your_notification),
-                                    style = typo().bodySmall,
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier =
-                                        Modifier
-                                            .clickable { doNotShowAgain = !doNotShowAgain }
-                                            .fillMaxWidth(),
-                                ) {
-                                    Checkbox(
-                                        checked = doNotShowAgain,
-                                        onCheckedChange = { doNotShowAgain = it },
-                                    )
-                                    Spacer(modifier = Modifier.width(5.dp))
-                                    Text(
-                                        stringResource(Res.string.do_not_show_again),
-                                        style = typo().bodySmall,
-                                    )
-                                }
-                            }
-                        },
-                    )
-                }
+                
             },
         )
     }
