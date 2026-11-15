@@ -563,7 +563,17 @@ fun HomeScreen(
                             }
                         }
                         if (homeListState == ListState.PAGINATION_EXHAUST) {
-                            items(newRelease, key = { it.hashCode() }) {
+                            items(
+                                items = newRelease,
+                                key = { item ->
+                                    val firstContentId =
+                                        item.contents.firstNotNullOfOrNull { content ->
+                                            content?.videoId ?: content?.browseId ?: content?.playlistId
+                                        }.orEmpty()
+                                    "${item.title}:${item.moreEndpoint?.browseId.orEmpty()}:${item.channelId.orEmpty()}:$firstContentId"
+                                },
+                                contentType = { "home-shelf" },
+                            ) {
                                 AnimatedVisibility(
                                     visible = newRelease.isNotEmpty(),
                                 ) {
