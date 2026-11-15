@@ -2,7 +2,7 @@ import java.util.Properties
 
 val isFullBuild: Boolean =
     try {
-        extra[ isFullBuild ] ==  true
+        extra["isFullBuild"] == "true"
     } catch (e: Exception) {
         false
     }
@@ -14,13 +14,13 @@ plugins {
 }
 
 android {
-    val abis = arrayOf( armeabi-v7a ,  arm64-v8a ,  x86_64 )
+    val abis = arrayOf("armeabi-v7a", "arm64-v8a", "x86_64")
 
-    namespace =  com.maxrave.simpmusic
+    namespace = "com.maxrave.simpmusic"
     compileSdk = 37
 
     defaultConfig {
-        applicationId =  com.pluto.music
+        applicationId = "com.pluto.music"
         minSdk = 26
         targetSdk = 36
         versionCode =
@@ -33,47 +33,47 @@ android {
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled = true
 
-        @Suppress( UnstableApiUsage )
+        @Suppress("UnstableApiUsage")
         androidResources {
             localeFilters +=
                 listOf(
-                     en ,
-                     vi ,
-                     it ,
-                     de ,
-                     ru ,
-                     tr ,
-                     fi ,
-                     pl ,
-                     pt ,
-                     fr ,
-                     es ,
-                     zh-rCN ,
-                     id ,
-                     in ,
-                     ar ,
-                     ja ,
-                     zh-rTW ,
-                     uk ,
-                     iw ,
-                     az ,
-                     hi ,
-                     th ,
-                     nl ,
-                     ko ,
-                     ca ,
-                     fa ,
-                     bg ,
-                     sv ,
-                     hr ,
+                    "en",
+                    "vi",
+                    "it",
+                    "de",
+                    "ru",
+                    "tr",
+                    "fi",
+                    "pl",
+                    "pt",
+                    "fr",
+                    "es",
+                    "zh-rCN",
+                    "id",
+                    "in",
+                    "ar",
+                    "ja",
+                    "zh-rTW",
+                    "uk",
+                    "iw",
+                    "az",
+                    "hi",
+                    "th",
+                    "nl",
+                    "ko",
+                    "ca",
+                    "fa",
+                    "bg",
+                    "sv",
+                    "hr",
                 )
         }
-        testInstrumentationRunner =  androidx.test.runner.AndroidJUnitRunner
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters.add( x86_64 )
-            abiFilters.add( armeabi-v7a )
-            abiFilters.add( arm64-v8a )
+            abiFilters.add("x86_64")
+            abiFilters.add("armeabi-v7a")
+            abiFilters.add("arm64-v8a")
         }
     }
 
@@ -88,8 +88,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile( proguard-android-optimize.txt ),
-                 proguard-rules.pro ,
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
             )
             splits {
                 abi {
@@ -102,8 +102,8 @@ android {
         }
         debug {
             isMinifyEnabled = false
-            applicationIdSuffix =  .dev
-            versionNameSuffix =  -dev
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
         }
     }
     compileOptions {
@@ -111,7 +111,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-
+    // enable view binding
     buildFeatures {
         viewBinding = true
         compose = true
@@ -121,24 +121,32 @@ android {
         jniLibs.useLegacyPackaging = true
         jniLibs.excludes +=
             listOf(
-                 META-INF/META-INF/DEPENDENCIES ,
-                 META-INF/LICENSE ,
-                 META-INF/LICENSE.txt ,
-                 META-INF/license.txt ,
-                 META-INF/NOTICE ,
-                 META-INF/NOTICE.txt ,
-                 META-INF/notice.txt ,
-                 META-INF/ASL2.0 ,
-                 META-INF/asm-license.txt ,
-                 META-INF/notice ,
-                 META-INF/*.kotlin_module ,
+                "META-INF/META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0",
+                "META-INF/asm-license.txt",
+                "META-INF/notice",
+                "META-INF/*.kotlin_module",
             )
         resources {
-            excludes +=  META-INF/versions/9/OSGI-INF/MANIFEST.MF
-
-            excludes +=  META-INF/*.md
-
-            excludes +=  com/atilika/kuromoji/ipadic/*.bin
+            excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            // kuromoji ships the SAME META-INF/CONTRIBUTORS.md and META-INF/LICENSE.md in both
+            // kuromoji-ipadic and the kuromoji-core it depends on, and mergeDebugJavaResource
+            // refuses to pick between two files at one path. Excluded by pattern rather than by
+            // name: dropping only CONTRIBUTORS.md moves the failure to LICENSE.md on the next
+            // build. Nothing here is code — these are documentation files.
+            excludes += "META-INF/*.md"
+            // kuromoji's ipadic dictionary is ~13 MB of .bin resources — the whole reason the APK
+            // grew by 14.4 MB. Android fetches the same eight files on demand instead (see
+            // KuromojiDictionary in lyricsService androidMain), so the classpath copies are
+            // dropped here. Desktop is untouched: its jars keep the resources and kuromoji's
+            // default classpath resolver keeps working there.
+            excludes += "com/atilika/kuromoji/ipadic/*.bin"
         }
     }
     compileOptions {
@@ -149,18 +157,22 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.desugaring)
-    val debugImplementation =  debugImplementation
+    val debugImplementation = "debugImplementation"
     debugImplementation(libs.ui.tooling)
     implementation(libs.activity.compose)
 
+    // Custom Activity On Crash
     implementation(libs.customactivityoncrash)
 
+    // Easy Permissions
     implementation(libs.easypermissions)
 
+    // Legacy Support
     implementation(libs.legacy.support.v4)
-
+    // Coroutines
     implementation(libs.coroutines.android)
 
+    // Glance
     implementation(libs.glance)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
@@ -176,25 +188,25 @@ dependencies {
 }
 
 sentry {
-    org.set( simpmusic )
-    projectName.set( android )
-    ignoredFlavors.set(setOf( foss ))
-    ignoredBuildTypes.set(setOf( debug ))
+    org.set("simpmusic")
+    projectName.set("android")
+    ignoredFlavors.set(setOf("foss"))
+    ignoredBuildTypes.set(setOf("debug"))
     autoInstallation.enabled = false
     if (isFullBuild) {
         val token =
             try {
-                println( Full build detected, enabling Sentry Auth Token )
+                println("Full build detected, enabling Sentry Auth Token")
                 val properties = Properties()
-                properties.load(rootProject.file( local.properties ).inputStream())
-                properties.getProperty( SENTRY_AUTH_TOKEN )
+                properties.load(rootProject.file("local.properties").inputStream())
+                properties.getProperty("SENTRY_AUTH_TOKEN")
             } catch (e: Exception) {
-                println( Failed to load SENTRY_AUTH_TOKEN from local.properties: ${e.message} )
+                println("Failed to load SENTRY_AUTH_TOKEN from local.properties: ${e.message}")
                 null
             }
-        authToken.set(token ?:   )
+        authToken.set(token ?: "")
         includeProguardMapping.set(true)
-
+        // Pull requests from forks get no secrets: build without uploading instead of failing on a 401.
         autoUploadProguardMapping.set(!token.isNullOrBlank())
     } else {
         includeProguardMapping.set(false)
@@ -203,7 +215,7 @@ sentry {
         includeDependenciesReport.set(false)
         includeSourceContext.set(false)
         includeNativeSources.set(false)
-
+        // FOSS ships no Sentry SDK: injected AppStartMetrics calls crash it at launch.
         tracingInstrumentation.enabled.set(false)
     }
     telemetry.set(false)
@@ -220,46 +232,47 @@ if (!isFullBuild) {
         @TaskAction
         fun execute() {
             assetDirectories.forEach { assetDir ->
-                val sentryFile = File(assetDir,  sentry-debug-meta.properties )
+                val sentryFile = File(assetDir, "sentry-debug-meta.properties")
                 if (sentryFile.exists()) {
                     sentryFile.delete()
-                    println( Deleted: ${sentryFile.absolutePath} )
+                    println("Deleted: ${sentryFile.absolutePath}")
                 }
             }
 
-            val dirName =  release/mergeReleaseAssets
-            val injectDirName =  release/injectSentryDebugMetaPropertiesIntoAssetsRelease
-            println( Cleaning Sentry meta files in build directories )
-            println( Build directory: ${buildDirectory.asFile.get().absolutePath} )
+            val dirName = "release/mergeReleaseAssets"
+            val injectDirName = "release/injectSentryDebugMetaPropertiesIntoAssetsRelease"
+            println("Cleaning Sentry meta files in build directories")
+            println("Build directory: ${buildDirectory.asFile.get().absolutePath}")
 
-            val buildAssetsDir = File(buildDirectory.asFile.get(),  intermediates/assets/$dirName )
-            println( Checking directory buildAssetsDir: ${buildAssetsDir.absolutePath} )
-            val sentryFile = File(buildAssetsDir,  sentry-debug-meta.properties )
+            val buildAssetsDir = File(buildDirectory.asFile.get(), "intermediates/assets/$dirName")
+            println("Checking directory buildAssetsDir: ${buildAssetsDir.absolutePath}")
+            val sentryFile = File(buildAssetsDir, "sentry-debug-meta.properties")
             if (sentryFile.exists()) {
                 sentryFile.delete()
-                println( Deleted: ${sentryFile.absolutePath} )
+                println("Deleted: ${sentryFile.absolutePath}")
             }
 
-            val injectBuildAssetsDir = File(buildDirectory.asFile.get(),  intermediates/assets/$injectDirName )
-            println( Checking directory injectBuildAssetsDir: ${injectBuildAssetsDir.absolutePath} )
-            val injectSentryFile = File(injectBuildAssetsDir,  sentry-debug-meta.properties )
+            val injectBuildAssetsDir = File(buildDirectory.asFile.get(), "intermediates/assets/$injectDirName")
+            println("Checking directory injectBuildAssetsDir: ${injectBuildAssetsDir.absolutePath}")
+            val injectSentryFile = File(injectBuildAssetsDir, "sentry-debug-meta.properties")
             if (injectSentryFile.exists()) {
                 injectSentryFile.delete()
-                println( Deleted: ${injectSentryFile.absolutePath} )
-                val sentryFile = File(injectBuildAssetsDir,  sentry-debug-meta.properties )
-                sentryFile.writeText(  )
-                println( ✓ Overwritten: ${sentryFile.absolutePath} )
+                println("Deleted: ${injectSentryFile.absolutePath}")
+                val sentryFile = File(injectBuildAssetsDir, "sentry-debug-meta.properties")
+                sentryFile.writeText("")
+                println("✓ Overwritten: ${sentryFile.absolutePath}")
             }
         }
     }
 
     val cleanSentryMetaTask =
-        tasks.register<CleanSentryMetaTask>( cleanSentryMetaForRelease ) {
+        tasks.register<CleanSentryMetaTask>("cleanSentryMetaForRelease") {
             assetDirectories.from(android.sourceSets.flatMap { it.assets.directories })
             buildDirectory.set(layout.buildDirectory)
         }
-
-    tasks.named { it.contains( injectSentryDebugMetaPropertiesIntoAssetsRelease ) }.configureEach {
+    // Lazy on purpose: whenTaskAdded creates every task as it is registered, and AGP 9.5.0's
+    // Compose Preview task throws while it is created unless unit tests include Android resources.
+    tasks.named { it.contains("injectSentryDebugMetaPropertiesIntoAssetsRelease") }.configureEach {
         finalizedBy(cleanSentryMetaTask)
     }
 }
