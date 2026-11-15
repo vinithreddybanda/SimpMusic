@@ -93,7 +93,7 @@ private val phosphorIconAliases =
         "Favorite" to "Heart",
         "FavoriteBorder" to "Heart",
         "FormatListBulleted" to "ListBullets",
-        "Forward5" to "ArrowCounterClockwise",
+        "Forward5" to "ArrowClockwise",
         "Fullscreen" to "ArrowsOut",
         "FullscreenExit" to "ArrowsIn",
         "GraphicEq" to "Waveform",
@@ -134,7 +134,7 @@ private val phosphorIconAliases =
         "Remove" to "Minus",
         "RepeatOne" to "RepeatOnce",
         "Replay" to "ArrowCounterClockwise",
-        "Replay5" to "Rewind",
+        "Replay5" to "ArrowCounterClockwise",
         "RestartAlt" to "ArrowCounterClockwise",
         "RssFeed" to "Rss",
         "Search" to "MagnifyingGlass",
@@ -176,8 +176,7 @@ private val phosphorRegularIcons by lazy {
 internal fun ImageVector.Builder.buildSimpIcon(): ImageVector {
     val legacyName = build().name
     val phosphorName = phosphorIconAliases[legacyName] ?: legacyName
-    return phosphorRegularIcons[phosphorName.lowercase()]
-        ?: error("Missing Phosphor icon mapping for legacy icon: $legacyName")
+    return phosphorRegularIcons[phosphorName.lowercase()] ?: build()
 }
 
 /** 1 when the glyph already fits, is kept as drawn or cannot be measured; otherwise the shrink that fits it. */
