@@ -448,7 +448,7 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(if (getPlatform() == Platform.Android) 6.dp else 8.dp),
                     ) {
                         itemsIndexed(
-                            homeShelves,
+                            items = homeShelves,
                             key = { _, item ->
                                 val firstContentId =
                                     item.contents.firstNotNullOfOrNull { content ->
@@ -456,6 +456,7 @@ fun HomeScreen(
                                     }.orEmpty()
                                 "${item.title}:${item.moreEndpoint?.browseId.orEmpty()}:${item.channelId.orEmpty()}:$firstContentId"
                             },
+                            contentType = { _, _ -> "home-shelf" },
                         ) { index, item ->
                             Box {
                                 if (index == 0) {
@@ -537,7 +538,7 @@ fun HomeScreen(
                                 }
                             }
                         }
-                        item {
+                        item(key = "home-pagination", contentType = "loading") {
                             AnimatedVisibility(
                                 homeListState == ListState.PAGINATING,
                                 enter = expandVertically() + expandVertically(),
@@ -578,7 +579,7 @@ fun HomeScreen(
                                     }
                                 }
                             }
-                            item {
+                            item(key = "home-moods", contentType = "mood-shelf") {
                                 AnimatedVisibility(
                                     visible = moodMomentAndGenre != null,
                                 ) {
@@ -596,7 +597,7 @@ fun HomeScreen(
                                     }
                                 }
                             }
-                            item {
+                            item(key = "home-chart", contentType = "chart-section") {
                                 Column(
                                     Modifier
                                         .padding(vertical = 10.dp)
@@ -649,7 +650,7 @@ fun HomeScreen(
                                 }
                             }
                         }
-                        item {
+                        item(key = "home-end", contentType = "footer") {
                             EndOfPage()
                         }
                     }
