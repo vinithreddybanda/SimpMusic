@@ -120,17 +120,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
             selectedIndex = BottomNavScreen.Home.ordinal
         }
     }
-    var isExpanded by rememberSaveable {
-        mutableStateOf(true)
-    }
-
-    var isInSearchDestination by remember {
-        mutableStateOf(false)
-    }
-
     LaunchedEffect(currentBackStackEntry, bottomNavScreens) {
         currentBackStackEntry?.destination?.let { current ->
-            isInSearchDestination = current.hasRoute(SearchDestination::class)
             bottomNavScreens.firstOrNull { screen ->
                 current.hierarchy.any { it.hasRoute(screen.destination::class) }
             }?.let { selectedIndex = it.ordinal }
@@ -140,8 +131,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
     val miniPlayerPadding = if (liquidGlass) 10.dp else 12.dp
     val miniPlayerGap = if (liquidGlass) 8.dp else 6.dp
     val constraintSet =
-        remember(isShowMiniPlayer, isExpanded, liquidGlass) {
-            decoupledConstraints(isShowMiniPlayer, isExpanded, miniPlayerPadding, miniPlayerGap)
+        remember(isShowMiniPlayer, liquidGlass) {
+            decoupledConstraints(isShowMiniPlayer, true, miniPlayerPadding, miniPlayerGap)
         }
 
     fun selectTab(index: Int) {
@@ -167,23 +158,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
         }
     }
 
-    val collapsedCircle: @Composable () -> Unit = {
-        val selectedScreen = bottomNavScreens.find { it.ordinal == selectedIndex } ?: BottomNavScreen.Home
-        Box(
-            modifier = Modifier.fillMaxSize().clickable(enabled = !isExpanded) { isExpanded = true },
-            contentAlignment = Alignment.Center,
-        ) {
-            if (liquidGlass) {
-                selectedScreen.icon(true)
-            } else {
-                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
-                    selectedScreen.icon(true)
-                }
-            }
-        }
-    }
-
-    val density = LocalDensity.current
     BoxWithConstraints(
         modifier =
             Modifier
