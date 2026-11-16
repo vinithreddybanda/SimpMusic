@@ -1101,6 +1101,7 @@ fun QuickPicks(
 fun MoodMomentAndGenre(
     mood: Mood,
     navController: NavController,
+    backdrop: com.maxrave.simpmusic.expect.ui.PlatformBackdrop,
 ) {
     Column(
         Modifier
@@ -1137,6 +1138,7 @@ fun MoodMomentAndGenre(
                     MoodMomentAndGenreHomeItem(
                         title = item.title,
                         stripeColor = item.stripeColor,
+                        backdrop = backdrop,
                     ) {
                         navController.navigate(
                             MoodDestination(
