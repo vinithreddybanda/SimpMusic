@@ -90,6 +90,7 @@ fun LiquidGlassTabBar(
     availableWidth: Dp = Dp.Unspecified,
     onTabSelected: (Int) -> Unit,
     collapsedContent: (@Composable () -> Unit)? = null,
+    blurEnabled: Boolean = true,
 ) {
     val density = LocalDensity.current
     val tabsCount = tabs.size
@@ -163,7 +164,7 @@ fun LiquidGlassTabBar(
                     CapsuleShape,
                     barInteraction,
                     pressedScale = 1.04f,
-                    blurScale = 0.55f,
+                    blurScale = if (blurEnabled) 0.55f else 0f,
                     minScrim = 0.18f,
                     maxScrim = 0.36f,
                 ),
@@ -195,8 +196,12 @@ fun LiquidGlassTabBar(
                                     saturation = 1.5f,
                                 )
                                 blur(
-                                    (if (l > 0f) lerp(4f.dp.toPx(), 8f.dp.toPx(), l) else lerp(4f.dp.toPx(), 2f.dp.toPx(), -l)) +
-                                        3f.dp.toPx() * progress,
+                                    if (blurEnabled) {
+                                        (if (l > 0f) lerp(4f.dp.toPx(), 8f.dp.toPx(), l) else lerp(4f.dp.toPx(), 2f.dp.toPx(), -l)) +
+                                            3f.dp.toPx() * progress
+                                    } else {
+                                        0f
+                                    },
                                 )
                                 lens(3f.dp.toPx() * progress, 4f.dp.toPx() * progress, chromaticAberration = false)
                             },
