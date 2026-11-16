@@ -94,10 +94,10 @@ actual fun LiquidGlassAppBottomNavigationBar(
         remember(showAnalyticsTab, showMixForYouTab) {
             listOfNotNull(
                 BottomNavScreen.Home,
+                BottomNavScreen.Search,
+                BottomNavScreen.Library,
                 BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
                 BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
-                BottomNavScreen.Library,
-                BottomNavScreen.Search,
             )
         }
     val barTabs = bottomNavScreens
