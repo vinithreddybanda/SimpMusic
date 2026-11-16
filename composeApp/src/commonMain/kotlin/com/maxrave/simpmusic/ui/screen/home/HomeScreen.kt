@@ -113,6 +113,7 @@ import com.maxrave.domain.utils.toTrack
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.Platform
 import com.maxrave.simpmusic.expect.ui.HorizontalScrollBar
+import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.extension.angledGradientBackground
@@ -674,6 +675,7 @@ fun HomeScreen(
                 HomeAccountButton(
                     accountName = accountInfo?.first,
                     thumbnailUrl = accountInfo?.second,
+                    backdrop = chipBackdrop,
                     navController = navController,
                 )
             }
