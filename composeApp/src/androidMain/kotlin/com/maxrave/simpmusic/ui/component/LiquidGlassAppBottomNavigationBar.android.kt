@@ -61,9 +61,7 @@ import com.maxrave.simpmusic.viewModel.SharedViewModel
 import kotlin.reflect.KClass
 
 private const val BAR_MORPH_MS = 260
-private val BarEdgePadding = 12.dp
-private val SearchGap = 8.dp
-private val SearchSize = 48.dp
+private val BarEdgePadding = 0.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -102,15 +100,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 BottomNavScreen.Search,
             )
         }
-    val barTabs =
-        remember(showAnalyticsTab, showMixForYouTab) {
-            listOfNotNull(
-                BottomNavScreen.Home,
-                BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-                BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
-                BottomNavScreen.Library,
-            )
-        }
+    val barTabs = bottomNavScreens
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
             when (startDestination) {
@@ -145,10 +135,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 current.hierarchy.any { it.hasRoute(screen.destination::class) }
             }?.let { selectedIndex = it.ordinal }
         }
-    }
-
-    LaunchedEffect(isInSearchDestination) {
-        isExpanded = !isInSearchDestination
     }
 
     val miniPlayerPadding = if (liquidGlass) 10.dp else 12.dp
@@ -209,7 +195,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 )
                 .then(if (liquidGlass) Modifier.imePadding() else Modifier),
     ) {
-        val capsuleBudget = maxWidth - BarEdgePadding * 2 - SearchGap - SearchSize
+        val capsuleBudget = maxWidth - BarEdgePadding * 2
         val capsuleWidth =
             if (liquidGlass) {
                 liquidGlassTabBarWidth(barTabs.size, capsuleBudget)
@@ -225,24 +211,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 modifier =
                     Modifier
                         .layoutId("toolbar")
-                        // The floating bar can be folded/unfolded directly, in addition to
-                        // following scroll direction. Up folds it; down restores the full tabs.
-                        .pointerInput(isExpanded) {
-                            var verticalDrag = 0f
-                            detectVerticalDragGestures(
-                                onVerticalDrag = { change, dragAmount ->
-                                    verticalDrag += dragAmount
-                                    change.consume()
-                                },
-                                onDragEnd = {
-                                    val threshold = with(density) { 24.dp.toPx() }
-                                    if (verticalDrag < -threshold) isExpanded = false
-                                    if (verticalDrag > threshold) isExpanded = true
-                                    verticalDrag = 0f
-                                },
-                                onDragCancel = { verticalDrag = 0f },
-                            )
-                        },
+                        ,
                 content = {
                     if (liquidGlass) {
                         LiquidGlassTabBar(
@@ -253,74 +222,31 @@ actual fun LiquidGlassAppBottomNavigationBar(
                             luminance = luminance,
                             availableWidth = capsuleBudget,
                             onTabSelected = { position -> selectTab(barTabs[position].ordinal) },
-                            collapsedContent = collapsedCircle,
-                            blurEnabled = isScrolledToTop,
+                            collapsedContent = null,
+                            blurEnabled = false,
                         )
-                        Box(
-                            modifier =
-                                Modifier
-                                    .size(SearchSize)
-                                    .drawInteractiveGlass(
-                                        LocalIsDarkTheme.current,
-                                        backdrop,
-                                        null,
-                                        { luminance.value },
-                                        CircleShape,
-                                        searchFabInteraction,
-                                        pressedScale = 1.04f,
-                                        blurScale = if (isScrolledToTop) 0.55f else 0f,
-                                        minScrim = 0.18f,
-                                        maxScrim = 0.36f,
-                                    ).clickable { selectTab(BottomNavScreen.Search.ordinal) },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            BottomNavScreen.Search.icon(true)
-                        }
                     } else {
                         FlatTabBar(
                             tabs = barTabs,
                             selectedIndex = selectedIndex,
                             availableWidth = capsuleBudget,
                             onTabSelected = { screen -> selectTab(screen.ordinal) },
-                            collapsedContent = collapsedCircle,
-                        )
-                        FlatSearchButton(
-                            selected = selectedIndex == BottomNavScreen.Search.ordinal,
-                            onClick = { selectTab(BottomNavScreen.Search.ordinal) },
+                            collapsedContent = null,
                         )
                     }
                 },
             ) { measurables, constraints ->
-                val folded = CollapsedBarSize.roundToPx()
                 val capsule = capsuleWidth.roundToPx()
-                val gap = SearchGap.roundToPx()
-                val search = SearchSize.roundToPx()
-                val expanded = capsule + gap + search
                 val width =
-                    if (constraints.hasFixedWidth) {
-                        constraints.maxWidth
-                    } else {
-                        expanded.coerceIn(constraints.minWidth, constraints.maxWidth)
-                    }
+                    if (constraints.hasFixedWidth) constraints.maxWidth
+                    else capsule.coerceIn(constraints.minWidth, constraints.maxWidth)
                 val height =
-                    if (constraints.hasFixedHeight) {
-                        constraints.maxHeight
-                    } else {
-                        (if (liquidGlass) BarHeight.roundToPx() else 64.dp.roundToPx()).coerceIn(constraints.minHeight, constraints.maxHeight)
-                    }
-                val progress = ((width - folded).toFloat() / (expanded - folded).coerceAtLeast(1)).coerceIn(0f, 1f)
-                val bar = measurables[0].measure(Constraints.fixed(lerp(folded, capsule, progress), height))
-                val fab = measurables[1].measure(Constraints.fixed(search, search))
-                val fabAlpha = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
+                    if (constraints.hasFixedHeight) constraints.maxHeight
+                    else (if (liquidGlass) BarHeight.roundToPx() else 64.dp.roundToPx())
+                        .coerceIn(constraints.minHeight, constraints.maxHeight)
+                val bar = measurables[0].measure(Constraints.fixed(width, height))
                 layout(width, height) {
                     bar.placeRelative(0, 0)
-                    if (fabAlpha > 0f) {
-                        fab.placeRelativeWithLayer(capsule + gap, (height - search) / 2) {
-                            alpha = fabAlpha
-                            scaleX = lerp(0.8f, 1f, fabAlpha)
-                            scaleY = scaleX
-                        }
-                    }
                 }
             }
             MiniPlayer(
@@ -359,7 +285,7 @@ private fun decoupledConstraints(
                 height = Dimension.value(CollapsedBarSize)
             } else {
                 end.linkTo(parent.end, margin = BarEdgePadding)
-                width = Dimension.wrapContent
+                width = Dimension.fillToConstraints
                 height = Dimension.value(BarHeight)
             }
         }
