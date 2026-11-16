@@ -37,11 +37,19 @@ plugins {
  */
 val generatedInterFontDir = layout.buildDirectory.dir("generated/composeResources/commonMain")
 val generatedInterFont = generatedInterFontDir.map { it.file("font/inter_variable.ttf") }
+val commonComposeResources = layout.projectDirectory.dir("src/commonMain/composeResources")
 val decodeInterFont by tasks.registering {
     val encoded = layout.projectDirectory.file("fontSources/inter_variable.ttf.b64")
     inputs.file(encoded)
-    outputs.file(generatedInterFont)
+    inputs.dir(commonComposeResources)
+    outputs.dir(generatedInterFontDir)
     doLast {
+        val outputDir = generatedInterFontDir.get().asFile
+        outputDir.deleteRecursively()
+        outputDir.mkdirs()
+        // customDirectory replaces the default Compose resource root, so mirror the
+        // existing common resources before adding the generated Inter font.
+        commonComposeResources.asFile.copyRecursively(outputDir, overwrite = true)
         val output = generatedInterFont.get().asFile
         output.parentFile.mkdirs()
         output.writeBytes(Base64.getMimeDecoder().decode(encoded.asFile.readText()))
