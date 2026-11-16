@@ -138,6 +138,7 @@ import com.maxrave.simpmusic.ui.component.OfflineErrorState
 import com.maxrave.simpmusic.ui.component.QuickPicksItem
 import com.maxrave.simpmusic.ui.component.SectionHeaderButton
 import com.maxrave.simpmusic.ui.component.homeCardAspectRatio
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.component.rememberHolderPainter
 import com.maxrave.simpmusic.ui.icon.Notifications
 import com.maxrave.simpmusic.ui.icon.Person
