@@ -709,3 +709,524 @@ fun HomeScreen(
         }
     }
 }
+
+internal fun Modifier.chipStripEdgeFades(
+    width: Dp,
+    start: () -> Float,
+    end: () -> Float,
+): Modifier =
+    graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val fadePx = width.toPx().coerceAtMost(size.width / 2f)
+            val startFade = start()
+            if (startFade > 0f) {
+                drawRect(
+                    brush = Brush.horizontalGradient(colorStops = chipFadeStops(startFade, fadingOut = false), startX = 0f, endX = fadePx),
+                    blendMode = BlendMode.DstIn,
+                )
+            }
+            val endFade = end()
+            if (endFade > 0f) {
+                drawRect(
+                    brush =
+                        Brush.horizontalGradient(
+                            colorStops = chipFadeStops(endFade, fadingOut = true),
+                            startX = size.width - fadePx,
+                            endX = size.width,
+                        ),
+                    blendMode = BlendMode.DstIn,
+                )
+            }
+        }
+
+private fun chipFadeStops(
+    fade: Float,
+    fadingOut: Boolean,
+): Array<Pair<Float, Color>> =
+    Array(CHIP_FADE_STEPS + 1) { i ->
+        val t = i / CHIP_FADE_STEPS.toFloat()
+        val ramp = t * t * (3f - 2f * t)
+        t to Color.Black.copy(alpha = 1f - fade * (if (fadingOut) ramp else 1f - ramp))
+    }
+
+private const val CHIP_FADE_STEPS = 24
+
+@Composable
+private fun HomeAccountButton(
+    accountName: String?,
+    thumbnailUrl: String?,
+    backdrop: PlatformBackdrop,
+    navController: NavController,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val signedIn = !accountName.isNullOrBlank()
+    val displayName = if (signedIn) accountName.orEmpty() else stringResource(Res.string.guest)
+    val hour = remember { now().time.hour }
+    val greeting =
+        stringResource(
+            when (hour) {
+                in 6..12 -> Res.string.good_morning
+                in 13..17 -> Res.string.good_afternoon
+                in 18..23 -> Res.string.good_evening
+                else -> Res.string.good_night
+            },
+        )
+    Box {
+        AccountAvatar(
+            signedIn = signedIn,
+            thumbnailUrl = thumbnailUrl,
+            size = if (getPlatform() == Platform.Android) 36.dp else 44.dp,
+            contentDescription = displayName,
+            modifier = Modifier.clickable { menuOpen = true },
+        )
+        DropdownMenu(
+            expanded = menuOpen,
+            onDismissRequest = { menuOpen = false },
+            modifier =
+                Modifier
+                    .widthIn(max = 280.dp)
+                    .fillMaxWidth()
+                    .liquidGlass(backdrop, RoundedCornerShape(16.dp), interactive = false),
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.Transparent,
+            shadowElevation = 0.dp,
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                AccountAvatar(
+                    signedIn = signedIn,
+                    thumbnailUrl = thumbnailUrl,
+                    size = 40.dp,
+                    contentDescription = null,
+                )
+                Column {
+                    Text(text = displayName, style = typo().titleSmall, maxLines = 1)
+                    Text(text = greeting, style = typo().bodySmall)
+                }
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.notification), style = typo().bodyMedium) },
+                leadingIcon = { Icon(SimpIcons.Notifications, contentDescription = null) },
+                onClick = {
+                    menuOpen = false
+                    navController.navigate(NotificationDestination)
+                },
+            )
+            DropdownMenuItem(
+                text = { Text("Settings", style = typo().bodyMedium) },
+                leadingIcon = { Icon(SimpIcons.Settings, contentDescription = null) },
+                onClick = {
+                    menuOpen = false
+                    navController.navigate(SettingsDestination)
+                },
+            )
+            if (!signedIn) {
+                Button(
+                    onClick = {
+                        menuOpen = false
+                        navController.navigate(LoginDestination)
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                ) {
+                    Text(stringResource(Res.string.log_in_to_YouTube), color = LocalContentColor.current)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountAvatar(
+    signedIn: Boolean,
+    thumbnailUrl: String?,
+    size: Dp,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+) {
+    val avatarModifier =
+        Modifier
+            .size(size)
+            .clip(CircleShape)
+            .then(modifier)
+    if (signedIn && !thumbnailUrl.isNullOrBlank()) {
+        AsyncImage(
+            model =
+                ImageRequest
+                    .Builder(LocalPlatformContext.current)
+                    .data(thumbnailUrl)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .diskCacheKey(thumbnailUrl)
+                    .crossfade(true)
+                    .build(),
+            placeholder = rememberHolderPainter(),
+            error = rememberHolderPainter(),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            modifier = avatarModifier,
+        )
+    } else {
+        Box(
+            modifier = avatarModifier.background(MaterialTheme.colorScheme.surfaceContainerHighest),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = SimpIcons.Person,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(size * 0.6f),
+            )
+        }
+    }
+}
+
+private val LandscapeGridItemMaxWidth = 400.dp
+
+private fun HomeItem.isSongCardShelf(): Boolean =
+    itemsPerColumn == null &&
+        moreEndpoint == null &&
+        contents.isNotEmpty() &&
+        contents.all { it != null && !it.videoId.isNullOrEmpty() && it.homeCardAspectRatio() == 1f }
+
+@ExperimentalFoundationApi
+@Composable
+fun QuickPicks(
+    homeItem: HomeItem,
+    navController: NavController,
+    viewModel: HomeViewModel = koinViewModel(),
+) {
+    val lazyListState = rememberLazyGridState()
+    val snapperFlingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = lazyListState, snapPosition = SnapPosition.Start))
+    val quickPickKeys =
+        remember(homeItem.contents) {
+            val occurrences = mutableMapOf<String, Int>()
+            homeItem.contents.mapIndexed { index, item ->
+                val identity = item?.videoId?.takeIf { it.isNotBlank() } ?: "empty:$index"
+                val occurrence = occurrences[identity] ?: 0
+                occurrences[identity] = occurrence + 1
+                "quick-pick:$identity:$occurrence"
+            }
+        }
+    val isPortrait = getScreenSizeInfo().let { it.wDP < it.hDP }
+    val density = LocalDensity.current
+    var widthDp by remember {
+        mutableStateOf(0.dp)
+    }
+    var bottomSheetShow by remember { mutableStateOf(false) }
+    var track by remember { mutableStateOf<Track?>(null) }
+
+    if (bottomSheetShow) {
+        NowPlayingBottomSheet(
+            onDismiss = { bottomSheetShow = false },
+            song = track?.toSongEntity(),
+            navController = navController,
+        )
+    }
+
+    Column(
+        Modifier
+            .padding(vertical = 8.dp)
+            .onGloballyPositioned { coordinates ->
+                with(density) {
+                    widthDp = (coordinates.size.width).toDp()
+                }
+            },
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(Res.string.let_s_start_with_a_radio),
+                    style = typo().bodySmall,
+                )
+                Text(
+                    text = stringResource(Res.string.quick_picks),
+                    style = typo().headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp),
+                )
+            }
+            if (homeItem.playAllEndpoint != null) {
+                SectionHeaderButton(
+                    text = stringResource(Res.string.play_all),
+                    onClick = { viewModel.playAll(homeItem) },
+                )
+            }
+        }
+        LazyHorizontalGrid(
+            rows = GridCells.Fixed(4),
+            modifier = Modifier.height(256.dp).mouseDragScroll(lazyListState, snapperFlingBehavior),
+            state = lazyListState,
+            flingBehavior = snapperFlingBehavior,
+        ) {
+            itemsIndexed(
+                items = homeItem.contents,
+                key = { index, _ -> quickPickKeys.getOrElse(index) { "quick-pick:$index" } },
+                contentType = { _, item -> if (item == null) "empty-quick-pick" else "quick-pick" },
+            ) { _, item ->
+                if (item != null) {
+                    QuickPicksItem(
+                        onClick = {
+                            val firstQueue: Track = item.toTrack()
+                            viewModel.setQueueData(
+                                QueueData.Data(
+                                    listTracks = arrayListOf(firstQueue),
+                                    firstPlayedTrack = firstQueue,
+                                    playlistId = "RDAMVM${item.videoId}",
+                                    playlistName = "\"${item.title}\" Radio",
+                                    playlistType = PlaylistType.RADIO,
+                                    continuation = null,
+                                ),
+                            )
+                            viewModel.loadMediaItem(
+                                firstQueue,
+                                type = Config.SONG_CLICK,
+                            )
+                        },
+                        onLongClick = {
+                            track = item.toTrack()
+                            bottomSheetShow = true
+                        },
+                        data = item,
+                        widthDp = if (isPortrait) widthDp else minOf(widthDp, LandscapeGridItemMaxWidth + 30.dp),
+                    )
+                }
+            }
+        }
+        HorizontalScrollBar(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            scrollState = lazyListState,
+            flingBehavior = snapperFlingBehavior,
+        )
+    }
+}
+
+@Composable
+fun MoodMomentAndGenre(
+    mood: Mood,
+    navController: NavController,
+    backdrop: com.maxrave.simpmusic.expect.ui.PlatformBackdrop,
+) {
+    Column(
+        Modifier
+            .padding(vertical = 8.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.let_s_pick_a_playlist_for_you),
+            style = typo().bodyMedium,
+        )
+        mood.sections.forEach { section ->
+            val gridState = rememberLazyGridState()
+            val flingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = gridState))
+            Text(
+                text = section.title,
+                style = typo().headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 5.dp),
+            )
+            LazyHorizontalGrid(
+                rows = GridCells.Fixed(3),
+                modifier = Modifier.height(210.dp).mouseDragScroll(gridState, flingBehavior),
+                state = gridState,
+                flingBehavior = flingBehavior,
+            ) {
+                items(
+                    items = section.items,
+                    key = { item -> item.params },
+                    contentType = { "mood-category" },
+                ) { item ->
+                    MoodMomentAndGenreHomeItem(
+                        title = item.title,
+                        stripeColor = item.stripeColor,
+                        backdrop = backdrop,
+                    ) {
+                        navController.navigate(
+                            MoodDestination(
+                                item.params,
+                            ),
+                        )
+                    }
+                }
+            }
+            HorizontalScrollBar(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                scrollState = gridState,
+                flingBehavior = flingBehavior,
+            )
+        }
+    }
+}
+
+@Composable
+fun ChartTitle() {
+    Column {
+        Text(
+            text = stringResource(Res.string.what_is_best_choice_today),
+            style = typo().bodyMedium,
+        )
+        Text(
+            text = stringResource(Res.string.chart),
+            style = typo().headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp),
+        )
+    }
+}
+
+@Composable
+fun ChartData(
+    chart: Chart,
+    navController: NavController,
+) {
+    var gridWidthDp by remember {
+        mutableStateOf(0.dp)
+    }
+    val density = LocalDensity.current
+
+    val lazyListState2 = rememberLazyGridState()
+    val snapperFlingBehavior2 =
+        rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = lazyListState2, snapPosition = SnapPosition.Start))
+    val isPortrait = getScreenSizeInfo().let { it.wDP < it.hDP }
+
+    Column(
+        Modifier.onGloballyPositioned { coordinates ->
+            with(density) {
+                gridWidthDp = (coordinates.size.width).toDp()
+            }
+        },
+    ) {
+        chart.listChartItem.forEach { item ->
+            Text(
+                text = item.title,
+                style = typo().headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+            )
+            val lazyListState = rememberLazyListState()
+            val snapperFlingBehavior = rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyListState = lazyListState))
+            LazyRow(
+                modifier = Modifier.mouseDragScroll(lazyListState, snapperFlingBehavior),
+                state = lazyListState,
+                flingBehavior = snapperFlingBehavior,
+            ) {
+                items(
+                    items = item.playlists,
+                    key = { playlist -> "chart-playlist:${playlist.id}" },
+                    contentType = { "chart-playlist" },
+                ) { playlist ->
+                    HomeItemContentPlaylist(
+                        onClick = {
+                            navController.navigate(
+                                PlaylistDestination(
+                                    playlistId = playlist.id,
+                                    isYourYouTubePlaylist = false,
+                                ),
+                            )
+                        },
+                        data = playlist,
+                    )
+                }
+            }
+        }
+        Text(
+            text = stringResource(Res.string.top_artists),
+            style = typo().headlineMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
+        )
+        LazyHorizontalGrid(
+            rows = GridCells.Fixed(3),
+            modifier = Modifier.height(240.dp).mouseDragScroll(lazyListState2, snapperFlingBehavior2),
+            state = lazyListState2,
+            flingBehavior = snapperFlingBehavior2,
+        ) {
+            items(
+                items = chart.artists.itemArtists,
+                key = { artist -> "chart-artist:${artist.browseId}" },
+                contentType = { "chart-artist" },
+            ) { data ->
+                ItemArtistChart(
+                    onClick = {
+                        navController.navigate(
+                            ArtistDestination(
+                                channelId = data.browseId,
+                            ),
+                        )
+                    },
+                    data = data,
+                    widthDp = if (isPortrait) gridWidthDp else minOf(gridWidthDp, LandscapeGridItemMaxWidth),
+                )
+            }
+        }
+        HorizontalScrollBar(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            scrollState = lazyListState2,
+            flingBehavior = snapperFlingBehavior2,
+        )
+        chart.podcasts?.let { podcasts ->
+            Text(
+                text = podcasts.title,
+                style = typo().headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+            )
+            val podcastGridState = rememberLazyGridState()
+            val podcastFlingBehavior =
+                rememberSnapFlingBehavior(SnapLayoutInfoProvider(lazyGridState = podcastGridState, snapPosition = SnapPosition.Start))
+            LazyHorizontalGrid(
+                rows = GridCells.Fixed(3),
+                modifier = Modifier.height(240.dp).mouseDragScroll(podcastGridState, podcastFlingBehavior),
+                state = podcastGridState,
+                flingBehavior = podcastFlingBehavior,
+            ) {
+                items(
+                    items = podcasts.shows,
+                    key = { show -> "chart-podcast:${show.browseId}" },
+                    contentType = { "chart-podcast" },
+                ) { data ->
+                    ItemArtistChart(
+                        onClick = { navController.navigate(PodcastDestination(podcastId = data.browseId)) },
+                        data = data,
+                        widthDp = if (isPortrait) gridWidthDp else minOf(gridWidthDp, LandscapeGridItemMaxWidth),
+                        thumbnailShape = RoundedCornerShape(8.dp),
+                        subtitle = data.subscribers,
+                    )
+                }
+            }
+            HorizontalScrollBar(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                scrollState = podcastGridState,
+                flingBehavior = podcastFlingBehavior,
+            )
+        }
+    }
+}
