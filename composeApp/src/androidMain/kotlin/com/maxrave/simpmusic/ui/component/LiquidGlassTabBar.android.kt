@@ -44,6 +44,8 @@ import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.IntSize
@@ -285,28 +287,23 @@ private fun LiquidGlassTab(
     onClick: () -> Unit,
 ) {
     val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-    Column(
+    val label = stringResource(screen.title)
+    Box(
         Modifier
             .width(width)
             .fillMaxHeight()
             .clip(CapsuleShape)
+            .semantics { contentDescription = label }
             .clickable(
                 interactionSource = null,
                 indication = null,
                 role = Role.Tab,
                 onClick = onClick,
             ),
-        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalContentColor provides color) {
             screen.icon(selected)
-            Text(
-                text = stringResource(screen.title),
-                style = typo().bodySmall,
-                color = color,
-                maxLines = 1,
-            )
         }
     }
 }
