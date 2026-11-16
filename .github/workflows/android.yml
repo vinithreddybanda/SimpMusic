@@ -39,7 +39,3 @@ jobs:
           path: androidApp/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
-
-      # Keep APK delivery independent from optional benchmark instrumentation.
-      - name: Compile Macrobenchmark instrumentation
-        run: ./gradlew --no-daemon :macrobenchmark:assembleBenchmark
