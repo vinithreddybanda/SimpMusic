@@ -181,14 +181,23 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge(
             navigationBarStyle =
-                SystemBarStyle.dark(
-                    scrim = Color.Transparent.toArgb(),
+                SystemBarStyle.auto(
+                    lightScrim = Color.Transparent.toArgb(),
+                    darkScrim = Color.Transparent.toArgb(),
                 ),
             statusBarStyle =
-                SystemBarStyle.dark(
-                    scrim = Color.Transparent.toArgb(),
+                SystemBarStyle.auto(
+                    lightScrim = Color.Transparent.toArgb(),
+                    darkScrim = Color.Transparent.toArgb(),
                 ),
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Let the app draw all the way behind both system bars, without Android's
+            // automatic contrast scrims or the legacy navigation-bar divider.
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+            window.navigationBarDividerColor = android.graphics.Color.TRANSPARENT
+        }
         viewModel.checkIsRestoring()
         val request =
             PeriodicWorkRequestBuilder<NotifyWork>(
