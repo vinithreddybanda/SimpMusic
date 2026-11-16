@@ -325,7 +325,7 @@ fun DesktopSidebar(
                         selected = selectedIndex == screen.ordinal,
                         collapsed = collapsed,
                         onClick = { selectTab(screen) },
-                        icon = screen.icon,
+                        icon = { screen.icon(selectedIndex == screen.ordinal) },
                     )
                 }
                 HorizontalDivider(
