@@ -120,7 +120,6 @@ import com.maxrave.simpmusic.extension.getScreenSizeInfo
 import com.maxrave.simpmusic.extension.isScrollingUp
 import com.maxrave.simpmusic.extension.mouseDragScroll
 import com.maxrave.simpmusic.extension.rgbFactor
-import com.maxrave.simpmusic.extension.ultraThinBarStyle
 import com.maxrave.simpmusic.getPlatform
 import com.maxrave.simpmusic.ui.component.CenterLoadingBox
 import com.maxrave.simpmusic.ui.component.Chip
@@ -170,10 +169,6 @@ import com.maxrave.simpmusic.viewModel.HomeViewModel.Companion.HOME_PARAMS_SLEEP
 import com.maxrave.simpmusic.viewModel.HomeViewModel.Companion.HOME_PARAMS_WORKOUT
 import com.maxrave.simpmusic.viewModel.ListState
 import com.maxrave.simpmusic.viewModel.SharedViewModel
-import dev.chrisbanes.haze.HazeInput
-import dev.chrisbanes.haze.blur.hazeBlur
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.http.Url
@@ -364,8 +359,6 @@ fun HomeScreen(
     val atTop by remember {
         derivedStateOf { scrollState.firstVisibleItemIndex == 0 && scrollState.firstVisibleItemScrollOffset == 0 }
     }
-    val hazeState =
-        rememberHazeState()
     val chipBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
 
     LaunchedEffect(scrollState) {
@@ -433,8 +426,7 @@ fun HomeScreen(
         PullToRefreshBox(
             modifier =
                 Modifier
-                    .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(chipBackdrop) else Modifier)
-                    .hazeSource(hazeState),
+                    .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(chipBackdrop) else Modifier),
             state = pullToRefreshState,
             onRefresh = onRefresh,
             isRefreshing = isRefreshing,
@@ -700,7 +692,6 @@ fun HomeScreen(
                                 Modifier.background(Color.Transparent)
                             } else {
                                 Modifier
-                                    .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle())
                             },
                         ).onGloballyPositioned { coordinates ->
                             topAppBarHeightPx = coordinates.size.height
@@ -740,7 +731,11 @@ fun HomeScreen(
                             ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.padding(start = if (getPlatform() == Platform.Android) 12.dp else 16.dp, end = 8.dp)) {
+                    Box(
+                        Modifier
+                            .padding(start = if (getPlatform() == Platform.Android) 12.dp else 16.dp, end = 8.dp)
+                            .liquidGlass(chipBackdrop, RoundedCornerShape(24.dp)),
+                    ) {
                         HomeAccountButton(
                             accountName = accountInfo?.first,
                             thumbnailUrl = accountInfo?.second,
