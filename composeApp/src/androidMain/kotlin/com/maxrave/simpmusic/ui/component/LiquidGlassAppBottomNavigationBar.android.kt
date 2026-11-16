@@ -197,7 +197,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 selectedScreen.icon(true)
             } else {
                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
-                    selectedScreen.icon(selected = true)
+                    selectedScreen.icon(true)
                 }
             }
         }
