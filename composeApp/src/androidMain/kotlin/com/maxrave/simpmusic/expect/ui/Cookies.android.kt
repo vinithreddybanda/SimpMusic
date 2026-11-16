@@ -40,7 +40,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import org.jetbrains.compose.resources.stringResource
 import simpmusic.composeapp.generated.resources.Res
-import simpmusic.composeapp.generated.resources.retry
 import simpmusic.composeapp.generated.resources.unavailable
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
@@ -227,7 +226,7 @@ private fun ManagedWebView(configure: WebView.(onRendererGone: () -> Unit) -> Un
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 // Leaving this branch for the AndroidView below composes a new one, so factory runs again.
                 Button(onClick = { rendererGone = false }) {
-                    Text(stringResource(Res.string.retry), color = LocalContentColor.current)
+                    Text("Retry", color = LocalContentColor.current)
                 }
             }
         }
