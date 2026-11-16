@@ -74,6 +74,7 @@ import kotlin.math.roundToInt
 import kotlin.math.sign
 
 private val CapsuleShape = RoundedCornerShape(percent = 50)
+private val BarSurfaceShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
 private val TabWidth = 84.dp
 internal val BarHeight = 56.dp
 private val BlobHeight = 48.dp
@@ -161,7 +162,7 @@ fun LiquidGlassTabBar(
                     backdrop,
                     layer,
                     { luminance.value },
-                    CapsuleShape,
+                    BarSurfaceShape,
                     barInteraction,
                     pressedScale = 1.04f,
                     blurScale = if (blurEnabled) 0.55f else 0f,
