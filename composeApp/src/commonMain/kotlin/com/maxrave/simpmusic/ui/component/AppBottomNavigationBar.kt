@@ -306,7 +306,7 @@ internal fun FlatSearchButton(
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
         ) {
-            BottomNavScreen.Search.icon()
+            BottomNavScreen.Search.icon(selected)
         }
     }
 }
@@ -443,7 +443,7 @@ fun AppNavigationRail(
         Spacer(Modifier.weight(1f))
         bottomNavScreens.forEach { screen ->
             NavigationRailItem(
-                icon = screen.icon,
+                icon = { screen.icon(selectedIndex == screen.ordinal) },
                 label = {
                     Text(
                         stringResource(screen.title),
