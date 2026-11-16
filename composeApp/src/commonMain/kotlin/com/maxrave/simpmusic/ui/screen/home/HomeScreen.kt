@@ -601,6 +601,7 @@ fun HomeScreen(
                                             MoodMomentAndGenre(
                                                 mood = it,
                                                 navController = navController,
+                                                backdrop = chipBackdrop,
                                             )
                                         }
                                     }
