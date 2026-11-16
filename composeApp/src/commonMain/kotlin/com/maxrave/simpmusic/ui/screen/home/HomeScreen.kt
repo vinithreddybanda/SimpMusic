@@ -752,12 +752,7 @@ fun HomeScreen(
                             .weight(1f)
                             .fillMaxHeight(),
                     ) {
-                        AnimatedVisibility(
-                            visible = target,
-                            enter = fadeIn(tween(180)),
-                            exit = fadeOut(tween(120)),
-                            modifier = Modifier.fillMaxHeight(),
-                        ) {
+                        if (target) {
                             Row(
                                 modifier =
                                     Modifier
@@ -797,7 +792,6 @@ fun HomeScreen(
                                     )
                                 }
                             }
-                        }
                     }
                     if (!createPinned) {
                         Box(Modifier.padding(start = 8.dp, end = 12.dp)) { createActions() }
