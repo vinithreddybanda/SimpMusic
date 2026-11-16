@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.input.pointer.consume
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
@@ -203,6 +204,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
         }
     }
 
+    val density = LocalDensity.current
     BoxWithConstraints(
         modifier =
             Modifier
@@ -240,7 +242,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                                     change.consume()
                                 },
                                 onDragEnd = {
-                                    val threshold = with(LocalDensity.current) { 24.dp.toPx() }
+                                    val threshold = with(density) { 24.dp.toPx() }
                                     if (verticalDrag < -threshold) isExpanded = false
                                     if (verticalDrag > threshold) isExpanded = true
                                     verticalDrag = 0f
