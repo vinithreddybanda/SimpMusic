@@ -459,9 +459,58 @@ fun HomeScreen(
                     }
                     LazyColumn(
                         state = scrollState,
-                        contentPadding = PaddingValues(bottom = 76.dp),
+                        contentPadding = PaddingValues(
+                            top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 8.dp,
+                            bottom = 12.dp,
+                        ),
                         verticalArrangement = Arrangement.spacedBy(if (getPlatform() == Platform.Android) 6.dp else 8.dp),
                     ) {
+                        item(key = "home-controls", contentType = "home-controls") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState())
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Box(Modifier.liquidGlass(chipBackdrop, RoundedCornerShape(24.dp))) {
+                                    HomeAccountButton(
+                                        accountName = accountInfo?.first,
+                                        thumbnailUrl = accountInfo?.second,
+                                        backdrop = chipBackdrop,
+                                        navController = navController,
+                                    )
+                                }
+                                Chip(
+                                    isAnimated = loading,
+                                    isSelected = params == null && !moodExpanded,
+                                    text = stringResource(Res.string.all),
+                                    backdrop = chipBackdrop,
+                                ) {
+                                    moodExpanded = false
+                                    viewModel.setParams(null)
+                                }
+                                ExpandableChip(
+                                    text = stringResource(Res.string.mood),
+                                    options = homeMoods.map { stringResource(it.first) },
+                                    selectedIndex = homeMoods.indexOfFirst { it.second == params }.takeIf { it >= 0 },
+                                    expanded = moodExpanded,
+                                    onExpandedChange = { moodExpanded = it },
+                                    onSelect = { index ->
+                                        moodExpanded = false
+                                        viewModel.setParams(homeMoods[index].second)
+                                    },
+                                    isAnimated = loading,
+                                    backdrop = chipBackdrop,
+                                )
+                                CreateActions(
+                                    backdrop = chipBackdrop,
+                                    navController = navController,
+                                    onSettings = null,
+                                )
+                            }
+                        }
                         itemsIndexed(
                             items = homeShelves,
                             key = { index, _ -> homeShelfKeys.getOrElse(index) { "home-shelf:$index" } },
@@ -662,50 +711,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(Modifier.liquidGlass(chipBackdrop, RoundedCornerShape(24.dp))) {
-                HomeAccountButton(
-                    accountName = accountInfo?.first,
-                    thumbnailUrl = accountInfo?.second,
-                    backdrop = chipBackdrop,
-                    navController = navController,
-                )
-            }
-            Chip(
-                isAnimated = loading,
-                isSelected = params == null && !moodExpanded,
-                text = stringResource(Res.string.all),
-                backdrop = chipBackdrop,
-            ) {
-                moodExpanded = false
-                viewModel.setParams(null)
-            }
-            ExpandableChip(
-                text = stringResource(Res.string.mood),
-                options = homeMoods.map { stringResource(it.first) },
-                selectedIndex = homeMoods.indexOfFirst { it.second == params }.takeIf { it >= 0 },
-                expanded = moodExpanded,
-                onExpandedChange = { moodExpanded = it },
-                onSelect = { index ->
-                    moodExpanded = false
-                    viewModel.setParams(homeMoods[index].second)
-                },
-                isAnimated = loading,
-                backdrop = chipBackdrop,
-            )
-            CreateActions(
-                backdrop = chipBackdrop,
-                navController = navController,
-                onSettings = null,
-            )
         }
     }
 }
