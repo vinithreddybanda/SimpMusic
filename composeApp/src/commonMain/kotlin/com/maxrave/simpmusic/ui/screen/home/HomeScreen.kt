@@ -793,6 +793,7 @@ fun HomeScreen(
                                 }
                             }
                     }
+                    }
                     if (!createPinned) {
                         Box(Modifier.padding(start = 8.dp, end = 12.dp)) { createActions() }
                     } else {
