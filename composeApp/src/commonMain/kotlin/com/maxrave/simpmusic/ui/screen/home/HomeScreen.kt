@@ -121,7 +121,6 @@ import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.extension.angledGradientBackground
 import com.maxrave.simpmusic.extension.artworkScrimBrush
 import com.maxrave.simpmusic.extension.getScreenSizeInfo
-import com.maxrave.simpmusic.extension.isScrollingUp
 import com.maxrave.simpmusic.extension.mouseDragScroll
 import com.maxrave.simpmusic.extension.rgbFactor
 import com.maxrave.simpmusic.getPlatform
@@ -238,7 +237,6 @@ fun HomeScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
-    val isScrollingUp by scrollState.isScrollingUp()
     val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     val homeData by viewModel.homeItemList.collectAsStateWithLifecycle()
     val quickPicksTitle = stringResource(Res.string.quick_picks)
@@ -357,17 +355,6 @@ fun HomeScreen(
         mutableStateOf(false)
     }
     val chipBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
-
-    LaunchedEffect(scrollState) {
-        snapshotFlow { scrollState.firstVisibleItemIndex }
-            .collect {
-                if (it <= 1) {
-                    onScrolling.invoke(true)
-                } else {
-                    onScrolling.invoke(isScrollingUp)
-                }
-            }
-    }
 
     val onRefresh: () -> Unit = {
         isRefreshing = true
