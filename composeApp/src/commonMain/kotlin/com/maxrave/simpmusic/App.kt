@@ -41,10 +41,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -414,25 +410,6 @@ fun App(
         val desktopPanel =
             if (isLightScheme) MaterialTheme.colorScheme.surfaceContainer else desktopPanelDark
 
-        // Observe nested vertical scrolling at the navigation host, not inside individual screens.
-        // This makes the folding tab bar respond consistently on every scrollable destination.
-        val navigationScrollConnection =
-            remember {
-                object : NestedScrollConnection {
-                    override fun onPostScroll(
-                        consumed: Offset,
-                        available: Offset,
-                        source: NestedScrollSource,
-                    ): Offset {
-                        when {
-                            consumed.y < -1f -> isScrolledToTop = false
-                            consumed.y > 1f || available.y > 1f -> isScrolledToTop = true
-                        }
-                        return Offset.Zero
-                    }
-                }
-            }
-
         val backdrop = rememberBackdrop(if (isDesktopShell) desktopPanel else MaterialTheme.colorScheme.background)
         Scaffold(
             // Draw the app surface edge-to-edge behind the status bar/notch. Individual
@@ -491,7 +468,6 @@ fun App(
                                     backdrop = backdrop,
                                     viewModel = viewModel,
                                     onOpenNowPlaying = { isShowNowPlaylistScreen = true },
-                                    isScrolledToTop = isScrolledToTop,
                                     showAnalyticsTab = showAnalyticsTab,
                                     showMixForYouTab = showMixForYouTab,
                                     liquidGlass = isLiquidGlassEnabled == TRUE,
@@ -646,9 +622,7 @@ fun App(
                                                 showNowPlayingSheet = {
                                                     isShowNowPlaylistScreen = true
                                                 },
-                                                onScrolling = {
-                                                    isScrolledToTop = it
-                                                },
+                                                onScrolling = {},
                                             )
                                         }
                                     }
