@@ -18,17 +18,8 @@ name: Build desktop packages (cross-OS via Conveyor)
 #    to preserve.
 
 on:
+  # Desktop packages are intentionally opt-in. The dev branch ships Android ARM64 APKs only.
   workflow_dispatch:
-  push:
-    branches:
-      - 'dev'
-    paths-ignore:
-      - 'README.md'
-      - 'fastlane/**'
-      - 'assets/**'
-      - '.github/**/*.md'
-      - '.github/FUNDING.yml'
-      - '.github/ISSUE_TEMPLATE/**'
 
 permissions:
   contents: write
