@@ -151,6 +151,7 @@ fun CreateActions(
 
     if (showCreate) {
         CreateSheet(
+            backdrop = backdrop,
             liveRoom = room.inRoom,
             onDismiss = { showCreate = false },
             onPlaylist = {
@@ -174,6 +175,7 @@ fun CreateActions(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CreateSheet(
+    backdrop: PlatformBackdrop,
     liveRoom: Boolean,
     onDismiss: () -> Unit,
     onPlaylist: () -> Unit,
@@ -188,13 +190,11 @@ private fun CreateSheet(
         scrimColor = Color.Black.copy(alpha = .5f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
-        Card(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
-            colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .liquidGlass(backdrop, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), interactive = false),
         ) {
             Column(Modifier.padding(bottom = 8.dp)) {
                 SheetHandle()
@@ -204,12 +204,14 @@ private fun CreateSheet(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
                 CreateRow(
+                    backdrop = backdrop,
                     icon = SimpIcons.PlaylistAdd,
                     title = stringResource(Res.string.local_playlist),
                     subtitle = stringResource(Res.string.create_playlist_description),
                     onClick = onPlaylist,
                 )
                 CreateRow(
+                    backdrop = backdrop,
                     icon = SimpIcons.Groups,
                     title = stringResource(Res.string.listen_together),
                     subtitle = stringResource(if (liveRoom) Res.string.create_room_live else Res.string.create_room_description),
@@ -223,6 +225,7 @@ private fun CreateSheet(
 
 @Composable
 private fun CreateRow(
+    backdrop: PlatformBackdrop,
     icon: ImageVector,
     title: String,
     subtitle: String,
@@ -232,8 +235,10 @@ private fun CreateRow(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .liquidGlass(backdrop, RoundedCornerShape(18.dp), interactive = false)
                 .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
