@@ -351,6 +351,9 @@ fun App(
         }
     }
 
+    var isScrolledToTop by rememberSaveable {
+        mutableStateOf(false)
+    }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         isScrolledToTop = true
@@ -391,9 +394,6 @@ fun App(
                 restoreState = true
             }
         }
-    }
-    var isScrolledToTop by rememberSaveable {
-        mutableStateOf(false)
     }
     val isTablet = windowSize.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)
     val isTabletLandscape = isTablet && currentOrientation() == Orientation.LANDSCAPE
