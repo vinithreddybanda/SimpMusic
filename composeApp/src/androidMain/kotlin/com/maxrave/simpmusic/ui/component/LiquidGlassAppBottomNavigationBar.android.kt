@@ -158,12 +158,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
             decoupledConstraints(isShowMiniPlayer, isExpanded, miniPlayerPadding, miniPlayerGap)
         }
 
-    LaunchedEffect(isScrolledToTop) {
-        if (!isInSearchDestination) {
-            isExpanded = isScrolledToTop
-        }
-    }
-
     fun selectTab(index: Int) {
         val screen = bottomNavScreens.find { it.ordinal == index } ?: return
         if (selectedIndex == index) {
@@ -260,6 +254,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                             availableWidth = capsuleBudget,
                             onTabSelected = { position -> selectTab(barTabs[position].ordinal) },
                             collapsedContent = collapsedCircle,
+                            blurEnabled = isScrolledToTop,
                         )
                         Box(
                             modifier =
@@ -273,7 +268,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
                                         CircleShape,
                                         searchFabInteraction,
                                         pressedScale = 1.04f,
-                                        blurScale = 0.55f,
+                                        blurScale = if (isScrolledToTop) 0.55f else 0f,
                                         minScrim = 0.18f,
                                         maxScrim = 0.36f,
                                     ).clickable { selectTab(BottomNavScreen.Search.ordinal) },
