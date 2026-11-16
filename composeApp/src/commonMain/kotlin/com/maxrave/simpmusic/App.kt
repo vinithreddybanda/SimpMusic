@@ -415,7 +415,7 @@ fun App(
             // top bars retain their own safe insets for readable controls.
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             modifier =
-                Modifier.pointerInput(Unit) {
+                Modifier.pointerInput(userStarted) {
                     awaitPointerEventScope {
                         while (!userStarted) {
                             val type = awaitPointerEvent(PointerEventPass.Initial).type
