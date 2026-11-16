@@ -71,6 +71,8 @@ import com.maxrave.simpmusic.ui.component.MoodMomentAndGenreHomeItem
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
 import com.maxrave.simpmusic.ui.component.RippleIconButton
 import com.maxrave.simpmusic.ui.component.homeCardAspectRatio
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
@@ -135,6 +137,7 @@ fun BrowseScreen(
         } else {
             backgroundColor
         }
+    val glassBackdrop = rememberBackdrop(pageBackground)
     var topHeaderColor by remember { mutableStateOf(backgroundColor) }
     val animatedColor by animateColorAsState(topHeaderColor, tween(500))
     val httpClient = remember { HttpClient(CIO) }
@@ -178,7 +181,8 @@ fun BrowseScreen(
         Box(
             Modifier
                 .fillMaxSize()
-                .hazeSource(hazeState),
+                .hazeSource(hazeState)
+                .layerBackdrop(glassBackdrop),
         ) {
             // Drawn before the list and scrolled away with it, as on Mix for you: the draw-phase
             // translation tracks the first row and parks once it has passed.
@@ -234,6 +238,7 @@ fun BrowseScreen(
                                                 MoodMomentAndGenreHomeItem(
                                                     title = mood.title,
                                                     stripeColor = mood.stripeColor,
+                                                    backdrop = glassBackdrop,
                                                     fillMaxWidth = true,
                                                 ) {
                                                     navController.navigate(MoodDestination(mood.params))
