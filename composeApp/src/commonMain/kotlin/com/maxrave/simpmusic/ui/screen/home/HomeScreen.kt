@@ -416,7 +416,7 @@ fun HomeScreen(
         }
     }
 
-    Box {
+    Box(Modifier.fillMaxSize()) {
         PullToRefreshBox(
             modifier =
                 Modifier
@@ -433,10 +433,7 @@ fun HomeScreen(
                         Modifier
                             .align(Alignment.TopCenter)
                             .padding(
-                                top =
-                                    with(LocalDensity.current) {
-                                        topAppBarHeightPx.toDp()
-                                    },
+                                top = 8.dp,
                             ),
                     containerColor = PullToRefreshDefaults.indicatorContainerColor,
                     color = PullToRefreshDefaults.indicatorColor,
@@ -518,9 +515,7 @@ fun HomeScreen(
                                 ) {
                                     if (index == 0) {
                                         Spacer(
-                                            Modifier.height(
-                                                with(LocalDensity.current) { topAppBarHeightPx.toDp() } + 8.dp,
-                                            ),
+                                            Modifier.height(8.dp),
                                         )
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
