@@ -1274,30 +1274,25 @@ fun HomeItemArtist(
 fun MoodMomentAndGenreHomeItem(
     title: String,
     stripeColor: Long,
+    backdrop: PlatformBackdrop,
     // Fill a grid cell instead of the fixed 160dp.
     fillMaxWidth: Boolean = false,
     onClick: () -> Unit,
 ) {
-    ElevatedCard(
-        elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 6.dp,
-            ),
-        onClick = onClick,
-        shape = RoundedCornerShape(5.dp),
+    Box(
         modifier =
             (if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier.width(160.dp))
                 .height(50.dp)
-                .padding(8.dp),
+                .padding(4.dp)
+                .liquidGlass(backdrop, RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(14.dp))
+                .combinedClickable(onClick = onClick),
     ) {
-        Row {
+        Row(Modifier.fillMaxSize()) {
             Box(
-                // `solid.leftStripeColor` straight from the API (full ARGB). This used to be
-                // generateRandomColor(), which — being outside remember — rolled a new colour on
-                // every recomposition, so the stripes flickered while scrolling.
                 Modifier
-                    .width(10.dp)
-                    .height(64.dp)
+                    .width(4.dp)
+                    .fillMaxHeight()
                     .background(Color(stripeColor)),
             )
             Text(
@@ -1308,7 +1303,8 @@ fun MoodMomentAndGenreHomeItem(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterVertically),
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp),
             )
         }
     }
