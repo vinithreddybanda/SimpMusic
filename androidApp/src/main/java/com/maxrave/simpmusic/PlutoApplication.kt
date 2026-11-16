@@ -103,11 +103,17 @@ class PlutoApplication :
             .restartActivity(MainActivity::class.java) // default: null (your app's launch activity)
             .apply()
 
-        @SuppressLint("DiscouragedPrivateApi")
-        val field: Field = CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
-        field.isAccessible = true
-        val expectSize = 100 * 1024 * 1024
-        field.set(null, expectSize)
+        runCatching {
+            @SuppressLint("DiscouragedPrivateApi")
+            val field: Field = CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
+            field.isAccessible = true
+            field.set(null, 100 * 1024 * 1024)
+        }.onFailure { error ->
+            Logger.w(
+                "PlutoApplication",
+                "CursorWindow tuning unavailable; using the platform default: ${error.message}",
+            )
+        }
 
         AppContext.apply {
             set(applicationContext)

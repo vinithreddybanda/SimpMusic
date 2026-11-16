@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
 
     private var mBound = false
     private var shouldUnbind = false
+    private var serviceStartRequested = false
     private val serviceConnection =
         object : ServiceConnection {
             override fun onServiceConnected(
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity() {
             override fun onServiceDisconnected(name: ComponentName?) {
                 Logger.w("MainActivity", "onServiceDisconnected: ")
                 mBound = false
+                serviceStartRequested = false
             }
         }
 
@@ -88,9 +90,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (shouldUnbind) {
+        if (shouldUnbind && mBound) {
             unbindService(serviceConnection)
+            mBound = false
         }
+        shouldUnbind = false
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -288,9 +292,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startMusicService() {
+        if (serviceStartRequested || viewModel.isServiceRunning) return
+        serviceStartRequested = true
 //        mediaPlayerHandler.startMediaService(this, serviceConnection)
-        com.maxrave.media3.di
-            .startService(this@MainActivity, serviceConnection)
+        try {
+            com.maxrave.media3.di
+                .startService(this@MainActivity, serviceConnection)
+        } catch (error: SecurityException) {
+            serviceStartRequested = false
+            Logger.e("MainActivity", "Unable to start the playback service: ${error.message}")
+            return
+        } catch (error: IllegalStateException) {
+            serviceStartRequested = false
+            Logger.e("MainActivity", "Playback service rejected during startup: ${error.message}")
+            return
+        }
         mediaPlayerHandler.pushPlayerError = { it ->
             pushPlayerError(it)
         }

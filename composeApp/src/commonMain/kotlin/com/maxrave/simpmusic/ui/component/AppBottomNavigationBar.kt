@@ -28,6 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -94,11 +98,25 @@ fun AppBottomNavigationBar(
     // selected, or the YouTube session ends while Mix for you is. Fall back to Home in both cases so
     // nothing is left highlighted.
     LaunchedEffect(showAnalyticsTab, showMixForYouTab) {
+        bottomNavScreens
+            .firstOrNull { screen ->
+                currentBackStackEntry?.destination?.hierarchy?.any {
+                    it.hasRoute(screen.destination::class)
+                } == true
+            }?.let { selectedIndex = it.ordinal }
         if ((!showAnalyticsTab && selectedIndex == BottomNavScreen.Analytics.ordinal) ||
             (!showMixForYouTab && selectedIndex == BottomNavScreen.MixForYou.ordinal)
         ) {
             selectedIndex = BottomNavScreen.Home.ordinal
         }
+    }
+    LaunchedEffect(currentBackStackEntry) {
+        bottomNavScreens
+            .firstOrNull { screen ->
+                currentBackStackEntry?.destination?.hierarchy?.any {
+                    it.hasRoute(screen.destination::class)
+                } == true
+            }?.let { selectedIndex = it.ordinal }
     }
     val selectTab: (BottomNavScreen) -> Unit = { screen ->
         if (selectedIndex == screen.ordinal) {
@@ -251,6 +269,10 @@ internal fun FlatTabBar(
                                     .width(tabWidth)
                                     .fillMaxHeight()
                                     .clip(RoundedCornerShape(FlatIndicatorHeight / 2))
+                                    .semantics {
+                                        contentDescription = stringResource(screen.title)
+                                        role = Role.Tab
+                                    }
                                     .clickable { onTabSelected(screen) },
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
@@ -422,11 +444,25 @@ fun AppNavigationRail(
     // selected, or the YouTube session ends while Mix for you is. Fall back to Home in both cases so
     // nothing is left highlighted.
     LaunchedEffect(showAnalyticsTab, showMixForYouTab) {
+        bottomNavScreens
+            .firstOrNull { screen ->
+                currentBackStackEntry?.destination?.hierarchy?.any {
+                    it.hasRoute(screen.destination::class)
+                } == true
+            }?.let { selectedIndex = it.ordinal }
         if ((!showAnalyticsTab && selectedIndex == BottomNavScreen.Analytics.ordinal) ||
             (!showMixForYouTab && selectedIndex == BottomNavScreen.MixForYou.ordinal)
         ) {
             selectedIndex = BottomNavScreen.Home.ordinal
         }
+    }
+    LaunchedEffect(currentBackStackEntry) {
+        bottomNavScreens
+            .firstOrNull { screen ->
+                currentBackStackEntry?.destination?.hierarchy?.any {
+                    it.hasRoute(screen.destination::class)
+                } == true
+            }?.let { selectedIndex = it.ordinal }
     }
     // Transparent, not the default `surface`: the rail sits on the Desktop window (pure black/white)
     // and on the page background on tablets, and must read as part of whatever is behind it.

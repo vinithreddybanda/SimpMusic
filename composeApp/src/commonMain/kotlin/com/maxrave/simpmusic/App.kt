@@ -124,7 +124,10 @@ fun App(
     val nowPlayingData by viewModel.nowPlayingState.collectAsStateWithLifecycle()
     val intent by viewModel.intent.collectAsStateWithLifecycle()
 
-    val isLiquidGlassEnabled = TRUE
+    val isLiquidGlassEnabled by
+        viewModel
+            .getEnableLiquidGlass()
+            .collectAsStateWithLifecycle(DataStoreManager.FALSE)
     val isLocalTrackingEnabled by viewModel.getLocalTrackingEnabled().collectAsStateWithLifecycle(DataStoreManager.FALSE)
     val showAnalyticsTab = isLocalTrackingEnabled == TRUE
     val isYouTubeLoggedIn by viewModel.getYouTubeLoggedIn().collectAsStateWithLifecycle(DataStoreManager.FALSE)

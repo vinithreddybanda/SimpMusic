@@ -6,6 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
@@ -15,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.materialkolor.PaletteStyle
 import com.materialkolor.rememberDynamicColorScheme
 import com.maxrave.domain.manager.DataStoreManager
@@ -71,6 +73,20 @@ val LocalLiquidGlassEnabled = staticCompositionLocalOf { true }
  * Provided by [AppTheme], consumed by [ForceDarkContent]; null only outside of [AppTheme].
  */
 val LocalForcedDarkColorScheme = staticCompositionLocalOf<ColorScheme?> { null }
+
+/**
+ * Shared iOS-inspired geometry for controls that still use Material's implementation underneath.
+ * The visual language is intentionally centralized here so screens do not accumulate slightly
+ * different corner radii during the migration to glass surfaces.
+ */
+private val IosShapes =
+    Shapes(
+        extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        small = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+        medium = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
+        large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
+        extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(30.dp),
+    )
 
 /** Parses "RRGGBB" or "AARRGGBB" (optionally "#"-prefixed) into a [Color]; null if malformed. */
 fun parseThemeColorHex(hex: String): Color? {
@@ -181,15 +197,17 @@ fun AppTheme(
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
         content = {
-            CompositionLocalProvider(
-                LocalRippleConfiguration provides SoftRippleConfiguration,
-                LocalContentColor provides colorScheme.onSurfaceVariant,
-                LocalAppColors provides if (isDark) DarkAppColors else LightAppColors,
-                LocalIsDarkTheme provides isDark,
-                LocalForcedDarkColorScheme provides forcedDarkScheme,
-                LocalLiquidGlassEnabled provides liquidGlassEnabled,
-                content = content,
-            )
+            MaterialTheme(shapes = IosShapes) {
+                CompositionLocalProvider(
+                    LocalRippleConfiguration provides SoftRippleConfiguration,
+                    LocalContentColor provides colorScheme.onSurfaceVariant,
+                    LocalAppColors provides if (isDark) DarkAppColors else LightAppColors,
+                    LocalIsDarkTheme provides isDark,
+                    LocalForcedDarkColorScheme provides forcedDarkScheme,
+                    LocalLiquidGlassEnabled provides liquidGlassEnabled,
+                    content = content,
+                )
+            }
         },
         typography = typo(colorScheme),
     )
@@ -249,13 +267,15 @@ fun ForceDarkContent(content: @Composable () -> Unit) {
     MaterialExpressiveTheme(
         colorScheme = darkScheme,
         content = {
-            CompositionLocalProvider(
-                LocalForceDarkText provides true,
-                LocalIsDarkTheme provides true,
-                LocalContentColor provides darkScheme.onSurfaceVariant,
-                LocalAppColors provides DarkAppColors,
-                content = content,
-            )
+            MaterialTheme(shapes = IosShapes) {
+                CompositionLocalProvider(
+                    LocalForceDarkText provides true,
+                    LocalIsDarkTheme provides true,
+                    LocalContentColor provides darkScheme.onSurfaceVariant,
+                    LocalAppColors provides DarkAppColors,
+                    content = content,
+                )
+            }
         },
         typography = typo(darkScheme, forceDark = true),
     )
