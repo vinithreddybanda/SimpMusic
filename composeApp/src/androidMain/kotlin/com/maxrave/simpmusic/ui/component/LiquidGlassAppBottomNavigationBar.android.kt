@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +53,6 @@ import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestinatio
 import com.maxrave.simpmusic.ui.navigation.destination.library.MixForYouDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
 import com.maxrave.simpmusic.ui.screen.MiniPlayer
-import com.maxrave.simpmusic.ui.theme.LocalIsDarkTheme
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import kotlin.reflect.KClass
 
@@ -63,8 +61,6 @@ private const val TAG = "LiquidGlassAppBottomNavigationBar"
 // How long the bar takes to morph between the tab bar and the collapsed pill.
 private const val BAR_MORPH_MS = 300
 private val BarEdgePadding = 16.dp
-private val SearchGap = 12.dp
-private val SearchSize = 56.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -81,7 +77,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
     reloadDestinationIfNeeded: (KClass<*>) -> Unit,
 ) {
     val layer = rememberGraphicsLayer()
-    val searchFabInteraction = rememberGlassInteraction()
     // Only the glass reads what is behind it.
     val luminance = rememberGlassLuminance(layer, enabled = liquidGlass)
 
@@ -115,13 +110,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
             BottomNavScreen.Search,
         )
     // Tabs shown in the sliding bar (Apple Music style); Search lives in its own FAB.
-    val barTabs =
-        listOfNotNull(
-            BottomNavScreen.Home,
-            BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-            BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
-            BottomNavScreen.Library,
-        )
+    // Every primary destination lives in one continuous glass dock.
+    val barTabs = bottomNavScreens
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
             when (startDestination) {
@@ -231,10 +221,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 // The flat bar never rode above the keyboard, so it still does not.
                 .then(if (liquidGlass) Modifier.imePadding() else Modifier),
     ) {
-        // The capsule's budget: the row minus its edge padding, the gap and the search FAB. The
-        // capsule caps its tabs at TabWidth, so with two or three tabs it ends up narrower and the
-        // toolbar centres capsule + gap + FAB as one cluster (see decoupledConstraints).
-        val capsuleBudget = maxWidth - BarEdgePadding * 2 - SearchGap - SearchSize
+        // Give the complete tab set one shared capsule, with no detached search button.
+        val capsuleBudget = maxWidth - BarEdgePadding * 2
         val capsuleWidth =
             if (liquidGlass) {
                 liquidGlassTabBarWidth(barTabs.size, capsuleBudget)
@@ -257,7 +245,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
             Layout(
                 modifier = Modifier.layoutId("toolbar"),
                 content = {
-                    // Exactly two children, in this order, for the measure policy below.
                     if (liquidGlass) {
                         LiquidGlassTabBar(
                             tabs = barTabs,
@@ -269,24 +256,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                             onTabSelected = { position -> selectTab(barTabs[position].ordinal) },
                             collapsedContent = collapsedCircle,
                         )
-                        // Search lives in its own circular glass FAB (Apple Music style).
-                        Box(
-                            modifier =
-                                Modifier
-                                    .size(SearchSize)
-                                    .drawInteractiveGlass(
-                                        LocalIsDarkTheme.current,
-                                        backdrop,
-                                        // Only the capsule records the shared sample; Search must not overwrite it.
-                                        null,
-                                        { luminance.value },
-                                        CircleShape,
-                                        searchFabInteraction,
-                                    ).clickable { selectTab(BottomNavScreen.Search.ordinal) },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            BottomNavScreen.Search.icon()
-                        }
                     } else {
                         FlatTabBar(
                             tabs = barTabs,
@@ -295,18 +264,12 @@ actual fun LiquidGlassAppBottomNavigationBar(
                             onTabSelected = { screen -> selectTab(screen.ordinal) },
                             collapsedContent = collapsedCircle,
                         )
-                        FlatSearchButton(
-                            selected = selectedIndex == BottomNavScreen.Search.ordinal,
-                            onClick = { selectTab(BottomNavScreen.Search.ordinal) },
-                        )
                     }
                 },
             ) { measurables, constraints ->
                 val folded = CollapsedBarSize.roundToPx()
                 val capsule = capsuleWidth.roundToPx()
-                val gap = SearchGap.roundToPx()
-                val search = SearchSize.roundToPx()
-                val expanded = capsule + gap + search
+                val expanded = capsule
                 val width =
                     if (constraints.hasFixedWidth) {
                         constraints.maxWidth
@@ -321,18 +284,8 @@ actual fun LiquidGlassAppBottomNavigationBar(
                     }
                 val progress = ((width - folded).toFloat() / (expanded - folded).coerceAtLeast(1)).coerceIn(0f, 1f)
                 val bar = measurables[0].measure(Constraints.fixed(lerp(folded, capsule, progress), height))
-                val fab = measurables[1].measure(Constraints.fixed(search, search))
-                val fabAlpha = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
                 layout(width, height) {
                     bar.placeRelative(0, 0)
-                    // Unplaced while hidden, so the folded bar leaves no invisible button behind.
-                    if (fabAlpha > 0f) {
-                        fab.placeRelativeWithLayer(capsule + gap, (height - search) / 2) {
-                            alpha = fabAlpha
-                            scaleX = lerp(0.8f, 1f, fabAlpha)
-                            scaleY = scaleX
-                        }
-                    }
                 }
             }
             MiniPlayer(
@@ -373,8 +326,7 @@ private fun decoupledConstraints(
                 width = Dimension.value(CollapsedBarSize)
                 height = Dimension.value(CollapsedBarSize)
             } else {
-                // Capsule + gap + search, centred between the edge paddings. The capsule is sized
-                // from the measured budget, so the cluster can no longer outgrow the screen.
+                // One capsule holds every primary destination and stays inside the screen edges.
                 end.linkTo(parent.end, margin = BarEdgePadding)
                 width = Dimension.wrapContent
                 height = Dimension.value(BarHeight)
