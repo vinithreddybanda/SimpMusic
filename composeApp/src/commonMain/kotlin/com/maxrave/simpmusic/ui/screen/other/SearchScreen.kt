@@ -142,6 +142,7 @@ import com.maxrave.simpmusic.ui.navigation.destination.list.ArtistDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.PlaylistDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.PodcastDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
 import com.maxrave.simpmusic.ui.theme.ArtworkShape
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.theme.typo
@@ -693,11 +694,7 @@ fun SearchScreen(
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier.fillMaxWidth(),
                                     )
-                                    SimpMusicChartButton(
-                                        modifier = Modifier.padding(top = 10.dp),
-                                    ) {
-                                        uriHandler.openUri("https://chart.simpmusic.org")
-                                    }
+
                                 }
                             }
                             mood.sections.forEachIndexed { index, section ->

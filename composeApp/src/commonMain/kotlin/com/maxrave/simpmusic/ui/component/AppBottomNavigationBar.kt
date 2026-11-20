@@ -75,7 +75,6 @@ fun AppBottomNavigationBar(
             BottomNavScreen.Search,
             BottomNavScreen.Account,
             BottomNavScreen.Settings,
-            BottomNavScreen.Mood,
             BottomNavScreen.Room,
         )
     var selectedIndex by rememberSaveable {
