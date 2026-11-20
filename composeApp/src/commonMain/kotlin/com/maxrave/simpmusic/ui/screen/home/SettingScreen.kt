@@ -764,6 +764,11 @@ fun SettingScreen(
                     )
                 }
                 SettingGroup(title = stringResource(Res.string.user_interface)) {
+                    SettingItem(
+                        title = "Liquid Glass",
+                        subtitle = "Always enabled across the entire app",
+                        smallSubtitle = true,
+                    )
                     // The Apple Music treatments ARE the blur — the frosted page behind the player, and
                     // the depth of field on the lyrics — and Modifier.blur is a documented no-op below
                     // Android 12, so on an older device they render as a flat, wrong-looking version of
