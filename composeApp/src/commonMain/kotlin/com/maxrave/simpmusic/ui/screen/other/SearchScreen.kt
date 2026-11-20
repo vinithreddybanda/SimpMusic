@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -124,7 +125,6 @@ import com.maxrave.simpmusic.ui.component.EndOfPage
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
 import com.maxrave.simpmusic.ui.component.PlaylistFullWidthItems
 import com.maxrave.simpmusic.ui.component.ShimmerSearchItem
-import com.maxrave.simpmusic.ui.component.SimpMusicChartButton
 import com.maxrave.simpmusic.ui.component.SongFullWidthItems
 import com.maxrave.simpmusic.ui.component.selection.SelectedSongsBottomSheet
 import com.maxrave.simpmusic.ui.component.selection.SongSelectionTopAppBar
@@ -136,7 +136,6 @@ import com.maxrave.simpmusic.ui.icon.GraphicEq
 import com.maxrave.simpmusic.ui.icon.History
 import com.maxrave.simpmusic.ui.icon.Search
 import com.maxrave.simpmusic.ui.icon.SimpIcons
-import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.AlbumDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.ArtistDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.PlaylistDestination
@@ -1035,11 +1034,12 @@ fun SearchScreen(
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
+                    .imePadding()
                     .onGloballyPositioned { searchBarHeightPx = it.size.height },
         ) {
             // Animate only the background so scrolling keeps the search input and its focus.
             AnimatedVisibility(
-                visible = !isContentAtTop,
+                visible = true,
                 modifier = Modifier.matchParentSize(),
                 enter = fadeIn(tween(300)),
                 exit = fadeOut(tween(300)),
@@ -1049,6 +1049,8 @@ fun SearchScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.075f))
                             .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
                 )
             }
@@ -1056,7 +1058,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 76.dp, top = 8.dp),
+                        .padding(bottom = 8.dp, top = 8.dp),
             ) {
         AnimatedVisibility(visible = selectionState.isActive) {
             SongSelectionTopAppBar(

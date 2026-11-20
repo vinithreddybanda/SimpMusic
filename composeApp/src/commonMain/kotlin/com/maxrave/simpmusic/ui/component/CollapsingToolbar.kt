@@ -44,6 +44,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.border
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -202,17 +203,9 @@ fun CollapsingToolbarParallaxEffect(
             ) {
                 IconButton(
                     onClick = onBack,
-                    colors =
-                        IconButtonDefaults.iconButtonColors().copy(
-                            containerColor =
-                                Color.DarkGray.copy(
-                                    alpha = 0.8f,
-                                ),
-                            contentColor =
-                                Color.White.copy(
-                                    alpha = 0.6f,
-                                ),
-                        ),
+                    modifier = Modifier.size(44.dp).clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.12f))
+                        .border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
                 ) {
                     Icon(SimpIcons.ArrowBackIosNew, "Back")
                 }
@@ -344,12 +337,11 @@ private fun Toolbar(
             modifier =
                 Modifier.background(
                     Brush.verticalGradient(
-                        listOf(
-                            Color.Black.copy(alpha = 0.28f),
-                            backgroundColor.rgbFactor(0.42f),
-                            backgroundColor.rgbFactor(0.22f),
-                            Color.Transparent,
-                        ),
+                        0.0f to Color.Black.copy(alpha = 0.34f),
+                        0.28f to backgroundColor.rgbFactor(0.38f).copy(alpha = 0.92f),
+                        0.58f to backgroundColor.rgbFactor(0.25f).copy(alpha = 0.55f),
+                        0.82f to backgroundColor.copy(alpha = 0.16f),
+                        1.0f to Color.Transparent,
                     ),
                 ),
             navigationIcon = {
@@ -359,8 +351,11 @@ private fun Toolbar(
                     },
                     modifier =
                         Modifier
-                            .padding(16.dp)
-                            .size(24.dp),
+                            .padding(start = 12.dp)
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.12f))
+                            .border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
                 ) {
                     Icon(
                         imageVector = SimpIcons.ArrowBackIosNew,

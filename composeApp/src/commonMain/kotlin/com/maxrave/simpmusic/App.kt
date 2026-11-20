@@ -10,6 +10,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -198,6 +201,8 @@ fun App(
     var isNavBarVisible by rememberSaveable {
         mutableStateOf(true)
     }
+
+    val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
 
     var shouldShowUpdateDialog by rememberSaveable {
         mutableStateOf(false)
@@ -535,7 +540,7 @@ fun App(
             containerColor =
                 if (isDesktopShell) desktopWindow else MaterialTheme.colorScheme.background,
             bottomBar = {
-                if (!isTablet) {
+                if (!isTablet && !isKeyboardVisible) {
                     AnimatedVisibility(
                         isNavBarVisible,
                         enter = fadeIn() + slideInHorizontally(),

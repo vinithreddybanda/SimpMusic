@@ -53,7 +53,6 @@ import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.icon.ArrowForwardIos
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination
-import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination
 import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination
@@ -114,7 +113,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
             BottomNavScreen.Search,
             BottomNavScreen.Account,
             BottomNavScreen.Settings,
-            BottomNavScreen.Mood,
             BottomNavScreen.Room,
         )
     // Tabs shown in the sliding bar (Apple Music style); Search lives in its own FAB.
@@ -128,7 +126,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 is LibraryDestination -> BottomNavScreen.Library.ordinal
                 is LoginDestination -> BottomNavScreen.Account.ordinal
                 is SettingsDestination -> BottomNavScreen.Settings.ordinal
-                is MoodDestination -> BottomNavScreen.Mood.ordinal
                 is ListenTogetherDestination -> BottomNavScreen.Room.ordinal
                 else -> BottomNavScreen.Home.ordinal // Default to Home if not recognized
             },
@@ -147,7 +144,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 current.hasRoute(SearchDestination::class) -> BottomNavScreen.Search.ordinal
                 current.hasRoute(LoginDestination::class) -> BottomNavScreen.Account.ordinal
                 current.hasRoute(SettingsDestination::class) -> BottomNavScreen.Settings.ordinal
-                current.hasRoute(MoodDestination::class) -> BottomNavScreen.Mood.ordinal
                 current.hasRoute(ListenTogetherDestination::class) -> BottomNavScreen.Room.ordinal
                 else -> selectedIndex
             }
