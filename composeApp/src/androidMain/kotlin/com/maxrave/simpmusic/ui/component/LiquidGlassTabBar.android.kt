@@ -354,7 +354,7 @@ private fun LiquidGlassTab(
         CompositionLocalProvider(LocalContentColor provides color) {
             screen.icon()
             Text(
-                text = screen.title?.let { stringResource(it) } ?: "More",
+                text = if (screen == BottomNavScreen.More) "More" else stringResource(screen.title),
                 style = typo().bodySmall,
                 color = color,
                 maxLines = 1,

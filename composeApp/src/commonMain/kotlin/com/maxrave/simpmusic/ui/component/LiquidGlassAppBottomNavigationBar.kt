@@ -44,7 +44,7 @@ expect fun LiquidGlassAppBottomNavigationBar(
 sealed class BottomNavScreen(
     val ordinal: Int,
     val destination: Any,
-    val title: StringResource?,
+    val title: StringResource,
     val icon: @Composable () -> Unit,
 ) {
     data object Home : BottomNavScreen(
@@ -115,7 +115,7 @@ sealed class BottomNavScreen(
     data object More : BottomNavScreen(
         ordinal = 5,
         destination = HomeDestination,
-        title = null,
+        title = Res.string.home,
         icon = {
             Icon(
                 imageVector = SimpIcons.MoreVert,
