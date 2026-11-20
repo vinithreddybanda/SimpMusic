@@ -444,11 +444,13 @@ fun SearchScreen(
         ) {
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize().imePadding(),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
                     LazyColumn(
                         modifier =
                             Modifier
-                                .align(Alignment.BottomCenter)
-                                .imePadding()
                                 .padding(bottom = 56.dp)
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
@@ -560,6 +562,7 @@ fun SearchScreen(
                                 withoutCredit = true,
                             )
                         }
+                    }
                     }
                     VerticalScrollBar(
                         scrollState = suggestionsState,
