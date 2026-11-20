@@ -773,35 +773,6 @@ fun SettingScreen(
                     )
                 }
                 SettingGroup(title = stringResource(Res.string.user_interface)) {
-                    val themeModeLabels =
-                        listOf(
-                            DataStoreManager.THEME_MODE_SYSTEM to stringResource(Res.string.theme_mode_system),
-                            DataStoreManager.THEME_MODE_DARK to stringResource(Res.string.theme_mode_dark),
-                            DataStoreManager.THEME_MODE_LIGHT to stringResource(Res.string.theme_mode_light),
-                        )
-                    SettingItem(
-                        title = stringResource(Res.string.theme),
-                        subtitle = themeModeLabels.firstOrNull { it.first == themeMode }?.second ?: "",
-                        onClick = {
-                            viewModel.setAlertData(
-                                SettingAlertState(
-                                    title = runBlocking { getString(Res.string.theme) },
-                                    selectOne =
-                                        SettingAlertState.SelectData(
-                                            listSelect = themeModeLabels.map { (it.first == themeMode) to it.second },
-                                        ),
-                                    confirm =
-                                        runBlocking { getString(Res.string.change) } to { state ->
-                                            val selected = state.selectOne?.getSelected()
-                                            themeModeLabels.firstOrNull { it.second == selected }?.first?.let {
-                                                sharedViewModel.setThemeMode(it)
-                                            }
-                                        },
-                                    dismiss = runBlocking { getString(Res.string.cancel) },
-                                ),
-                            )
-                        },
-                    )
                     // The Apple Music treatments ARE the blur — the frosted page behind the player, and
                     // the depth of field on the lyrics — and Modifier.blur is a documented no-op below
                     // Android 12, so on an older device they render as a flat, wrong-looking version of
@@ -814,7 +785,6 @@ fun SettingScreen(
                             DataStoreManager.NOW_PLAYING_STYLE_M3_EXPRESSIVE to stringResource(Res.string.now_playing_style_m3_expressive),
                             DataStoreManager.NOW_PLAYING_STYLE_APPLE_MUSIC to
                                 stringResource(Res.string.now_playing_style_apple_music) + requiresAndroid12,
-                            DataStoreManager.NOW_PLAYING_STYLE_SOUNDCLOUD to stringResource(Res.string.now_playing_style_soundcloud),
                         )
                     SettingItem(
                         title = stringResource(Res.string.now_playing_style),
@@ -951,54 +921,6 @@ fun SettingScreen(
                                 ),
                             )
                         },
-                    )
-                    val colorSourceLabels =
-                        buildList {
-                            add(DataStoreManager.THEME_COLOR_DEFAULT to stringResource(Res.string.theme_color_default))
-                            if (isWallpaperDynamicColorSupported()) {
-                                add(DataStoreManager.THEME_COLOR_WALLPAPER to stringResource(Res.string.theme_color_wallpaper))
-                            }
-                            add(DataStoreManager.THEME_COLOR_CUSTOM to stringResource(Res.string.theme_color_custom))
-                        }
-                    SettingItem(
-                        title = stringResource(Res.string.theme_color),
-                        subtitle = colorSourceLabels.firstOrNull { it.first == themeColorSource }?.second ?: "",
-                        onClick = {
-                            viewModel.setAlertData(
-                                SettingAlertState(
-                                    title = runBlocking { getString(Res.string.theme_color) },
-                                    selectOne =
-                                        SettingAlertState.SelectData(
-                                            listSelect = colorSourceLabels.map { (it.first == themeColorSource) to it.second },
-                                        ),
-                                    confirm =
-                                        runBlocking { getString(Res.string.change) } to { state ->
-                                            val selected = state.selectOne?.getSelected()
-                                            colorSourceLabels.firstOrNull { it.second == selected }?.first?.let {
-                                                sharedViewModel.setThemeColorSource(it)
-                                                if (it == DataStoreManager.THEME_COLOR_CUSTOM) {
-                                                    showColorPickerDialog = true
-                                                }
-                                            }
-                                        },
-                                    dismiss = runBlocking { getString(Res.string.cancel) },
-                                ),
-                            )
-                        },
-                    )
-                    if (themeColorSource == DataStoreManager.THEME_COLOR_CUSTOM) {
-                        SettingItem(
-                            title = stringResource(Res.string.custom_color),
-                            subtitle = "#${customThemeColorHex.takeLast(6)}",
-                            smallSubtitle = true,
-                            onClick = { showColorPickerDialog = true },
-                        )
-                    }
-                    SettingItem(
-                        title = stringResource(Res.string.enable_liquid_glass_effect),
-                        subtitle = stringResource(Res.string.enable_liquid_glass_effect_description),
-                        smallSubtitle = true,
-                        switch = (enableLiquidGlass to { viewModel.setEnableLiquidGlass(it) }),
                     )
                 }
             }
