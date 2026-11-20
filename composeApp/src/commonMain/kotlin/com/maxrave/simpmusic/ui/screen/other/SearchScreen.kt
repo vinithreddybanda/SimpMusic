@@ -432,7 +432,10 @@ fun SearchScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Transparent),
+                .background(Color.Transparent)
+                // Apply the IME inset once at the shared screen container. This keeps the
+                // suggestion surface and floating search dock on the same keyboard animation.
+                .imePadding(),
     ) {
         // Content scrolls under the bar (it is the haze source), so it needs top padding
         // equal to the bar's measured height to keep its first item clear of it.
@@ -443,7 +446,7 @@ fun SearchScreen(
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
                     Box(
-                        modifier = Modifier.fillMaxSize().imePadding(),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
                     LazyColumn(
@@ -1057,7 +1060,6 @@ fun SearchScreen(
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .imePadding()
                     .onGloballyPositioned { searchBarHeightPx = it.size.height },
         ) {
             // Animate only the background so scrolling keeps the search input and its focus.
