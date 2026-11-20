@@ -1071,7 +1071,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
+                        .padding(bottom = if (isKeyboardVisible) 2.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .widthIn(max = 344.dp)
@@ -1097,7 +1097,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 8.dp)
+                        .padding(bottom = if (isKeyboardVisible) 2.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 4.dp)
                         // Measure the dock itself, not its keyboard inset, for list offsets.
                         .onGloballyPositioned { searchBarHeightPx = it.size.height },
                 horizontalAlignment = Alignment.CenterHorizontally,
