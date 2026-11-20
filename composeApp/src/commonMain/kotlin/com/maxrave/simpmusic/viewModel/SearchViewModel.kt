@@ -344,7 +344,8 @@ class SearchViewModel(
     fun suggestQuery(query: String) {
         suggestQueryJob?.cancel()
 
-        if (query.isBlank()) {
+        val normalizedQuery = query.trim()
+        if (normalizedQuery.length < 2) {
             _searchScreenState.update { state ->
                 state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
             }
@@ -354,13 +355,13 @@ class SearchViewModel(
         suggestQueryJob =
             viewModelScope.launch {
                 // Avoid firing a network request for every intermediate keystroke.
-                delay(250)
+                delay(300)
                 _searchScreenState.update { state ->
                     state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
                 }
 
                 try {
-                    searchRepository.getSuggestQuery(query).collectLatest { values ->
+                    searchRepository.getSuggestQuery(normalizedQuery).collectLatest { values ->
                         when (values) {
                             is Resource.Success -> {
                                 values.data?.let { suggestData ->
