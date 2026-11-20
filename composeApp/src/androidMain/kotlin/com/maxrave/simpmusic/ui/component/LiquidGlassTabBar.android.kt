@@ -74,9 +74,9 @@ import kotlin.math.roundToInt
 import kotlin.math.sign
 
 private val CapsuleShape = RoundedCornerShape(percent = 50)
-private val TabWidth = 96.dp
-internal val BarHeight = 64.dp
-private val BlobHeight = 56.dp
+private val TabWidth = 64.dp
+internal val BarHeight = 56.dp
+private val BlobHeight = 48.dp
 // Breathing room between the capsule edge and the pill on the first/last tab. The pill is a full
 // tab wide, so without this it sits flush against the capsule's rounded end.
 private val BarInset = 6.dp
@@ -146,7 +146,7 @@ fun LiquidGlassTabBar(
                 initialScale = 1f,
                 // On press the blob inflates from 56dp up to ~76dp — past the 64dp bar height — so it
                 // visibly bulges out of the capsule row (Apple Music style), then springs back on release.
-                pressedScale = 76f / 56f,
+                pressedScale = 64f / 48f,
                 onDragStarted = { draggedFlag[0] = false },
                 onDragStopped = {
                     if (draggedFlag[0]) {
@@ -348,17 +348,11 @@ private fun LiquidGlassTab(
                 role = Role.Tab,
                 onClick = onClick,
             ),
-        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CompositionLocalProvider(LocalContentColor provides color) {
             screen.icon()
-            Text(
-                text = if (screen == BottomNavScreen.More) "More" else stringResource(screen.title),
-                style = typo().bodySmall,
-                color = color,
-                maxLines = 1,
-            )
         }
     }
 }

@@ -1077,89 +1077,15 @@ fun HomeScreen(
                                 WindowInsets.statusBars,
                             ),
                 )
-                // The avatar stays put and the chips scroll only to its right, clipped there instead of
-                // passing over it, each end faded while chips wait past that edge. On a phone held
-                // upright Create rides at the end of the chip row: the row is at least as wide as its
-                // strip, so at rest Create sits at the right edge, and a Mood that opens wide pushes it
-                // along instead of sliding under it. On Desktop and in landscape Create stays put at the
-                // right edge, like the avatar.
-                val createPinned = getPlatform() == Platform.Desktop || getScreenSizeInfo().let { it.wDP >= it.hDP }
-                val chipHeadFade by animateFloatAsState(if (chipRowState.canScrollBackward) 1f else 0f)
-                val chipTailFade by animateFloatAsState(if (chipRowState.canScrollForward) 1f else 0f)
-                // Notifications moved into the avatar menu, Listen Together into the Create sheet.
-                val createActions: @Composable () -> Unit = {
-                    CreateActions(
-                        backdrop = chipBackdrop,
-                        navController = navController,
-                        onSettings = { navController.navigate(SettingsDestination) },
-                    )
-                }
                 Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
+                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 20.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.padding(start = 16.dp, end = 8.dp)) {
-                        HomeAccountButton(
-                            accountName = accountInfo?.first,
-                            thumbnailUrl = accountInfo?.second,
-                            navController = navController,
-                        )
-                    }
-                    BoxWithConstraints(
-                        Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                    ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxHeight()
-                                    .chipStripEdgeFades(32.dp, start = { chipHeadFade }, end = { chipTailFade })
-                                    .mouseDragScroll(chipRowState)
-                                    .horizontalScroll(chipRowState)
-                                    .widthIn(min = maxWidth)
-                                    .padding(end = if (createPinned) 0.dp else 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Chip(
-                                    isAnimated = loading,
-                                    isSelected = params == null && !moodExpanded,
-                                    text = stringResource(Res.string.all),
-                                    backdrop = chipBackdrop,
-                                ) {
-                                    moodExpanded = false
-                                    viewModel.setParams(null)
-                                }
-                                ExpandableChip(
-                                    text = stringResource(Res.string.mood),
-                                    options = homeMoods.map { stringResource(it.first) },
-                                    selectedIndex = homeMoods.indexOfFirst { it.second == params }.takeIf { it >= 0 },
-                                    expanded = moodExpanded,
-                                    onExpandedChange = { moodExpanded = it },
-                                    onSelect = { index ->
-                                        moodExpanded = false
-                                        viewModel.setParams(homeMoods[index].second)
-                                    },
-                                    isAnimated = loading,
-                                    backdrop = chipBackdrop,
-                                )
-                            }
-                            if (!createPinned) {
-                                Box(Modifier.padding(start = 8.dp)) { createActions() }
-                            }
-                        }
-                    }
-                    if (createPinned) {
-                        Box(Modifier.padding(start = 8.dp, end = 16.dp)) { createActions() }
-                    }
+                    Text(
+                        text = "Pluto",
+                        style = typo().titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
         }

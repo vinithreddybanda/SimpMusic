@@ -4,25 +4,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
-import com.maxrave.simpmusic.ui.icon.AutoGraph
 import com.maxrave.simpmusic.ui.icon.Home
 import com.maxrave.simpmusic.ui.icon.LibraryMusic
-import com.maxrave.simpmusic.ui.icon.MoreVert
+import com.maxrave.simpmusic.ui.icon.Person
+import com.maxrave.simpmusic.ui.icon.Settings
+import com.maxrave.simpmusic.ui.icon.Favorite
+import com.maxrave.simpmusic.ui.icon.Groups
 import com.maxrave.simpmusic.ui.icon.Search
-import com.maxrave.simpmusic.ui.icon.Sensors
 import com.maxrave.simpmusic.ui.icon.SimpIcons
-import com.maxrave.simpmusic.ui.navigation.destination.home.AnalyticsDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination
+import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination
-import com.maxrave.simpmusic.ui.navigation.destination.library.MixForYouDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import org.jetbrains.compose.resources.StringResource
 import simpmusic.composeapp.generated.resources.Res
-import simpmusic.composeapp.generated.resources.analytics
 import simpmusic.composeapp.generated.resources.home
 import simpmusic.composeapp.generated.resources.library
-import simpmusic.composeapp.generated.resources.mix
 import simpmusic.composeapp.generated.resources.search
 import kotlin.reflect.KClass
 
@@ -83,44 +84,31 @@ sealed class BottomNavScreen(
         },
     )
 
-    // Only shown when local tracking is enabled.
-    data object Analytics : BottomNavScreen(
+    data object Account : BottomNavScreen(
         ordinal = 3,
-        destination = AnalyticsDestination,
-        title = Res.string.analytics,
-        icon = {
-            Icon(
-                imageVector = SimpIcons.AutoGraph,
-                contentDescription = null,
-            )
-        },
-    )
-
-    // Only shown while signed in to YouTube — an anonymous session gets no mixes.
-    // Labelled "Mix", not "Mix for you": the full title is the widest label in the bar and forces
-    // every tab to be that wide. The screen itself still uses the full title.
-    data object MixForYou : BottomNavScreen(
-        ordinal = 4,
-        destination = MixForYouDestination,
-        title = Res.string.mix,
-        icon = {
-            Icon(
-                imageVector = SimpIcons.Sensors,
-                contentDescription = null,
-            )
-        },
-    )
-
-    // Secondary destinations live in the dock's overflow sheet, keeping the primary bar compact.
-    data object More : BottomNavScreen(
-        ordinal = 5,
-        destination = HomeDestination,
+        destination = LoginDestination,
         title = Res.string.home,
-        icon = {
-            Icon(
-                imageVector = SimpIcons.MoreVert,
-                contentDescription = null,
-            )
-        },
+        icon = { Icon(SimpIcons.Person, contentDescription = "Account") },
+    )
+
+    data object Settings : BottomNavScreen(
+        ordinal = 4,
+        destination = SettingsDestination,
+        title = Res.string.home,
+        icon = { Icon(SimpIcons.Settings, contentDescription = "Settings") },
+    )
+
+    data object Mood : BottomNavScreen(
+        ordinal = 5,
+        destination = MoodDestination,
+        title = Res.string.home,
+        icon = { Icon(SimpIcons.Favorite, contentDescription = "Mood") },
+    )
+
+    data object Room : BottomNavScreen(
+        ordinal = 6,
+        destination = ListenTogetherDestination,
+        title = Res.string.home,
+        icon = { Icon(SimpIcons.Groups, contentDescription = "Room") },
     )
 }

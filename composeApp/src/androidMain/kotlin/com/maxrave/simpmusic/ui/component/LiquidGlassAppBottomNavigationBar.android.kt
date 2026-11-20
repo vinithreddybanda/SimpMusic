@@ -17,8 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -50,14 +48,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.maxrave.domain.data.player.GenericMediaItem
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
-import com.maxrave.simpmusic.ui.navigation.destination.home.AnalyticsDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
-import com.maxrave.simpmusic.ui.navigation.destination.home.NotificationDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination
-import com.maxrave.simpmusic.ui.navigation.destination.home.WrappedDestination
+import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination
-import com.maxrave.simpmusic.ui.navigation.destination.library.MixForYouDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
 import com.maxrave.simpmusic.ui.screen.MiniPlayer
 import com.maxrave.simpmusic.viewModel.SharedViewModel
@@ -113,7 +111,10 @@ actual fun LiquidGlassAppBottomNavigationBar(
             BottomNavScreen.Home,
             BottomNavScreen.Library,
             BottomNavScreen.Search,
-            BottomNavScreen.More,
+            BottomNavScreen.Account,
+            BottomNavScreen.Settings,
+            BottomNavScreen.Mood,
+            BottomNavScreen.Room,
         )
     // Tabs shown in the sliding bar (Apple Music style); Search lives in its own FAB.
     // Every primary destination lives in one continuous glass dock.
@@ -124,26 +125,17 @@ actual fun LiquidGlassAppBottomNavigationBar(
                 is HomeDestination -> BottomNavScreen.Home.ordinal
                 is SearchDestination -> BottomNavScreen.Search.ordinal
                 is LibraryDestination -> BottomNavScreen.Library.ordinal
-                is AnalyticsDestination -> BottomNavScreen.Analytics.ordinal
-                is MixForYouDestination -> BottomNavScreen.MixForYou.ordinal
+                is LoginDestination -> BottomNavScreen.Account.ordinal
+                is SettingsDestination -> BottomNavScreen.Settings.ordinal
+                is MoodDestination -> BottomNavScreen.Mood.ordinal
+                is ListenTogetherDestination -> BottomNavScreen.Room.ordinal
                 else -> BottomNavScreen.Home.ordinal // Default to Home if not recognized
             },
         )
     }
-    // A tab can disappear from the bar under the user: tracking gets turned off while Analytics is
-    // selected, or the YouTube session ends while Mix for you is. Fall back to Home in both cases so
-    // nothing is left highlighted.
-    LaunchedEffect(showAnalyticsTab, showMixForYouTab) {
-        if ((!showAnalyticsTab && selectedIndex == BottomNavScreen.Analytics.ordinal) ||
-            (!showMixForYouTab && selectedIndex == BottomNavScreen.MixForYou.ordinal)
-        ) {
-            selectedIndex = BottomNavScreen.Home.ordinal
-        }
-    }
     var isExpanded by rememberSaveable {
         mutableStateOf(true)
     }
-    var showMoreSheet by rememberSaveable { mutableStateOf(false) }
 
     var isInSearchDestination by remember {
         mutableStateOf(false)
@@ -153,6 +145,16 @@ actual fun LiquidGlassAppBottomNavigationBar(
         currentBackStackEntry?.destination?.let { current ->
             Logger.d(TAG, "LiquidGlassAppBottomNavigationBar: current route: ${current.route}")
             isInSearchDestination = current.hasRoute(SearchDestination::class)
+            selectedIndex = when {
+                current.hasRoute(HomeDestination::class) -> BottomNavScreen.Home.ordinal
+                current.hasRoute(LibraryDestination::class) -> BottomNavScreen.Library.ordinal
+                current.hasRoute(SearchDestination::class) -> BottomNavScreen.Search.ordinal
+                current.hasRoute(LoginDestination::class) -> BottomNavScreen.Account.ordinal
+                current.hasRoute(SettingsDestination::class) -> BottomNavScreen.Settings.ordinal
+                current.hasRoute(MoodDestination::class) -> BottomNavScreen.Mood.ordinal
+                current.hasRoute(ListenTogetherDestination::class) -> BottomNavScreen.Room.ordinal
+                else -> selectedIndex
+            }
         }
     }
 
@@ -176,11 +178,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
     }
 
     fun selectTab(index: Int) {
-        if (index == BottomNavScreen.More.ordinal) {
-            selectedIndex = BottomNavScreen.More.ordinal
-            showMoreSheet = true
-            return
-        }
         val screen = bottomNavScreens.find { it.ordinal == index } ?: return
         if (selectedIndex == index) {
             if (currentBackStackEntry?.destination?.hierarchy?.any {
@@ -319,57 +316,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
         }
     }
 
-    if (showMoreSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showMoreSheet = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-        ) {
-            androidx.compose.foundation.layout.Column(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-            ) {
-                Text(
-                    text = "Explore",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-                )
-                fun open(destination: Any) {
-                    showMoreSheet = false
-                    navController.navigate(destination) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-                if (showMixForYouTab) {
-                    androidx.compose.material3.ListItem(
-                        headlineContent = { Text("Mix for you") },
-                        modifier = Modifier.clickable { open(MixForYouDestination) },
-                    )
-                }
-                if (showAnalyticsTab) {
-                    androidx.compose.material3.ListItem(
-                        headlineContent = { Text("Analytics") },
-                        modifier = Modifier.clickable { open(AnalyticsDestination) },
-                    )
-                }
-                androidx.compose.material3.ListItem(
-                    headlineContent = { Text("Mood and moments") },
-                    modifier = Modifier.clickable { open(MoodDestination) },
-                )
-                androidx.compose.material3.ListItem(
-                    headlineContent = { Text("Notifications") },
-                    modifier = Modifier.clickable { open(NotificationDestination) },
-                )
-                androidx.compose.material3.ListItem(
-                    headlineContent = { Text("Settings") },
-                    modifier = Modifier.clickable { open(SettingsDestination) },
-                )
-                androidx.compose.material3.ListItem(
-                    headlineContent = { Text("Wrapped") },
-                    modifier = Modifier.clickable { open(WrappedDestination) },
-                )
-            }
-        }
-    }
+
 }
 
 private fun decoupledConstraints(
