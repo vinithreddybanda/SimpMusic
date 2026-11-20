@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -391,12 +390,14 @@ fun AppNavigationRail(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     // See the note in AppBottomNavigationBar: `ordinal` is the tab's identity, not its position.
     val bottomNavScreens =
-        listOfNotNull(
+        listOf(
             BottomNavScreen.Home,
-            BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-            BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
             BottomNavScreen.Library,
             BottomNavScreen.Search,
+            BottomNavScreen.Account,
+            BottomNavScreen.Settings,
+            BottomNavScreen.Mood,
+            BottomNavScreen.Room,
         )
     var selectedIndex by rememberSaveable {
         mutableIntStateOf(
@@ -404,21 +405,13 @@ fun AppNavigationRail(
                 is HomeDestination -> BottomNavScreen.Home.ordinal
                 is SearchDestination -> BottomNavScreen.Search.ordinal
                 is LibraryDestination -> BottomNavScreen.Library.ordinal
-                is AnalyticsDestination -> BottomNavScreen.Analytics.ordinal
-                is MixForYouDestination -> BottomNavScreen.MixForYou.ordinal
-                else -> BottomNavScreen.Home.ordinal // Default to Home if not recognized
+                is LoginDestination -> BottomNavScreen.Account.ordinal
+                is SettingsDestination -> BottomNavScreen.Settings.ordinal
+                is MoodDestination -> BottomNavScreen.Mood.ordinal
+                is ListenTogetherDestination -> BottomNavScreen.Room.ordinal
+                else -> BottomNavScreen.Home.ordinal
             },
         )
-    }
-    // A tab can disappear from the list under the user: tracking gets turned off while Analytics is
-    // selected, or the YouTube session ends while Mix for you is. Fall back to Home in both cases so
-    // nothing is left highlighted.
-    LaunchedEffect(showAnalyticsTab, showMixForYouTab) {
-        if ((!showAnalyticsTab && selectedIndex == BottomNavScreen.Analytics.ordinal) ||
-            (!showMixForYouTab && selectedIndex == BottomNavScreen.MixForYou.ordinal)
-        ) {
-            selectedIndex = BottomNavScreen.Home.ordinal
-        }
     }
     // Transparent, not the default `surface`: the rail sits on the Desktop window (pure black/white)
     // and on the page background on tablets, and must read as part of whatever is behind it.
