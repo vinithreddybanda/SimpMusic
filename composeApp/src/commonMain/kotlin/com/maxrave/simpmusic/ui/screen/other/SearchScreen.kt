@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
@@ -1060,7 +1061,7 @@ fun SearchScreen(
                     Modifier
                         .align(Alignment.BottomCenter)
                         .imePadding()
-                        .padding(bottom = if (isMiniPlayerVisible && !isKeyboardVisible) 76.dp else 8.dp)
+                        .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
                         .widthIn(max = 344.dp)
                         .fillMaxWidth()
                         .height(48.dp),
