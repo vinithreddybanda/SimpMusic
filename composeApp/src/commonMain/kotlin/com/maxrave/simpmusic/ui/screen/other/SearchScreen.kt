@@ -1064,7 +1064,6 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .align(Alignment.BottomCenter)
-                        .imePadding()
                         .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
