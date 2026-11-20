@@ -18,6 +18,8 @@ import com.maxrave.domain.utils.toQueryList
 import com.maxrave.logger.LogLevel
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.viewModel.base.BaseViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -111,6 +113,9 @@ class SearchViewModel(
     val moodArtwork: StateFlow<Map<String, String>> get() = _moodArtwork.asStateFlow()
 
     private val requestedArtwork = mutableSetOf<String>()
+
+    // Suggestions are requested for every edit. Keep only the latest request alive.
+    private var suggestQueryJob: Job? = null
 
     var regionCode: String? = null
     var language: String? = null
@@ -337,27 +342,52 @@ class SearchViewModel(
     }
 
     fun suggestQuery(query: String) {
-        viewModelScope.launch {
-            searchRepository.getSuggestQuery(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { suggestData ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    suggestQueries = suggestData.queries,
-                                    suggestYTItems = suggestData.recommendedItems,
-                                )
+        suggestQueryJob?.cancel()
+
+        if (query.isBlank()) {
+            _searchScreenState.update { state ->
+                state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
+            }
+            return
+        }
+
+        suggestQueryJob =
+            viewModelScope.launch {
+                // Avoid firing a network request for every intermediate keystroke.
+                delay(250)
+                _searchScreenState.update { state ->
+                    state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
+                }
+
+                try {
+                    searchRepository.getSuggestQuery(query).collectLatest { values ->
+                        when (values) {
+                            is Resource.Success -> {
+                                values.data?.let { suggestData ->
+                                    _searchScreenState.update { state ->
+                                        state.copy(
+                                            suggestQueries = suggestData.queries,
+                                            suggestYTItems = suggestData.recommendedItems,
+                                        )
+                                    }
+                                }
+                            }
+
+                            is Resource.Error -> {
+                                log("Error fetching suggest queries: ${values.message}", LogLevel.ERROR)
                             }
                         }
                     }
-
-                    is Resource.Error -> {
-                        // Không cần xử lý lỗi đặc biệt cho gợi ý
-                        log("Error fetching suggest queries: ${values.message}", LogLevel.ERROR)
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (exception: Exception) {
+                    // A transient suggestion/API parsing failure must not crash the app.
+                    log("Suggestion request failed: ${exception.message}", LogLevel.ERROR)
+                    _searchScreenState.update { state ->
+                        state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
                     }
                 }
             }
-        }
     }
 
     fun searchAlbums(query: String) {
