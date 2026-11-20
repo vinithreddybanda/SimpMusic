@@ -4,6 +4,16 @@ package com.maxrave.simpmusic.ui.component
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,6 +26,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.MoreVert
@@ -31,10 +43,37 @@ fun NormalAppBar(
     leftIcon: @Composable (() -> Unit)? = null,
     rightIcon: @Composable (RowScope.() -> Unit)? = null,
 ) {
-    TopAppBar(
+    Box(modifier = modifier.fillMaxWidth().height(64.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(112.dp)
+                .blur(22.dp)
+                .background(
+                    Brush.verticalGradient(
+                        0.0f to Color.Black.copy(alpha = 0.38f),
+                        0.32f to MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                        0.72f to MaterialTheme.colorScheme.surface.copy(alpha = 0.22f),
+                        1.0f to Color.Transparent,
+                    ),
+                ),
+        )
+        TopAppBar(
         title = title,
-        modifier = modifier,
-        navigationIcon = leftIcon ?: {},
+        modifier = Modifier.fillMaxWidth(),
+        navigationIcon = {
+            if (leftIcon != null) {
+                Box(
+                    modifier = Modifier.padding(start = 12.dp).size(44.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.12f))
+                        .border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
+                    contentAlignment = androidx.compose.ui.Alignment.Center,
+                ) {
+                    leftIcon()
+                }
+            }
+        },
         actions = rightIcon ?: {},
         // Every other screen in the app builds its TopAppBar with a transparent container and
         // onBackground content. Leaving `colors` unset here fell back to the Material default
@@ -48,7 +87,8 @@ fun NormalAppBar(
                 navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
                 actionIconContentColor = MaterialTheme.colorScheme.onBackground,
             ),
-    )
+        )
+    }
 }
 
 @Preview
