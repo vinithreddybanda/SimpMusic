@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -231,6 +232,7 @@ fun SearchScreen(
     val resultsState = rememberLazyListState()
     var searchBarHeightPx by remember { mutableIntStateOf(0) }
     val searchBarHeight = with(LocalDensity.current) { searchBarHeightPx.toDp() }
+    val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val isContentAtTop by remember {
         derivedStateOf {
             when (searchUIType) {
@@ -1058,7 +1060,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp, top = 8.dp),
+                        .padding(bottom = if (isKeyboardVisible) 8.dp else 76.dp, top = 8.dp),
             ) {
         AnimatedVisibility(visible = selectionState.isActive) {
             SongSelectionTopAppBar(

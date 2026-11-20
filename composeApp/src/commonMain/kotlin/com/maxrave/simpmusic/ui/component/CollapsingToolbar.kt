@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.border
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -329,7 +330,24 @@ private fun Toolbar(
         enter = fadeIn(animationSpec = tween(300)),
         exit = fadeOut(animationSpec = tween(300)),
     ) {
-        TopAppBar(
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(112.dp)
+                    .blur(22.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            0.0f to Color.Black.copy(alpha = 0.42f),
+                            0.28f to backgroundColor.rgbFactor(0.38f).copy(alpha = 0.88f),
+                            0.58f to backgroundColor.rgbFactor(0.25f).copy(alpha = 0.48f),
+                            0.84f to backgroundColor.copy(alpha = 0.12f),
+                            1.0f to Color.Transparent,
+                        ),
+                    ),
+            )
+            TopAppBar(
             windowInsets =
                 TopAppBarDefaults.windowInsets.exclude(
                     TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Start),
@@ -371,7 +389,8 @@ private fun Toolbar(
                     .copy(
                         containerColor = Color.Transparent,
                     ),
-        )
+            )
+        }
     }
 }
 
