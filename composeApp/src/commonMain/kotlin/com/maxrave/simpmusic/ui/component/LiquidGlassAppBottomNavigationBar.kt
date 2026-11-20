@@ -19,6 +19,7 @@ import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
+import com.maxrave.simpmusic.viewModel.HomeViewModel.Companion.HOME_PARAMS_FEEL_GOOD
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import org.jetbrains.compose.resources.StringResource
 import simpmusic.composeapp.generated.resources.Res
@@ -100,7 +101,7 @@ sealed class BottomNavScreen(
 
     data object Mood : BottomNavScreen(
         ordinal = 5,
-        destination = MoodDestination,
+        destination = MoodDestination(HOME_PARAMS_FEEL_GOOD),
         title = Res.string.home,
         icon = { Icon(SimpIcons.Favorite, contentDescription = "Mood") },
     )

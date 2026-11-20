@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -48,6 +49,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.maxrave.domain.data.player.GenericMediaItem
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
+import com.maxrave.simpmusic.ui.icon.SimpIcons
+import com.maxrave.simpmusic.ui.icon.ArrowForwardIos
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
@@ -135,14 +138,9 @@ actual fun LiquidGlassAppBottomNavigationBar(
         mutableStateOf(true)
     }
 
-    var isInSearchDestination by remember {
-        mutableStateOf(false)
-    }
-
     LaunchedEffect(currentBackStackEntry) {
         currentBackStackEntry?.destination?.let { current ->
             Logger.d(TAG, "LiquidGlassAppBottomNavigationBar: current route: ${current.route}")
-            isInSearchDestination = current.hasRoute(SearchDestination::class)
             selectedIndex = when {
                 current.hasRoute(HomeDestination::class) -> BottomNavScreen.Home.ordinal
                 current.hasRoute(LibraryDestination::class) -> BottomNavScreen.Library.ordinal
@@ -156,10 +154,6 @@ actual fun LiquidGlassAppBottomNavigationBar(
         }
     }
 
-    LaunchedEffect(isInSearchDestination) {
-        isExpanded = !isInSearchDestination
-    }
-
     // Flat: the bar's own 16dp side edges, so the two line up, and its 8dp gaps.
     val miniPlayerPadding = if (liquidGlass) 12.dp else 16.dp
     val miniPlayerGap = if (liquidGlass) 12.dp else 8.dp
@@ -170,9 +164,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
 
     LaunchedEffect(isScrolledToTop) {
         Logger.d(TAG, "isScrolledToTop: $isScrolledToTop")
-        if (!isInSearchDestination) {
-            isExpanded = isScrolledToTop
-        }
+        isExpanded = isScrolledToTop
     }
 
     fun selectTab(index: Int) {
@@ -200,18 +192,15 @@ actual fun LiquidGlassAppBottomNavigationBar(
 
     // The folded bar is one circle holding the selected tab; tapping it opens the bar again.
     val collapsedCircle: @Composable () -> Unit = {
-        val selectedScreen = bottomNavScreens.find { it.ordinal == selectedIndex } ?: BottomNavScreen.Home
         Box(
             modifier = Modifier.fillMaxSize().clickable(enabled = !isExpanded) { isExpanded = true },
             contentAlignment = Alignment.Center,
         ) {
-            if (liquidGlass) {
-                selectedScreen.icon()
-            } else {
-                // The flat bar marks its selected tab in primary, and this circle is that tab.
-                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
-                    selectedScreen.icon()
-                }
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
+                Icon(
+                    imageVector = SimpIcons.ArrowForwardIos,
+                    contentDescription = "Expand navigation",
+                )
             }
         }
     }
