@@ -1,4 +1,14 @@
 pluginManagement {
+    // Resolve KSP directly to its implementation artifact. The marker artifact
+    // intermittently fails through the Gradle Plugin Portal even though the
+    // implementation is published on Maven Central.
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "com.google.devtools.ksp") {
+                useModule("com.google.devtools.ksp:symbol-processing-gradle-plugin:${requested.version}")
+            }
+        }
+    }
     repositories {
         google()
         mavenCentral()
