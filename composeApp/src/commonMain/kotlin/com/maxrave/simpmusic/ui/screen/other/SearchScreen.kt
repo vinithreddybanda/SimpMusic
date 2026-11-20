@@ -91,6 +91,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.maxrave.common.Config
 import com.maxrave.domain.data.entities.SongEntity
+import com.maxrave.domain.data.player.GenericMediaItem
 import com.maxrave.domain.data.model.browse.album.Track
 import com.maxrave.domain.data.model.intent.GenericIntent
 import com.maxrave.domain.data.model.searchResult.albums.AlbumsResult
@@ -190,6 +191,8 @@ fun SearchScreen(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val searchScreenState by searchViewModel.searchScreenState.collectAsStateWithLifecycle()
+    val nowPlayingData by sharedViewModel.nowPlayingState.collectAsStateWithLifecycle()
+    val isMiniPlayerVisible = nowPlayingData?.mediaItem?.let { it != GenericMediaItem.EMPTY } == true
     val uiState by searchViewModel.searchScreenUIState.collectAsStateWithLifecycle()
     val searchHistory by searchViewModel.searchHistory.collectAsStateWithLifecycle()
     val moodAndGenres by searchViewModel.moodAndGenres.collectAsStateWithLifecycle()
@@ -1057,7 +1060,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = if (isKeyboardVisible) 8.dp else 76.dp, top = 8.dp),
+                        .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 8.dp),
             ) {
         AnimatedVisibility(visible = selectionState.isActive) {
             SongSelectionTopAppBar(
