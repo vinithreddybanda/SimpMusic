@@ -522,35 +522,7 @@ fun HomeScreen(
         )
     }
 
-    if (showFootgunsDialog) {
-        FootgunsStarDialog(
-            onDismissRequest = {
-                // "Later" advances OPEN_APP_TIME, the same way the review and share-lyrics dialogs do.
-                // Home's launch effect runs again every time Home re-enters composition, reading the
-                // stored count; leaving it untouched kept the milestone condition true, so the prompt
-                // came back on every return to Home until the app was restarted.
-                showFootgunsDialog = false
-                sharedViewModel.onDoneReview(isDismissOnly = true)
-            },
-            onDoneStar = {
-                sharedViewModel.putString(FOOTGUNS_STAR_KEY, "true")
-                showFootgunsDialog = false
-            },
-        )
-    }
 
-    if (showBlogPromoDialog) {
-        BlogPromoDialog(
-            onDismissRequest = {
-                sharedViewModel.putString(BLOG_PROMO_KEY, "true")
-                showBlogPromoDialog = false
-            },
-            onVisitBlog = {
-                sharedViewModel.putString(BLOG_PROMO_KEY, "true")
-                showBlogPromoDialog = false
-            },
-        )
-    }
 
     if (showRequestShareLyricsPermissions) {
         ShareSavedLyricsDialog(
@@ -644,42 +616,7 @@ fun HomeScreen(
             promoBanner = null
         }
     }
-    promoBanner?.takeIf { it == promoClearFor && !promoBlocked }?.let { banner ->
-        LaunchedEffect(banner.id) { Logger.i("Promo", "On screen: ${banner.id}") }
-        PromoBanner(
-            banner = banner,
-            onOpen = {
-                Logger.i("Promo", "Opened ${banner.id}: ${banner.link}")
-                promoBanner = null
-                sharedViewModel.markPromoShown(banner.id)
-                val link = banner.link
-                when {
-                    // The same router as links from the web and the widgets.
-                    link.startsWith("simpmusic://") -> {
-                        runCatching { Uri.parse(link) }.getOrNull()?.let {
-                            sharedViewModel.setIntent(GenericIntent(data = it))
-                        }
-                    }
 
-                    // openUrl rather than LocalUriHandler, which throws where no browser answers.
-                    link.startsWith("https://", ignoreCase = true) -> {
-                        runCatching { openUrl(link) }
-                    }
-                    // Anything else is a mistake in the config: ignoring it beats crashing on a tap.
-                }
-            },
-            onClose = {
-                Logger.i("Promo", "Closed ${banner.id}")
-                promoBanner = null
-                sharedViewModel.markPromoShown(banner.id)
-            },
-            // No picture, no banner: closed without counting, so a later launch tries again.
-            onFailed = {
-                Logger.w("Promo", "Picture failed to load for ${banner.id}; closed without counting it")
-                promoBanner = null
-            },
-        )
-    }
 
     if (shouldShowLogInAlert) {
         var doNotShowAgain by rememberSaveable {

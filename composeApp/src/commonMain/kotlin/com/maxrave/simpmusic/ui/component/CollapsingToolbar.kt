@@ -345,8 +345,10 @@ private fun Toolbar(
                 Modifier.background(
                     Brush.verticalGradient(
                         listOf(
-                            backgroundColor.rgbFactor(0.5f),
-                            backgroundColor.rgbFactor(0.3f),
+                            Color.Black.copy(alpha = 0.28f),
+                            backgroundColor.rgbFactor(0.42f),
+                            backgroundColor.rgbFactor(0.22f),
+                            Color.Transparent,
                         ),
                     ),
                 ),

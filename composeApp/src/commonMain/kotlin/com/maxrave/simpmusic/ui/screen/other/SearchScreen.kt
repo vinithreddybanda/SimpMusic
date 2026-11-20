@@ -441,7 +441,7 @@ fun SearchScreen(
                     LazyColumn(
                         Modifier.padding(horizontal = 16.dp),
                         state = suggestionsState,
-                        contentPadding = PaddingValues(top = searchBarHeight, bottom = 10.dp),
+                        contentPadding = PaddingValues(top = 10.dp, bottom = searchBarHeight + 76.dp),
                     ) {
                         items(searchScreenState.suggestYTItems) { item ->
                             SuggestItemRow(
@@ -1034,7 +1034,7 @@ fun SearchScreen(
         Box(
             modifier =
                 Modifier
-                    .align(Alignment.TopCenter)
+                    .align(Alignment.BottomCenter)
                     .onGloballyPositioned { searchBarHeightPx = it.size.height },
         ) {
             // Animate only the background so scrolling keeps the search input and its focus.
@@ -1056,8 +1056,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                        .padding(vertical = 10.dp),
+                        .padding(bottom = 76.dp, top = 8.dp),
             ) {
         AnimatedVisibility(visible = selectionState.isActive) {
             SongSelectionTopAppBar(
@@ -1209,7 +1208,8 @@ fun SearchScreen(
                     .onFocusChanged {
                         isFocused = it.isFocused
                     }.padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = CircleShape,
+            colors = SearchBarDefaults.colors(containerColor = Color.Transparent),
             // See the note on SongSelectionTopAppBar above — the Column owns the status-bar inset.
             windowInsets = WindowInsets(0),
             content = {},

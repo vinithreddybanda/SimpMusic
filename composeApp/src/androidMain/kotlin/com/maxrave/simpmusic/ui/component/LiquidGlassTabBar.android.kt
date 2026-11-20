@@ -74,12 +74,12 @@ import kotlin.math.roundToInt
 import kotlin.math.sign
 
 private val CapsuleShape = RoundedCornerShape(percent = 50)
-private val TabWidth = 64.dp
-internal val BarHeight = 56.dp
-private val BlobHeight = 48.dp
+private val TabWidth = 54.dp
+internal val BarHeight = 48.dp
+private val BlobHeight = 40.dp
 // Breathing room between the capsule edge and the pill on the first/last tab. The pill is a full
 // tab wide, so without this it sits flush against the capsule's rounded end.
-private val BarInset = 6.dp
+private val BarInset = 10.dp
 
 /**
  * iOS 26 / Kyant-style liquid sliding tab bar.
