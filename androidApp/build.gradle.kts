@@ -20,7 +20,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.maxrave.simpmusic"
+        applicationId = "com.vinithreddybanda.pluto"
         minSdk = 26
         targetSdk = 36
         versionCode =

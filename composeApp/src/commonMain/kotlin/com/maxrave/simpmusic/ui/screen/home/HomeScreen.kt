@@ -380,15 +380,16 @@ fun HomeScreen(
     var showRequestShareLyricsPermissions by rememberSaveable {
         mutableStateOf(false)
     }
-    var showBlogPromoDialog by rememberSaveable {
+    var showBlogPromoDialog by remember {
         mutableStateOf(false)
     }
     var showFootgunsDialog by rememberSaveable {
         mutableStateOf(false)
     }
     // Decided once per launch (saveable, so a rotation does not count as a new launch).
-    var promoLaunchDecided by rememberSaveable {
-        mutableStateOf(false)
+    // Remote promotional content is disabled in this Pluto build.
+    var promoLaunchDecided by remember {
+        mutableStateOf(true)
     }
     var promoBanner by remember {
         mutableStateOf<PromoBannerData?>(null)
@@ -458,11 +459,6 @@ fun HomeScreen(
             showReviewDialog = true
         } else if ((openAppTime == 1 || openAppTime % 15 == 0) && openAppTime <= 60 && !shareLyricsPermissions) {
             showRequestShareLyricsPermissions = true
-        } else if (openAppTime == 5) {
-            // Blog promo: one-shot after 5 app opens, bump key suffix to re-promote later
-            if (sharedViewModel.getString(BLOG_PROMO_KEY) != "true") {
-                showBlogPromoDialog = true
-            }
         } else if (openAppTime % 10 == 6 &&
             openAppTime <= 46 &&
             sharedViewModel.getString(FOOTGUNS_STAR_KEY) != "true"

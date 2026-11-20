@@ -193,8 +193,6 @@ class SharedViewModel(
     private val _showNotificationPermissionDialog = MutableStateFlow(false)
     val showNotificationPermissionDialog: StateFlow<Boolean> = _showNotificationPermissionDialog
 
-    private val _isOfficialBuild = MutableStateFlow(true)
-    val isOfficialBuild: StateFlow<Boolean> = _isOfficialBuild
 
     // One-shot: the Desktop capsule asks the Now Playing panel, which hosts the page, to open
     // full-screen lyrics. The panel consumes it once shown.
@@ -1293,28 +1291,6 @@ class SharedViewModel(
         }
     }
 
-    /**
-     * [signingCerts]: SHA-256 hex of each certificate this APK is signed with. A failed fetch leaves
-     * the app usable — it plays offline, and an unknown answer must not lock out our own users.
-     */
-    fun checkOfficialBuild(
-        packageName: String,
-        signingCerts: List<String>,
-    ) {
-        if (packageName !in Config.OFFICIAL_PACKAGE_NAMES) {
-            _isOfficialBuild.value = false
-            return
-        }
-        viewModelScope.launch {
-            updateRepository.getFdroidSigningKeys().collect { response ->
-                val keys = response.data
-                // No certificate read at all is an unknown answer, and unknown never blocks.
-                if (response is Resource.Success && keys != null && signingCerts.isNotEmpty() && keys.none { it in signingCerts }) {
-                    _isOfficialBuild.value = false
-                }
-            }
-        }
-    }
 
     fun stopPlayer() {
         _nowPlayingScreenData.value = NowPlayingScreenData.initial()
