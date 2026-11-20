@@ -449,7 +449,7 @@ fun SearchScreen(
                             Modifier
                                 .align(Alignment.BottomCenter)
                                 .imePadding()
-                                .padding(bottom = 64.dp)
+                                .padding(bottom = 56.dp)
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .widthIn(max = 344.dp)
@@ -1083,7 +1083,6 @@ fun SearchScreen(
             Column(
                 modifier =
                     Modifier
-                        .widthIn(max = 344.dp)
                         .fillMaxWidth()
                         .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
