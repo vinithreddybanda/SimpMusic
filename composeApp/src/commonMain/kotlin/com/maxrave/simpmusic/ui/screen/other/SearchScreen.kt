@@ -126,6 +126,7 @@ import com.maxrave.simpmusic.ui.component.ArtistFullWidthItems
 import com.maxrave.simpmusic.ui.component.Chip
 import com.maxrave.simpmusic.ui.component.EndOfPage
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.component.PlaylistFullWidthItems
 import com.maxrave.simpmusic.ui.component.ShimmerSearchItem
 import com.maxrave.simpmusic.ui.component.SongFullWidthItems
@@ -456,9 +457,11 @@ fun SearchScreen(
                                 .padding(horizontal = 16.dp)
                                 .widthIn(max = 344.dp)
                                 .heightIn(max = 240.dp)
-                                .clip(RoundedCornerShape(28.dp))
-                                .background(Color.White.copy(alpha = 0.055f))
-                                .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
+                                .liquidGlass(
+                                    backdrop = chipBackdrop,
+                                    shape = RoundedCornerShape(28.dp),
+                                    interactive = false,
+                                ),
                         state = suggestionsState,
                         contentPadding =
                             PaddingValues(
@@ -1077,9 +1080,11 @@ fun SearchScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.075f))
-                            .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
+                            .liquidGlass(
+                                backdrop = chipBackdrop,
+                                shape = CircleShape,
+                                interactive = true,
+                            ),
                 )
             }
             Column(
