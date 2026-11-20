@@ -115,7 +115,7 @@ sealed class BottomNavScreen(
     data object More : BottomNavScreen(
         ordinal = 5,
         destination = HomeDestination,
-        title = Res.string.more,
+        title = Res.string.more_tab,
         icon = {
             Icon(
                 imageVector = SimpIcons.MoreVert,

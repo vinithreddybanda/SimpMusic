@@ -104,6 +104,7 @@
     <string name="move_down">Move down</string>
     <string name="delete_from_queue">Delete from queue</string>
     <string name="more">More</string>
+    <string name="more_tab">More</string>
     <string name="play_all">Play all</string>
     <string name="singles">Singles</string>
     <string name="related_artists">Related Artists</string>
