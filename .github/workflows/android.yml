@@ -55,21 +55,10 @@ jobs:
       - name: Assemble ARM64 release APK
         run: ./gradlew --no-daemon androidApp:assembleRelease
 
-      - name: Sign and align ARM64 APK
-        id: sign_app
-        uses: kevin-david/zipalign-sign-android-release@v2
-        with:
-          releaseDirectory: androidApp/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          zipAlign: true
-
       - name: Upload ARM64 APK
         uses: actions/upload-artifact@v4
         with:
           name: simpmusic-arm64-v8a
-          path: androidApp/build/outputs/apk/release/*arm64-v8a*-signed.apk
+          path: androidApp/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14

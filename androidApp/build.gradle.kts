@@ -80,6 +80,9 @@ android {
 
     buildTypes {
         release {
+            // Use the built-in debug keystore so CI can produce an installable APK
+            // without requiring private signing secrets. This is for personal/testing builds.
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
