@@ -450,8 +450,9 @@ fun SearchScreen(
                                 .align(Alignment.BottomCenter)
                                 .imePadding()
                                 .padding(bottom = 64.dp)
-                                .widthIn(max = 344.dp)
                                 .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .widthIn(max = 344.dp)
                                 .heightIn(max = 240.dp)
                                 .clip(RoundedCornerShape(28.dp))
                                 .background(Color.White.copy(alpha = 0.055f))
@@ -1062,8 +1063,9 @@ fun SearchScreen(
                         .align(Alignment.BottomCenter)
                         .imePadding()
                         .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
-                        .widthIn(max = 344.dp)
                         .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .widthIn(max = 344.dp)
                         .height(48.dp),
                 enter = fadeIn(tween(300)),
                 exit = fadeOut(tween(300)),
@@ -1231,13 +1233,14 @@ fun SearchScreen(
             onExpandedChange = {},
             modifier =
                 Modifier
-                    .widthIn(max = 344.dp)
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .widthIn(max = 344.dp)
                     .height(48.dp)
                     .focusRequester(focusRequester)
                     .onFocusChanged {
                         isFocused = it.isFocused
-                    }.padding(horizontal = 16.dp),
+                    },
             shape = CircleShape,
             colors = SearchBarDefaults.colors(containerColor = Color.Transparent),
             // See the note on SongSelectionTopAppBar above — the Column owns the status-bar inset.
