@@ -176,7 +176,7 @@ fun DesktopSidebar(
                 current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination::class) -> BottomNavScreen.Search.ordinal
                 current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination::class) -> BottomNavScreen.Account.ordinal
                 current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination::class) -> BottomNavScreen.Settings.ordinal
-                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination::class) -> BottomNavScreen.Mood.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination::class) -> BottomNavScreen.Home.ordinal
                 current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination::class) -> BottomNavScreen.Room.ordinal
                 else -> selectedIndex
             }

@@ -85,7 +85,7 @@ fun AppBottomNavigationBar(
                 is LibraryDestination -> BottomNavScreen.Library.ordinal
                 is LoginDestination -> BottomNavScreen.Account.ordinal
                 is SettingsDestination -> BottomNavScreen.Settings.ordinal
-                is MoodDestination -> BottomNavScreen.Mood.ordinal
+                is MoodDestination -> BottomNavScreen.Home.ordinal
                 is ListenTogetherDestination -> BottomNavScreen.Room.ordinal
                 else -> BottomNavScreen.Home.ordinal // Default to Home if not recognized
             },
@@ -395,7 +395,6 @@ fun AppNavigationRail(
             BottomNavScreen.Search,
             BottomNavScreen.Account,
             BottomNavScreen.Settings,
-            BottomNavScreen.Mood,
             BottomNavScreen.Room,
         )
     var selectedIndex by rememberSaveable {
