@@ -444,9 +444,23 @@ fun SearchScreen(
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
                     LazyColumn(
-                        Modifier.padding(horizontal = 16.dp),
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .imePadding()
+                                .padding(bottom = 64.dp)
+                                .widthIn(max = 344.dp)
+                                .fillMaxWidth()
+                                .heightIn(max = 240.dp)
+                                .clip(RoundedCornerShape(28.dp))
+                                .background(Color.White.copy(alpha = 0.055f))
+                                .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
                         state = suggestionsState,
-                        contentPadding = PaddingValues(top = 10.dp, bottom = searchBarHeight + 76.dp),
+                        contentPadding =
+                            PaddingValues(
+                                top = 8.dp,
+                                bottom = if (isKeyboardVisible) 8.dp else searchBarHeight + 76.dp,
+                            ),
                     ) {
                         items(searchScreenState.suggestYTItems) { item ->
                             SuggestItemRow(
@@ -1042,7 +1056,14 @@ fun SearchScreen(
             // Animate only the background so scrolling keeps the search input and its focus.
             AnimatedVisibility(
                 visible = true,
-                modifier = Modifier.matchParentSize(),
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .imePadding()
+                        .padding(bottom = if (isMiniPlayerVisible && !isKeyboardVisible) 76.dp else 8.dp)
+                        .widthIn(max = 344.dp)
+                        .fillMaxWidth()
+                        .height(48.dp),
                 enter = fadeIn(tween(300)),
                 exit = fadeOut(tween(300)),
                 label = "search_bar_scrim",
@@ -1059,8 +1080,10 @@ fun SearchScreen(
             Column(
                 modifier =
                     Modifier
+                        .widthIn(max = 344.dp)
                         .fillMaxWidth()
                         .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
         AnimatedVisibility(visible = selectionState.isActive) {
             SongSelectionTopAppBar(
@@ -1207,7 +1230,9 @@ fun SearchScreen(
             onExpandedChange = {},
             modifier =
                 Modifier
+                    .widthIn(max = 344.dp)
                     .fillMaxWidth()
+                    .height(48.dp)
                     .focusRequester(focusRequester)
                     .onFocusChanged {
                         isFocused = it.isFocused
