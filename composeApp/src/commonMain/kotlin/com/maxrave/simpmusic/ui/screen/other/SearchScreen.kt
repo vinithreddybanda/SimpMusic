@@ -334,7 +334,7 @@ fun SearchScreen(
 
     LaunchedEffect(isExpanded, searchText, isFocused) {
         searchUIType =
-            if (searchText.isNotEmpty() && isExpanded) {
+            if (searchText.trim().length >= 2 && isExpanded) {
                 SearchUIType.SEARCH_SUGGESTIONS
             } else if (isFocused && isExpanded) {
                 SearchUIType.SEARCH_HISTORY
