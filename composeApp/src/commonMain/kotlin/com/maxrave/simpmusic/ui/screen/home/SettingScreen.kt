@@ -149,7 +149,6 @@ import com.maxrave.simpmusic.ui.navigation.destination.login.LastfmLoginDestinat
 import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
 import com.maxrave.simpmusic.ui.navigation.destination.login.SpotifyLoginDestination
 import com.maxrave.simpmusic.ui.theme.md_theme_dark_primary
-import com.maxrave.simpmusic.ui.theme.parseThemeColorHex
 import com.maxrave.simpmusic.ui.theme.typo
 import com.maxrave.simpmusic.utils.VersionManager
 import com.maxrave.simpmusic.viewModel.ImportViewModel
@@ -269,8 +268,6 @@ import simpmusic.composeapp.generated.resources.download_quality
 import simpmusic.composeapp.generated.resources.downloaded_cache
 import simpmusic.composeapp.generated.resources.enable_animated_artwork
 import simpmusic.composeapp.generated.resources.enable_canvas
-import simpmusic.composeapp.generated.resources.enable_liquid_glass_effect
-import simpmusic.composeapp.generated.resources.enable_liquid_glass_effect_description
 import simpmusic.composeapp.generated.resources.enable_rich_presence
 import simpmusic.composeapp.generated.resources.enable_scrobbling
 import simpmusic.composeapp.generated.resources.enable_sponsor_block
@@ -374,7 +371,6 @@ import simpmusic.composeapp.generated.resources.normalize_volume
 import simpmusic.composeapp.generated.resources.not_available_while_casting
 import simpmusic.composeapp.generated.resources.now_playing_style
 import simpmusic.composeapp.generated.resources.now_playing_style_apple_music
-import simpmusic.composeapp.generated.resources.now_playing_style_soundcloud
 import simpmusic.composeapp.generated.resources.now_playing_style_m3_expressive
 import simpmusic.composeapp.generated.resources.now_playing_style_spotify
 import simpmusic.composeapp.generated.resources.ok
@@ -594,15 +590,10 @@ fun SettingScreen(
     val autoBackupMaxFiles by viewModel.autoBackupMaxFiles.collectAsStateWithLifecycle()
     val autoBackupLastTime by viewModel.autoBackupLastTime.collectAsStateWithLifecycle()
     val updateChannel by viewModel.updateChannel.collectAsStateWithLifecycle()
-    val enableLiquidGlass by viewModel.enableLiquidGlass.collectAsStateWithLifecycle()
-    val themeMode by sharedViewModel.getThemeMode().collectAsStateWithLifecycle(DataStoreManager.THEME_MODE_DARK)
-    val themeColorSource by sharedViewModel.getThemeColorSource().collectAsStateWithLifecycle(DataStoreManager.THEME_COLOR_DEFAULT)
-    val customThemeColorHex by sharedViewModel.getCustomThemeColor().collectAsStateWithLifecycle(DataStoreManager.DEFAULT_THEME_COLOR_HEX)
     val nowPlayingStyle by sharedViewModel.getNowPlayingStyle().collectAsStateWithLifecycle(DataStoreManager.NOW_PLAYING_STYLE_SPOTIFY)
     val lyricsStyle by sharedViewModel.getLyricsStyle().collectAsStateWithLifecycle(DataStoreManager.LYRICS_STYLE_CLASSIC)
     val romanizationStored by sharedViewModel.getRomanizationLanguages().collectAsStateWithLifecycle("")
     val japaneseDictionaryState by viewModel.japaneseDictionaryState.collectAsStateWithLifecycle()
-    var showColorPickerDialog by rememberSaveable { mutableStateOf(false) }
     val discordLoggedIn by viewModel.discordLoggedIn.collectAsStateWithLifecycle()
     val loggedIn by viewModel.loggedIn.collectAsStateWithLifecycle()
     val syncFollowToYouTube by viewModel.syncFollowToYouTube.collectAsStateWithLifecycle()
@@ -2840,103 +2831,6 @@ fun SettingScreen(
                     },
                 ) {
                     Text(text = alertBasicState.dismiss)
-                }
-            },
-        )
-    }
-    if (showColorPickerDialog) {
-        // The primary colour of each music app, as its brand publishes it. Names are brand names and
-        // are not translated.
-        val presetColors =
-            listOf(
-                "FF1ED760" to "Spotify",
-                "FFFF5500" to "SoundCloud",
-                "FFFA243C" to "Apple Music",
-                "FFFF0000" to "YouTube Music",
-                "FFA238FF" to "Deezer",
-                "FF3668FF" to "Pandora",
-                "FFFFA200" to "Audiomack",
-                "FF1DA0C3" to "Bandcamp",
-            )
-        var pendingHex by rememberSaveable { mutableStateOf(customThemeColorHex.takeLast(6)) }
-        val parsedColor = parseThemeColorHex(pendingHex)
-        AlertDialog(
-            onDismissRequest = { showColorPickerDialog = false },
-            title = { Text(text = stringResource(Res.string.custom_color), style = typo().titleSmall) },
-            text = {
-                Column {
-                    // Four across: at five, a cell is too narrow for "SoundCloud" under its swatch.
-                    presetColors.chunked(4).forEach { rowColors ->
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                            rowColors.forEach { (hex, name) ->
-                                val color = parseThemeColorHex(hex) ?: Color.Gray
-                                val isSelected = pendingHex.equals(hex.takeLast(6), ignoreCase = true)
-                                Column(
-                                    modifier =
-                                        Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .clickable { pendingHex = hex.takeLast(6) }
-                                            .padding(vertical = 4.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .size(40.dp)
-                                                .clip(CircleShape)
-                                                .background(color)
-                                                .border(
-                                                    width = if (isSelected) 3.dp else 0.dp,
-                                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
-                                                    shape = CircleShape,
-                                                ),
-                                    )
-                                    Spacer(Modifier.height(6.dp))
-                                    Text(
-                                        text = name,
-                                        style = typo().bodySmall,
-                                        color =
-                                            if (isSelected) {
-                                                MaterialTheme.colorScheme.onSurface
-                                            } else {
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                            },
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 2,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    TextField(
-                        value = pendingHex,
-                        onValueChange = { pendingHex = it.removePrefix("#").take(8).uppercase() },
-                        label = { Text("HEX") },
-                        prefix = { Text("#") },
-                        singleLine = true,
-                        isError = parsedColor == null,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    enabled = parsedColor != null,
-                    onClick = {
-                        parsedColor?.let {
-                            val argb = "FF${pendingHex.takeLast(6).uppercase()}"
-                            sharedViewModel.setCustomThemeColor(argb)
-                            sharedViewModel.setThemeColorSource(DataStoreManager.THEME_COLOR_CUSTOM)
-                        }
-                        showColorPickerDialog = false
-                    },
-                ) { Text(text = stringResource(Res.string.change)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showColorPickerDialog = false }) {
-                    Text(text = stringResource(Res.string.cancel))
                 }
             },
         )
