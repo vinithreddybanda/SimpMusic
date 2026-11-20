@@ -100,7 +100,6 @@ import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
 import com.maxrave.simpmusic.ui.navigation.destination.player.FullscreenDestination
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentActions
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentAppleMusic
-import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentSoundCloud
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentM3Expressive
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentSpotify
 import com.maxrave.simpmusic.ui.screen.player.content.NowPlayingContentState
@@ -994,12 +993,6 @@ fun NowPlayingScreenContent(
 
         DataStoreManager.NOW_PLAYING_STYLE_APPLE_MUSIC ->
             NowPlayingContentAppleMusic(
-                state = state,
-                actions = actions,
-            )
-
-        DataStoreManager.NOW_PLAYING_STYLE_SOUNDCLOUD ->
-            NowPlayingContentSoundCloud(
                 state = state,
                 actions = actions,
             )
