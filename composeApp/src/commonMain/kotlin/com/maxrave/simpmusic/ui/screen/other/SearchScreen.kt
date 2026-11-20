@@ -314,6 +314,9 @@ fun SearchScreen(
         }
         if (searchText.isNotEmpty() && isFocused) {
             searchViewModel.suggestQuery(searchText)
+        } else if (searchText.isEmpty()) {
+            // Cancel an in-flight request when the user clears the field.
+            searchViewModel.suggestQuery("")
         }
     }
 
@@ -432,10 +435,7 @@ fun SearchScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color.Transparent)
-                // Apply the IME inset once at the shared screen container. This keeps the
-                // suggestion surface and floating search dock on the same keyboard animation.
-                .imePadding(),
+                .background(Color.Transparent),
     ) {
         // Content scrolls under the bar (it is the haze source), so it needs top padding
         // equal to the bar's measured height to keep its first item clear of it.
@@ -446,7 +446,9 @@ fun SearchScreen(
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        // Only the suggestion surface follows the IME. The page behind it
+                        // remains full-height, avoiding a second full-screen lift.
+                        modifier = Modifier.fillMaxSize().imePadding(),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
                     LazyColumn(
@@ -1060,6 +1062,8 @@ fun SearchScreen(
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
+                    // Move only the floating search dock above the keyboard.
+                    .imePadding()
                     .onGloballyPositioned { searchBarHeightPx = it.size.height },
         ) {
             // Animate only the background so scrolling keeps the search input and its focus.
