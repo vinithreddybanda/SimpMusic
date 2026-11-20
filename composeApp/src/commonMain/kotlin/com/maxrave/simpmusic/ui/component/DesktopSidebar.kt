@@ -164,7 +164,6 @@ fun DesktopSidebar(
         BottomNavScreen.Search,
         BottomNavScreen.Account,
         BottomNavScreen.Settings,
-        BottomNavScreen.Mood,
         BottomNavScreen.Room,
     )
     var selectedIndex by rememberSaveable { mutableIntStateOf(BottomNavScreen.Home.ordinal) }
