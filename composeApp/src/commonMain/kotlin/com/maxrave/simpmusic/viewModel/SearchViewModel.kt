@@ -345,7 +345,7 @@ class SearchViewModel(
         suggestQueryJob?.cancel()
 
         val normalizedQuery = query.trim()
-        if (normalizedQuery.length < 2) {
+        if (normalizedQuery.isEmpty()) {
             _searchScreenState.update { state ->
                 state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
             }
