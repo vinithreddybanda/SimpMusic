@@ -157,22 +157,30 @@ fun DesktopSidebar(
     reloadDestinationIfNeeded: (KClass<*>) -> Unit = { _ -> },
 ) {
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    // See the note in AppBottomNavigationBar: `ordinal` is the tab's identity, not its position.
-    val navScreens =
-        listOfNotNull(
-            BottomNavScreen.Home,
-            BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-            BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
-            BottomNavScreen.Search,
-        )
+    // Keep the desktop navigation in sync with the same destinations as the compact glass dock.
+    val navScreens = listOf(
+        BottomNavScreen.Home,
+        BottomNavScreen.Library,
+        BottomNavScreen.Search,
+        BottomNavScreen.Account,
+        BottomNavScreen.Settings,
+        BottomNavScreen.Mood,
+        BottomNavScreen.Room,
+    )
     var selectedIndex by rememberSaveable { mutableIntStateOf(BottomNavScreen.Home.ordinal) }
-    // A tab can disappear under the user (tracking turned off, YouTube session ended); fall back to
-    // Home so nothing is left highlighted.
-    LaunchedEffect(showAnalyticsTab, showMixForYouTab) {
-        if ((!showAnalyticsTab && selectedIndex == BottomNavScreen.Analytics.ordinal) ||
-            (!showMixForYouTab && selectedIndex == BottomNavScreen.MixForYou.ordinal)
-        ) {
-            selectedIndex = BottomNavScreen.Home.ordinal
+    LaunchedEffect(currentBackStackEntry?.id) {
+        viewModel.refresh()
+        currentBackStackEntry?.destination?.let { current ->
+            selectedIndex = when {
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination::class) -> BottomNavScreen.Home.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination::class) -> BottomNavScreen.Library.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination::class) -> BottomNavScreen.Search.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination::class) -> BottomNavScreen.Account.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination::class) -> BottomNavScreen.Settings.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination::class) -> BottomNavScreen.Mood.ordinal
+                current.hasRoute(com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination::class) -> BottomNavScreen.Room.ordinal
+                else -> selectedIndex
+            }
         }
     }
     val selectTab: (BottomNavScreen) -> Unit = { screen ->
@@ -196,7 +204,6 @@ fun DesktopSidebar(
 
     // The library sources are one-shot reads, not observed queries, so the list is read again whenever
     // the user moves between screens, which is where a like, follow or new playlist happens.
-    LaunchedEffect(currentBackStackEntry?.id) { viewModel.refresh() }
     val collapsed by viewModel.collapsed.collectAsStateWithLifecycle()
     val overview by viewModel.overview.collectAsStateWithLifecycle()
     val libraryItems by viewModel.items.collectAsStateWithLifecycle()
