@@ -77,6 +77,8 @@ fun Modifier.liquidGlass(
     shape: Shape = CircleShape,
     interactive: Boolean = true,
     highlight: Highlight = Highlight.Default,
+    minScrim: Float = 0.12f,
+    maxScrim: Float = 0.5f,
 ): Modifier {
     // With the setting off, every glass surface falls back to the flat translucent pill the detail
     // screens used before the migration (surfaceContainerHighest @ 80%) — shape and hit target
@@ -99,6 +101,8 @@ fun Modifier.liquidGlass(
         shape = shape,
         interaction = if (interactive) interaction else null,
         highlight = highlight,
+        minScrim = minScrim,
+        maxScrim = maxScrim,
     )
 }
 
