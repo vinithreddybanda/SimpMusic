@@ -7,6 +7,7 @@ import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
 import com.maxrave.simpmusic.ui.icon.AutoGraph
 import com.maxrave.simpmusic.ui.icon.Home
 import com.maxrave.simpmusic.ui.icon.LibraryMusic
+import com.maxrave.simpmusic.ui.icon.MoreVert
 import com.maxrave.simpmusic.ui.icon.Search
 import com.maxrave.simpmusic.ui.icon.Sensors
 import com.maxrave.simpmusic.ui.icon.SimpIcons
@@ -105,6 +106,19 @@ sealed class BottomNavScreen(
         icon = {
             Icon(
                 imageVector = SimpIcons.Sensors,
+                contentDescription = null,
+            )
+        },
+    )
+
+    // Secondary destinations live in the dock's overflow sheet, keeping the primary bar compact.
+    data object More : BottomNavScreen(
+        ordinal = 5,
+        destination = HomeDestination,
+        title = Res.string.more,
+        icon = {
+            Icon(
+                imageVector = SimpIcons.MoreVert,
                 contentDescription = null,
             )
         },

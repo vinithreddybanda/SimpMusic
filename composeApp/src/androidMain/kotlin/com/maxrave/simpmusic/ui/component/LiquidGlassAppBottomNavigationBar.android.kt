@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +51,10 @@ import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
 import com.maxrave.simpmusic.ui.navigation.destination.home.AnalyticsDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.HomeDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.NotificationDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.SettingsDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.WrappedDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.LibraryDestination
 import com.maxrave.simpmusic.ui.navigation.destination.library.MixForYouDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
@@ -104,10 +110,9 @@ actual fun LiquidGlassAppBottomNavigationBar(
     val bottomNavScreens =
         listOfNotNull(
             BottomNavScreen.Home,
-            BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
-            BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
             BottomNavScreen.Library,
             BottomNavScreen.Search,
+            BottomNavScreen.More,
         )
     // Tabs shown in the sliding bar (Apple Music style); Search lives in its own FAB.
     // Every primary destination lives in one continuous glass dock.
@@ -137,6 +142,7 @@ actual fun LiquidGlassAppBottomNavigationBar(
     var isExpanded by rememberSaveable {
         mutableStateOf(true)
     }
+    var showMoreSheet by rememberSaveable { mutableStateOf(false) }
 
     var isInSearchDestination by remember {
         mutableStateOf(false)
@@ -169,6 +175,11 @@ actual fun LiquidGlassAppBottomNavigationBar(
     }
 
     fun selectTab(index: Int) {
+        if (index == BottomNavScreen.More.ordinal) {
+            selectedIndex = BottomNavScreen.More.ordinal
+            showMoreSheet = true
+            return
+        }
         val screen = bottomNavScreens.find { it.ordinal == index } ?: return
         if (selectedIndex == index) {
             if (currentBackStackEntry?.destination?.hierarchy?.any {
@@ -304,6 +315,58 @@ actual fun LiquidGlassAppBottomNavigationBar(
                     viewModel.isServiceRunning = false
                 },
             )
+        }
+    }
+
+    if (showMoreSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showMoreSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+            ) {
+                Text(
+                    text = "Explore",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                )
+                fun open(destination: Any) {
+                    showMoreSheet = false
+                    navController.navigate(destination) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+                if (showMixForYouTab) {
+                    androidx.compose.material3.ListItem(
+                        headlineContent = { Text("Mix for you") },
+                        modifier = Modifier.clickable { open(MixForYouDestination) },
+                    )
+                }
+                if (showAnalyticsTab) {
+                    androidx.compose.material3.ListItem(
+                        headlineContent = { Text("Analytics") },
+                        modifier = Modifier.clickable { open(AnalyticsDestination) },
+                    )
+                }
+                androidx.compose.material3.ListItem(
+                    headlineContent = { Text("Mood and moments") },
+                    modifier = Modifier.clickable { open(MoodDestination) },
+                )
+                androidx.compose.material3.ListItem(
+                    headlineContent = { Text("Notifications") },
+                    modifier = Modifier.clickable { open(NotificationDestination) },
+                )
+                androidx.compose.material3.ListItem(
+                    headlineContent = { Text("Settings") },
+                    modifier = Modifier.clickable { open(SettingsDestination) },
+                )
+                androidx.compose.material3.ListItem(
+                    headlineContent = { Text("Wrapped") },
+                    modifier = Modifier.clickable { open(WrappedDestination) },
+                )
+            }
         }
     }
 }
