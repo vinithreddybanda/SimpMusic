@@ -71,7 +71,7 @@ fun AppBottomNavigationBar(
     // Library here while keeping the ordinal they were declared with, so that the numbering stays
     // stable whether or not those tabs are present.
     val bottomNavScreens =
-        listOfNotNull(
+        listOfNotNull<BottomNavScreen>(
             BottomNavScreen.Home,
             BottomNavScreen.MixForYou.takeIf { showMixForYouTab },
             BottomNavScreen.Analytics.takeIf { showAnalyticsTab },
