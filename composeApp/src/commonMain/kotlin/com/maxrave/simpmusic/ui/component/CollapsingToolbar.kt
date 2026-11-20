@@ -330,7 +330,7 @@ private fun Toolbar(
         enter = fadeIn(animationSpec = tween(300)),
         exit = fadeOut(animationSpec = tween(300)),
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().height(64.dp)) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -352,16 +352,7 @@ private fun Toolbar(
                 TopAppBarDefaults.windowInsets.exclude(
                     TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Start),
                 ),
-            modifier =
-                Modifier.background(
-                    Brush.verticalGradient(
-                        0.0f to Color.Black.copy(alpha = 0.34f),
-                        0.28f to backgroundColor.rgbFactor(0.38f).copy(alpha = 0.92f),
-                        0.58f to backgroundColor.rgbFactor(0.25f).copy(alpha = 0.55f),
-                        0.82f to backgroundColor.copy(alpha = 0.16f),
-                        1.0f to Color.Transparent,
-                    ),
-                ),
+            modifier = Modifier,
             navigationIcon = {
                 IconButton(
                     onClick = {
