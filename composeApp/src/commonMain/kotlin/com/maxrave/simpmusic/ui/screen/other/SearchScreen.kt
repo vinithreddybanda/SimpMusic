@@ -1063,8 +1063,7 @@ fun SearchScreen(
                 Modifier
                     .align(Alignment.BottomCenter)
                     // Move only the floating search dock above the keyboard.
-                    .imePadding()
-                    .onGloballyPositioned { searchBarHeightPx = it.size.height },
+                    .imePadding(),
         ) {
             // Animate only the background so scrolling keeps the search input and its focus.
             AnimatedVisibility(
@@ -1098,7 +1097,9 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 8.dp),
+                        .padding(bottom = if (isKeyboardVisible) 8.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 8.dp)
+                        // Measure the dock itself, not its keyboard inset, for list offsets.
+                        .onGloballyPositioned { searchBarHeightPx = it.size.height },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
         AnimatedVisibility(visible = selectionState.isActive) {
