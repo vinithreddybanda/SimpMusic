@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,7 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.MoreVert
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.ui.icon.SimpIcons
+import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,9 +41,16 @@ fun NormalAppBar(
     leftIcon: @Composable (() -> Unit)? = null,
     rightIcon: @Composable (RowScope.() -> Unit)? = null,
 ) {
+    val backdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
     Box(modifier = modifier.fillMaxWidth().height(64.dp)) {
         Box(
             modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(backdrop) else Modifier)
+        ) {
+            Box(
+                modifier = Modifier
                 .fillMaxWidth()
                 .height(112.dp)
                 .blur(22.dp)
@@ -51,10 +62,14 @@ fun NormalAppBar(
                         1.0f to Color.Transparent,
                     ),
                 ),
-        )
+            )
+        }
         TopAppBar(
         title = title,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(backdrop, RoundedCornerShape(26.dp), interactive = false) else Modifier),
         navigationIcon = {
             if (leftIcon != null) {
                 Box(
