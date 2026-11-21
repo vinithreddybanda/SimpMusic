@@ -503,28 +503,6 @@ fun SearchScreen(
                                 bottom = if (isKeyboardVisible) 8.dp else searchBarHeight + 76.dp,
                             ),
                     ) {
-                        item(key = "search_diagnostics") {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Suggestions",
-                                        style = typo().labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                    )
-                                    Text(
-                                        text = "Search activity is recorded for troubleshooting",
-                                        style = typo().labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                TextButton(onClick = { navController.navigate(AppLogDestination) }) {
-                                    Text("Logs")
-                                }
-                            }
-                        }
                         items(searchScreenState.suggestYTItems) { item ->
                             SuggestItemRow(
                                 searchResult = item,
