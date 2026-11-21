@@ -30,6 +30,7 @@ import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.MoreVert
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 
@@ -47,7 +48,7 @@ fun NormalAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp)
-                .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(backdrop) else Modifier)
+                .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(backdrop) else Modifier),
         ) {
             Box(
                 modifier = Modifier
@@ -73,10 +74,7 @@ fun NormalAppBar(
         navigationIcon = {
             if (leftIcon != null) {
                 Box(
-                    modifier = Modifier.padding(start = 12.dp).size(44.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.12f))
-                        .border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
+                    modifier = Modifier.padding(start = 12.dp).size(44.dp),
                     contentAlignment = androidx.compose.ui.Alignment.Center,
                 ) {
                     leftIcon()
