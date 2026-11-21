@@ -42,6 +42,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.simpmusic.crashlytics.configCrashlytics
+import org.simpmusic.crashlytics.installCrashLogging
 import org.simpmusic.discord.configDiscord
 import org.simpmusic.lastfm.configLastfm
 import java.io.File
@@ -110,6 +111,8 @@ class SimpMusicApplication :
             .minTimeBetweenCrashesMs(2000) // default: 3000 //default: bug image
             .restartActivity(MainActivity::class.java) // default: null (your app's launch activity)
             .apply()
+        // Keep the previous crash handler in the chain, but persist the full stack trace first.
+        installCrashLogging()
 
         @SuppressLint("DiscouragedPrivateApi")
         val field: Field = CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
