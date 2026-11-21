@@ -135,6 +135,7 @@ import com.maxrave.simpmusic.ui.component.selection.rememberSongSelectionState
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.ArrowOutward
 import com.maxrave.simpmusic.ui.icon.Close
+import com.maxrave.simpmusic.ui.icon.Error
 import com.maxrave.simpmusic.ui.icon.GraphicEq
 import com.maxrave.simpmusic.ui.icon.History
 import com.maxrave.simpmusic.ui.icon.Search
@@ -145,6 +146,7 @@ import com.maxrave.simpmusic.ui.navigation.destination.list.PlaylistDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.PodcastDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.AppLogDestination
 import com.maxrave.simpmusic.ui.theme.ArtworkShape
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.theme.typo
@@ -234,7 +236,8 @@ fun SearchScreen(
     val moodGridState = rememberLazyGridState()
     val resultsState = rememberLazyListState()
     var searchBarHeightPx by remember { mutableIntStateOf(0) }
-    val searchBarHeight = with(LocalDensity.current) { searchBarHeightPx.toDp() }
+    val density = LocalDensity.current
+    val searchBarHeight = with(density) { searchBarHeightPx.toDp() }
     val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val isContentAtTop by remember {
         derivedStateOf {
@@ -334,6 +337,20 @@ fun SearchScreen(
     LaunchedEffect(isFocused) {
         if (isFocused) {
             isExpanded = true
+        }
+    }
+
+    LaunchedEffect(searchUIType) {
+        searchViewModel.logSearchEvent("Search UI state: $searchUIType")
+    }
+
+    LaunchedEffect(isKeyboardVisible) {
+        if (isKeyboardVisible) {
+            delay(150)
+            val imeBottomPx = WindowInsets.ime.getBottom(density)
+            searchViewModel.logSearchEvent("Keyboard shown (IME bottom inset=${imeBottomPx}px)")
+        } else {
+            searchViewModel.logSearchEvent("Keyboard hidden")
         }
     }
 
@@ -482,46 +499,66 @@ fun SearchScreen(
                                 bottom = if (isKeyboardVisible) 8.dp else searchBarHeight + 76.dp,
                             ),
                     ) {
+                        item(key = "search_diagnostics") {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Suggestions",
+                                        style = typo().labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = "Search activity is recorded for troubleshooting",
+                                        style = typo().labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                TextButton(onClick = { navController.navigate(AppLogDestination) }) {
+                                    Text("Logs")
+                                }
+                            }
+                        }
                         items(searchScreenState.suggestYTItems) { item ->
                             SuggestItemRow(
                                 searchResult = item,
-                                onItemClick = { item ->
-                                    when (item) {
-                                        is SongsResult, is VideosResult -> {
-                                            focusManager.clearFocus()
-                                            val firstTrack: Track = (item as? SongsResult)?.toTrack() ?: (item as VideosResult).toTrack()
-                                            searchViewModel.setQueueData(
-                                                QueueData.Data(
-                                                    listTracks = arrayListOf(firstTrack),
-                                                    firstPlayedTrack = firstTrack,
-                                                    playlistId = "RDAMVM${firstTrack.videoId}",
+                                onItemClick = { selectedItem ->
+                                    try {
+                                        when (selectedItem) {
+                                            is SongsResult, is VideosResult -> {
+                                                focusManager.clearFocus()
+                                                val firstTrack: Track =
+                                                    (selectedItem as? SongsResult)?.toTrack()
+                                                        ?: (selectedItem as VideosResult).toTrack()
+                                                searchViewModel.setQueueData(
+                                                    QueueData.Data(
+                                                        listTracks = arrayListOf(firstTrack),
+                                                        firstPlayedTrack = firstTrack,
+                                                        playlistId = "RDAMVM${firstTrack.videoId}",
                                                     playlistName = "\"${searchText}\" ${getStringBlocking(Res.string.in_search)}",
-                                                    playlistType = PlaylistType.RADIO,
-                                                    continuation = null,
-                                                ),
-                                            )
-                                            searchViewModel.loadMediaItem(firstTrack, type = Config.SONG_CLICK)
-                                        }
+                                                        playlistType = PlaylistType.RADIO,
+                                                        continuation = null,
+                                                    ),
+                                                )
+                                                searchViewModel.loadMediaItem(firstTrack, type = Config.SONG_CLICK)
+                                            }
 
-                                        is ArtistsResult -> {
-                                            navController.navigate(
-                                                ArtistDestination(item.browseId),
-                                            )
-                                        }
+                                            is ArtistsResult -> {
+                                                navController.navigate(ArtistDestination(selectedItem.browseId))
+                                            }
 
-                                        is AlbumsResult -> {
-                                            navController.navigate(
-                                                AlbumDestination(item.browseId),
-                                            )
-                                        }
+                                            is AlbumsResult -> {
+                                                navController.navigate(AlbumDestination(selectedItem.browseId))
+                                            }
 
-                                        is PlaylistsResult -> {
-                                            navController.navigate(
-                                                PlaylistDestination(
-                                                    item.browseId,
-                                                ),
-                                            )
+                                            is PlaylistsResult -> {
+                                                navController.navigate(PlaylistDestination(selectedItem.browseId))
+                                            }
                                         }
+                                    } catch (exception: Exception) {
+                                        searchViewModel.logSearchFailure("suggestion selection", exception)
                                     }
                                 },
                             )
@@ -1140,6 +1177,7 @@ fun SearchScreen(
                     query = searchText,
                     onQueryChange = { newText ->
                         searchText = newText
+                        searchViewModel.logSearchEvent("Search input changed (length=${newText.length})")
                     },
                     onSearch = { query ->
                         // A pasted YouTube link is a destination, not a query. Translating it into
@@ -1221,30 +1259,40 @@ fun SearchScreen(
                         }
                     },
                     trailingIcon = {
-                        // X button only shows when there's text
-                        if (searchText.isNotEmpty()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 modifier = Modifier.clip(CircleShape),
-                                onClick = {
-                                    searchText = ""
-                                    isSearchSubmitted = false
-                                },
+                                onClick = { navController.navigate(AppLogDestination) },
                             ) {
                                 Icon(
-                                    imageVector = SimpIcons.Close,
-                                    contentDescription = "Clear search",
+                                    imageVector = SimpIcons.Error,
+                                    contentDescription = "Open app logs",
+                                    modifier = Modifier.size(20.dp),
                                 )
                             }
-                        } else if (getPlatform() == Platform.Android) {
-                            // An empty field offers song recognition instead (Android only).
-                            IconButton(
-                                modifier = Modifier.clip(CircleShape),
-                                onClick = { showRecognition = true },
-                            ) {
-                                Icon(
-                                    imageVector = SimpIcons.GraphicEq,
-                                    contentDescription = stringResource(Res.string.recognize_song),
-                                )
+                            if (searchText.isNotEmpty()) {
+                                IconButton(
+                                    modifier = Modifier.clip(CircleShape),
+                                    onClick = {
+                                        searchText = ""
+                                        isSearchSubmitted = false
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = SimpIcons.Close,
+                                        contentDescription = "Clear search",
+                                    )
+                                }
+                            } else if (getPlatform() == Platform.Android) {
+                                IconButton(
+                                    modifier = Modifier.clip(CircleShape),
+                                    onClick = { showRecognition = true },
+                                ) {
+                                    Icon(
+                                        imageVector = SimpIcons.GraphicEq,
+                                        contentDescription = stringResource(Res.string.recognize_song),
+                                    )
+                                }
                             }
                         }
                     },

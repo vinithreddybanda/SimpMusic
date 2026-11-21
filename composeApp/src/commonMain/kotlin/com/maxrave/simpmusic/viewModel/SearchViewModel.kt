@@ -342,6 +342,17 @@ class SearchViewModel(
         }
     }
 
+    fun logSearchEvent(message: String) {
+        Logger.d(tag, message)
+    }
+
+    fun logSearchFailure(stage: String, throwable: Throwable) {
+        log(
+            "Search failure [$stage]: ${throwable.message}\n${throwable.stackTraceToString()}",
+            LogLevel.ERROR,
+        )
+    }
+
     fun suggestQuery(query: String) {
         suggestQueryJob?.cancel()
         val requestGeneration = ++suggestQueryGeneration
@@ -359,17 +370,23 @@ class SearchViewModel(
             state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
         }
 
+        Logger.d(tag, "Search suggestions queued (queryLength=${normalizedQuery.length}, generation=$requestGeneration)")
         suggestQueryJob =
             viewModelScope.launch {
                 delay(300)
 
                 try {
+                    Logger.d(tag, "Search suggestions request started (generation=$requestGeneration)")
                     searchRepository.getSuggestQuery(normalizedQuery).collectLatest { values ->
                         if (requestGeneration != suggestQueryGeneration) return@collectLatest
 
                         when (values) {
                             is Resource.Success -> {
                                 val suggestions = values.data
+                                Logger.d(
+                                    tag,
+                                    "Search suggestions received (queries=${suggestions?.queries?.size ?: 0}, items=${suggestions?.recommendedItems?.size ?: 0}, generation=$requestGeneration)",
+                                )
                                 _searchScreenState.update { state ->
                                     if (requestGeneration == suggestQueryGeneration) {
                                         state.copy(
@@ -383,7 +400,7 @@ class SearchViewModel(
                             }
 
                             is Resource.Error -> {
-                                log("Error fetching suggest queries: ${values.message}", LogLevel.ERROR)
+                                log("Search suggestions failed: ${values.message}", LogLevel.ERROR)
                                 _searchScreenState.update { state ->
                                     if (requestGeneration == suggestQueryGeneration) {
                                         state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
@@ -398,7 +415,7 @@ class SearchViewModel(
                     throw cancellation
                 } catch (exception: Exception) {
                     if (requestGeneration == suggestQueryGeneration) {
-                        log("Suggestion request failed: ${exception.message}", LogLevel.ERROR)
+                        logSearchFailure("suggestion request", exception)
                         _searchScreenState.update { state ->
                             state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
                         }
