@@ -312,11 +312,15 @@ fun SearchScreen(
             isSearchSubmitted = false
             isExpanded = true
         }
+    }
+
+    // Keep retrieval tied to focus and submission as well as text. This cancels suggestions
+    // immediately when the field loses focus or a full search is submitted.
+    LaunchedEffect(searchText, isFocused, isSearchSubmitted) {
         val normalizedQuery = searchText.trim()
-        if (isFocused && normalizedQuery.length >= 2) {
+        if (isFocused && !isSearchSubmitted && normalizedQuery.length >= 2) {
             searchViewModel.suggestQuery(normalizedQuery)
         } else {
-            // Do not request suggestions for one character or after focus leaves the field.
             searchViewModel.suggestQuery("")
         }
     }
@@ -436,6 +440,9 @@ fun SearchScreen(
         modifier =
             Modifier
                 .fillMaxSize()
+                // This is the single IME inset owner for the search page. Compose applies the
+                // live keyboard bottom inset here, including height changes and IME animation.
+                .imePadding()
                 .background(Color.Transparent),
     ) {
         // Content scrolls under the bar (it is the haze source), so it needs top padding
@@ -455,7 +462,8 @@ fun SearchScreen(
                     LazyColumn(
                         modifier =
                             Modifier
-                                .padding(bottom = 56.dp)
+                                // 48 dp search dock + 12 dp dock clearance + 12 dp visual gap.
+                                .padding(bottom = 72.dp)
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .widthIn(max = 344.dp)
@@ -1070,7 +1078,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = if (isKeyboardVisible) 2.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
+                        .padding(bottom = if (isKeyboardVisible) 12.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .widthIn(max = 344.dp)
@@ -1096,7 +1104,7 @@ fun SearchScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = if (isKeyboardVisible) 2.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 4.dp)
+                        .padding(bottom = if (isKeyboardVisible) 12.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 4.dp)
                         // Measure the dock itself, not its keyboard inset, for list offsets.
                         .onGloballyPositioned { searchBarHeightPx = it.size.height },
                 horizontalAlignment = Alignment.CenterHorizontally,

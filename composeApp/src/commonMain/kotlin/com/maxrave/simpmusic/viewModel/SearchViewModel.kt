@@ -116,6 +116,7 @@ class SearchViewModel(
 
     // Suggestions are requested for every edit. Keep only the latest request alive.
     private var suggestQueryJob: Job? = null
+    private var suggestQueryGeneration: Long = 0L
 
     var regionCode: String? = null
     var language: String? = null
@@ -343,6 +344,7 @@ class SearchViewModel(
 
     fun suggestQuery(query: String) {
         suggestQueryJob?.cancel()
+        val requestGeneration = ++suggestQueryGeneration
 
         val normalizedQuery = query.trim()
         if (normalizedQuery.length < 2) {
@@ -352,42 +354,54 @@ class SearchViewModel(
             return
         }
 
-        // Clear results immediately so a previous query cannot flash under the new text.
+        // Remove old results immediately; only the newest request may publish results.
         _searchScreenState.update { state ->
             state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
         }
 
         suggestQueryJob =
             viewModelScope.launch {
-                // Debounce edits so only the settled query reaches the network.
                 delay(300)
 
                 try {
                     searchRepository.getSuggestQuery(normalizedQuery).collectLatest { values ->
+                        if (requestGeneration != suggestQueryGeneration) return@collectLatest
+
                         when (values) {
                             is Resource.Success -> {
-                                values.data?.let { suggestData ->
-                                    _searchScreenState.update { state ->
+                                val suggestions = values.data
+                                _searchScreenState.update { state ->
+                                    if (requestGeneration == suggestQueryGeneration) {
                                         state.copy(
-                                            suggestQueries = suggestData.queries,
-                                            suggestYTItems = suggestData.recommendedItems,
+                                            suggestQueries = suggestions?.queries.orEmpty(),
+                                            suggestYTItems = suggestions?.recommendedItems.orEmpty(),
                                         )
+                                    } else {
+                                        state
                                     }
                                 }
                             }
 
                             is Resource.Error -> {
                                 log("Error fetching suggest queries: ${values.message}", LogLevel.ERROR)
+                                _searchScreenState.update { state ->
+                                    if (requestGeneration == suggestQueryGeneration) {
+                                        state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
+                                    } else {
+                                        state
+                                    }
+                                }
                             }
                         }
                     }
                 } catch (cancellation: CancellationException) {
                     throw cancellation
                 } catch (exception: Exception) {
-                    // A transient suggestion/API parsing failure must not crash the app.
-                    log("Suggestion request failed: ${exception.message}", LogLevel.ERROR)
-                    _searchScreenState.update { state ->
-                        state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
+                    if (requestGeneration == suggestQueryGeneration) {
+                        log("Suggestion request failed: ${exception.message}", LogLevel.ERROR)
+                        _searchScreenState.update { state ->
+                            state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
+                        }
                     }
                 }
             }
