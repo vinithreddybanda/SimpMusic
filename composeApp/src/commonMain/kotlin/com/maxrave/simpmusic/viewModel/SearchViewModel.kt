@@ -342,6 +342,10 @@ class SearchViewModel(
         }
     }
 
+    fun logSearchEvent(message: String) {
+        Logger.d(tag, message)
+    }
+
     fun logSearchFailure(stage: String, throwable: Throwable) {
         log(
             "Search failure [$stage]: ${throwable.message}\n${throwable.stackTraceToString()}",
