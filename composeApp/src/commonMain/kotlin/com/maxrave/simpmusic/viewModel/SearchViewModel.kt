@@ -19,8 +19,6 @@ import com.maxrave.logger.LogLevel
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.viewModel.base.BaseViewModel
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -221,12 +219,12 @@ class SearchViewModel(
     }
 
     private suspend fun <T> collectSearchResults(
-        results: Flow<Resource<T>>,
+        request: () -> Flow<Resource<T>>,
         onSuccess: (T?) -> Unit,
     ) {
         var receivedEmission = false
         try {
-            results.collect { resource ->
+            request().collect { resource ->
                 receivedEmission = true
                 when (resource) {
                     is Resource.Success -> {
@@ -254,7 +252,7 @@ class SearchViewModel(
     fun searchSongs(query: String) {
         prepareSearch(query, SearchType.SONGS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataSong(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataSong(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchSongsResult = results)
@@ -269,61 +267,96 @@ class SearchViewModel(
         activeSearchJob =
             viewModelScope.launch {
                 var song = ArrayList<SongsResult>()
-                var video = ArrayList<VideosResult>()
+                val video = ArrayList<VideosResult>()
                 var album = ArrayList<AlbumsResult>()
                 var artist = ArrayList<ArtistsResult>()
                 var playlist = ArrayList<PlaylistsResult>()
                 var featuredPlaylist = ArrayList<PlaylistsResult>()
                 var podcast = ArrayList<PlaylistsResult>()
 
-                // Keep the same seven upstream repository requests, but isolate failures per
-                // category. A malformed response from one endpoint must not cancel sibling jobs
-                // and crash the whole search screen.
-                val successfulCategories =
-                    coroutineScope {
-                        listOf(
-                            async {
-                                collectSearchCategory("songs", searchRepository.getSearchDataSong(query)) {
-                                    it?.let { values -> song = ArrayList(values) }
-                                }
-                            },
-                            async {
-                                collectSearchCategory("artists", searchRepository.getSearchDataArtist(query)) {
-                                    it?.let { values -> artist = ArrayList(values) }
-                                }
-                            },
-                            async {
-                                collectSearchCategory("albums", searchRepository.getSearchDataAlbum(query)) {
-                                    it?.let { values -> album = ArrayList(values) }
-                                }
-                            },
-                            async {
-                                collectSearchCategory("playlists", searchRepository.getSearchDataPlaylist(query)) {
-                                    it?.let { values -> playlist = ArrayList(values) }
-                                }
-                            },
-                            async {
-                                collectSearchCategory("videos", searchRepository.getSearchDataVideo(query)) {
-                                    it?.let { values -> video = ArrayList(values) }
-                                }
-                            },
-                            async {
-                                collectSearchCategory(
-                                    "featured playlists",
-                                    searchRepository.getSearchDataFeaturedPlaylist(query),
-                                ) {
-                                    it?.let { values -> featuredPlaylist = ArrayList(values) }
-                                }
-                            },
-                            async {
-                                collectSearchCategory("podcasts", searchRepository.getSearchDataPodcast(query)) {
-                                    it?.let { values -> podcast = ArrayList(values) }
-                                }
-                            },
-                        ).awaitAll()
+                var songSucceeded = false
+                var artistSucceeded = false
+                var albumSucceeded = false
+                var playlistSucceeded = false
+                var videoSucceeded = false
+                var featuredPlaylistSucceeded = false
+                var podcastSucceeded = false
+
+                // Keep the exact seven concurrent repository calls and ordering used upstream.
+                // Each collector catches its own request/parsing failure so sibling categories finish.
+                val job1 =
+                    launch {
+                        songSucceeded =
+                            collectSearchCategory("songs", { searchRepository.getSearchDataSong(query) }) {
+                                it?.let { values -> song = values }
+                            }
+                    }
+                val job2 =
+                    launch {
+                        artistSucceeded =
+                            collectSearchCategory("artists", { searchRepository.getSearchDataArtist(query) }) {
+                                it?.let { values -> artist = values }
+                            }
+                    }
+                val job3 =
+                    launch {
+                        albumSucceeded =
+                            collectSearchCategory("albums", { searchRepository.getSearchDataAlbum(query) }) {
+                                it?.let { values -> album = values }
+                            }
+                    }
+                val job4 =
+                    launch {
+                        playlistSucceeded =
+                            collectSearchCategory("playlists", { searchRepository.getSearchDataPlaylist(query) }) {
+                                it?.let { values -> playlist = values }
+                            }
+                    }
+                val job5 =
+                    launch {
+                        videoSucceeded =
+                            collectSearchCategory("videos", { searchRepository.getSearchDataVideo(query) }) {
+                                it?.let { values -> video.addAll(values) }
+                            }
+                    }
+                val job6 =
+                    launch {
+                        featuredPlaylistSucceeded =
+                            collectSearchCategory(
+                                "featured playlists",
+                                { searchRepository.getSearchDataFeaturedPlaylist(query) },
+                            ) {
+                                it?.let { values -> featuredPlaylist = values }
+                            }
+                    }
+                val job7 =
+                    launch {
+                        podcastSucceeded =
+                            collectSearchCategory("podcasts", { searchRepository.getSearchDataPodcast(query) }) {
+                                it?.let { values -> podcast = values }
+                            }
                     }
 
-                if (successfulCategories.none { it }) {
+                job1.join()
+                job2.join()
+                job3.join()
+                job4.join()
+                job5.join()
+                job6.join()
+                job7.join()
+
+                val successfulCategories =
+                    listOf(
+                        songSucceeded,
+                        artistSucceeded,
+                        albumSucceeded,
+                        playlistSucceeded,
+                        videoSucceeded,
+                        featuredPlaylistSucceeded,
+                        podcastSucceeded,
+                    ).count { it }
+
+                if (successfulCategories == 0) {
                     log("Search All failed: all seven category requests failed or returned no success", LogLevel.ERROR)
                     _searchScreenUIState.value = SearchScreenUIState.Error
                     return@launch
@@ -331,16 +364,24 @@ class SearchViewModel(
 
                 val combinedResults = ArrayList<SearchResultType>()
                 if (artist.size >= 3) {
-                    combinedResults.addAll(artist.take(3))
+                    for (i in 0..2) {
+                        combinedResults += artist[i]
+                    }
+                    combinedResults.addAll(song)
+                    combinedResults.addAll(video)
+                    combinedResults.addAll(album)
+                    combinedResults.addAll(playlist)
+                    combinedResults.addAll(featuredPlaylist)
+                    combinedResults.addAll(podcast)
                 } else {
                     combinedResults.addAll(artist)
+                    combinedResults.addAll(song)
+                    combinedResults.addAll(video)
+                    combinedResults.addAll(album)
+                    combinedResults.addAll(playlist)
+                    combinedResults.addAll(featuredPlaylist)
+                    combinedResults.addAll(podcast)
                 }
-                combinedResults.addAll(song)
-                combinedResults.addAll(video)
-                combinedResults.addAll(album)
-                combinedResults.addAll(playlist)
-                combinedResults.addAll(featuredPlaylist)
-                combinedResults.addAll(podcast)
 
                 _searchScreenState.update { state ->
                     state.copy(
@@ -356,20 +397,18 @@ class SearchViewModel(
                     )
                 }
                 _searchScreenUIState.value = SearchScreenUIState.Success
-                log(
-                    "Search All completed: successful categories=${successfulCategories.count { it }}/7, results=${combinedResults.size}",
-                )
+                log("Search All completed: successful categories=$successfulCategories/7, results=${combinedResults.size}")
             }
     }
 
     private suspend fun <T> collectSearchCategory(
         category: String,
-        results: Flow<Resource<T>>,
+        request: () -> Flow<Resource<T>>,
         onSuccess: (T?) -> Unit,
     ): Boolean {
         var receivedSuccess = false
         try {
-            results.collect { resource ->
+            request().collect { resource ->
                 when (resource) {
                     is Resource.Success -> {
                         receivedSuccess = true
@@ -387,6 +426,7 @@ class SearchViewModel(
         }
         return receivedSuccess
     }
+
 
     fun logSearchEvent(message: String) {
         // Persist search/IME diagnostics in App Logs, not only transient Logcat output.
@@ -472,7 +512,7 @@ class SearchViewModel(
     fun searchAlbums(query: String) {
         prepareSearch(query, SearchType.ALBUMS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataAlbum(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataAlbum(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchAlbumsResult = results)
@@ -485,7 +525,7 @@ class SearchViewModel(
     fun searchFeaturedPlaylist(query: String) {
         prepareSearch(query, SearchType.FEATURED_PLAYLISTS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataFeaturedPlaylist(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataFeaturedPlaylist(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchFeaturedPlaylistsResult = results)
@@ -498,7 +538,7 @@ class SearchViewModel(
     fun searchPodcast(query: String) {
         prepareSearch(query, SearchType.PODCASTS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataPodcast(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataPodcast(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchPodcastsResult = results)
@@ -511,7 +551,7 @@ class SearchViewModel(
     fun searchArtists(query: String) {
         prepareSearch(query, SearchType.ARTISTS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataArtist(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataArtist(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchArtistsResult = results)
@@ -524,7 +564,7 @@ class SearchViewModel(
     fun searchPlaylists(query: String) {
         prepareSearch(query, SearchType.PLAYLISTS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataPlaylist(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataPlaylist(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchPlaylistsResult = results)
@@ -537,7 +577,7 @@ class SearchViewModel(
     fun searchVideos(query: String) {
         prepareSearch(query, SearchType.VIDEOS)
         activeSearchJob = viewModelScope.launch {
-            collectSearchResults(searchRepository.getSearchDataVideo(query)) { results ->
+            collectSearchResults({ searchRepository.getSearchDataVideo(query) }) { results ->
                 if (results != null) {
                     _searchScreenState.update { state ->
                         state.copy(searchVideosResult = results)
