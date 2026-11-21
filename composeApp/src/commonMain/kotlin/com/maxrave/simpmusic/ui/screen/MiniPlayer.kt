@@ -179,7 +179,7 @@ fun MiniPlayer(
     // Glass needs both the luminance sampling loop that drives it and the theme-following text
     // colour; without the loop the glass sits at luminance 0, a 2dp blur and a 0.12 darken, which
     // reads as a smear. The setting governs the Android card and the Desktop capsule alike.
-    val useGlassSurface = isLiquidGlassEnabled == DataStoreManager.TRUE
+    val useGlassSurface = true
     val luminance = rememberGlassLuminance(layer, enabled = useGlassSurface && isVisible)
 
     val isDarkTheme = LocalIsDarkTheme.current
@@ -274,14 +274,14 @@ fun MiniPlayer(
         val miniPlayerShape = CircleShape
         // Without glass the card follows the theme, not the playing artwork.
         val cardColor =
-            if (isLiquidGlassEnabled == DataStoreManager.TRUE) {
+            if (useGlassSurface) {
                 Color.Transparent
             } else {
                 // Same opaque surface as the bottom bar capsule, so the two floating surfaces read as one set.
                 MaterialTheme.colorScheme.surfaceContainer
             }
         // The flat (default) card: round artwork and controls sitting in filled circles. Glass keeps its own look.
-        val isFlat = isLiquidGlassEnabled != DataStoreManager.TRUE
+        val isFlat = !useGlassSurface
         Card(
             shape = miniPlayerShape,
             colors =
@@ -292,7 +292,7 @@ fun MiniPlayer(
             modifier =
                 modifier
                     .then(
-                        if (isLiquidGlassEnabled == DataStoreManager.TRUE) {
+                        if (useGlassSurface) {
                             Modifier.liquidGlass(backdrop, layer, luminance, RoundedCornerShape(16.dp))
                         } else {
                             Modifier
