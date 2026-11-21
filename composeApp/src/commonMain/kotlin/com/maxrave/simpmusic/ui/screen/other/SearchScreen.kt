@@ -321,7 +321,7 @@ fun SearchScreen(
     // immediately when the field loses focus or a full search is submitted.
     LaunchedEffect(searchText, isFocused, isSearchSubmitted) {
         val normalizedQuery = searchText.trim()
-        if (isFocused && !isSearchSubmitted && normalizedQuery.length >= 2) {
+        if (isFocused && !isSearchSubmitted && normalizedQuery.isNotEmpty()) {
             searchViewModel.suggestQuery(normalizedQuery)
         } else {
             searchViewModel.suggestQuery("")
@@ -357,7 +357,7 @@ fun SearchScreen(
 
     LaunchedEffect(isExpanded, searchText, isFocused) {
         searchUIType =
-            if (searchText.trim().length >= 2 && isExpanded) {
+            if (searchText.trim().isNotEmpty() && isExpanded) {
                 SearchUIType.SEARCH_SUGGESTIONS
             } else if (isFocused && isExpanded) {
                 SearchUIType.SEARCH_HISTORY
@@ -481,7 +481,7 @@ fun SearchScreen(
                         modifier =
                             Modifier
                                 // 48 dp search dock + 12 dp dock clearance + 12 dp visual gap.
-                                .padding(bottom = 72.dp)
+                                .padding(bottom = searchBarHeight + 16.dp)
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
                                 .widthIn(max = 344.dp)
@@ -1320,7 +1320,7 @@ fun SearchScreen(
                 // Filter chips ride along inside the blurred block instead of sitting in the
                 // results branch. That way searchBarHeight covers them too, results scroll
                 // underneath the whole thing, and the glass has something to blur.
-                AnimatedVisibility(visible = searchUIType == SearchUIType.SEARCH_RESULTS) {
+                AnimatedVisibility(visible = isKeyboardVisible || searchUIType == SearchUIType.SEARCH_RESULTS) {
                     Row(
                         modifier =
                             Modifier
@@ -1337,7 +1337,7 @@ fun SearchScreen(
                                 text = stringResource(id.toStringRes()),
                                 backdrop = chipBackdrop,
                             ) {
-                                searchViewModel.setSearchType(id)
+                                searchViewModel.setSearchType(id, requery = isSearchSubmitted)
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                         }
