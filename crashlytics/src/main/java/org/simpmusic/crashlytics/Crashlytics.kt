@@ -2,13 +2,34 @@ package org.simpmusic.crashlytics
 
 import android.content.Context
 import android.util.Log
+import com.maxrave.logger.Logger
 import com.maxrave.domain.data.player.PlayerError
 import io.sentry.Sentry
 import io.sentry.android.core.SentryAndroid
 
 // Sent crash to Sentry
 fun reportCrash(throwable: Throwable) {
+    Logger.e("Crashlytics", "Uncaught exception: ${throwable.message}\n${throwable.stackTraceToString()}")
     Sentry.captureException(throwable)
+}
+
+/**
+ * Installed after CustomActivityOnCrash so the complete fatal stack trace reaches the on-disk
+ * app/error logs before the previous handler restarts or terminates the process.
+ */
+fun installCrashLogging() {
+    val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+        runCatching {
+            Logger.e("Crashlytics", "FATAL on ${thread.name}: ${throwable.message}\n${throwable.stackTraceToString()}")
+            Sentry.captureException(throwable)
+        }
+        previousHandler?.uncaughtException(thread, throwable)
+            ?: run {
+                android.os.Process.killProcess(android.os.Process.myPid())
+                kotlin.system.exitProcess(10)
+            }
+    }
 }
 
 private const val APP_OPEN = "app.open"
