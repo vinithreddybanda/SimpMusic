@@ -19,6 +19,9 @@ import com.maxrave.logger.LogLevel
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.viewModel.base.BaseViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -263,124 +266,86 @@ class SearchViewModel(
 
     fun searchAll(query: String) {
         prepareSearch(query, SearchType.ALL)
-        activeSearchJob = viewModelScope.launch {
-            var song = ArrayList<SongsResult>()
-            val video = ArrayList<VideosResult>()
-            var album = ArrayList<AlbumsResult>()
-            var artist = ArrayList<ArtistsResult>()
-            var playlist = ArrayList<PlaylistsResult>()
-            var featuredPlaylist = ArrayList<PlaylistsResult>()
-            var podcast = ArrayList<PlaylistsResult>()
-            val temp: ArrayList<SearchResultType> = ArrayList()
-            var completedRequests = 0
+        activeSearchJob =
+            viewModelScope.launch {
+                var song = ArrayList<SongsResult>()
+                var video = ArrayList<VideosResult>()
+                var album = ArrayList<AlbumsResult>()
+                var artist = ArrayList<ArtistsResult>()
+                var playlist = ArrayList<PlaylistsResult>()
+                var featuredPlaylist = ArrayList<PlaylistsResult>()
+                var podcast = ArrayList<PlaylistsResult>()
 
-            val job1 =
-                launch {
-                    searchRepository.getSearchDataSong(query).collect { values ->
-                        when (values) {
-                            is Resource.Success -> { completedRequests++; values.data?.let { song = it } }
-                            is Resource.Error -> { completedRequests++ }
-                        }
+                // Keep the same seven upstream repository requests, but isolate failures per
+                // category. A malformed response from one endpoint must not cancel sibling jobs
+                // and crash the whole search screen.
+                val successfulCategories =
+                    coroutineScope {
+                        listOf(
+                            async {
+                                collectSearchCategory("songs", searchRepository.getSearchDataSong(query)) {
+                                    it?.let { values -> song = ArrayList(values) }
+                                }
+                            },
+                            async {
+                                collectSearchCategory("artists", searchRepository.getSearchDataArtist(query)) {
+                                    it?.let { values -> artist = ArrayList(values) }
+                                }
+                            },
+                            async {
+                                collectSearchCategory("albums", searchRepository.getSearchDataAlbum(query)) {
+                                    it?.let { values -> album = ArrayList(values) }
+                                }
+                            },
+                            async {
+                                collectSearchCategory("playlists", searchRepository.getSearchDataPlaylist(query)) {
+                                    it?.let { values -> playlist = ArrayList(values) }
+                                }
+                            },
+                            async {
+                                collectSearchCategory("videos", searchRepository.getSearchDataVideo(query)) {
+                                    it?.let { values -> video = ArrayList(values) }
+                                }
+                            },
+                            async {
+                                collectSearchCategory(
+                                    "featured playlists",
+                                    searchRepository.getSearchDataFeaturedPlaylist(query),
+                                ) {
+                                    it?.let { values -> featuredPlaylist = ArrayList(values) }
+                                }
+                            },
+                            async {
+                                collectSearchCategory("podcasts", searchRepository.getSearchDataPodcast(query)) {
+                                    it?.let { values -> podcast = ArrayList(values) }
+                                }
+                            },
+                        ).awaitAll()
                     }
-                }
-            val job2 =
-                launch {
-                    searchRepository.getSearchDataArtist(query).collect { values ->
-                        when (values) {
-                            is Resource.Success -> { completedRequests++; values.data?.let { artist = it } }
-                            is Resource.Error -> { completedRequests++ }
-                        }
-                    }
-                }
-            val job3 =
-                launch {
-                    searchRepository
-                        .getSearchDataAlbum(query)
-                        .collect { values ->
-                            when (values) {
-                                is Resource.Success -> { completedRequests++; values.data?.let { album = it } }
-                                is Resource.Error -> { completedRequests++ }
-                            }
-                        }
-                }
-            val job4 =
-                launch {
-                    searchRepository.getSearchDataPlaylist(query).collect { values ->
-                        when (values) {
-                            is Resource.Success -> { completedRequests++; values.data?.let { playlist = it } }
-                            is Resource.Error -> { completedRequests++ }
-                        }
-                    }
-                }
-            val job5 =
-                launch {
-                    searchRepository.getSearchDataVideo(query).collect { values ->
-                        when (values) {
-                            is Resource.Success -> { completedRequests++; values.data?.let { video.addAll(it) } }
-                            is Resource.Error -> { completedRequests++ }
-                        }
-                    }
-                }
-            val job6 =
-                launch {
-                    searchRepository.getSearchDataFeaturedPlaylist(query).collect { values ->
-                        when (values) {
-                            is Resource.Success -> { completedRequests++; values.data?.let { featuredPlaylist = it } }
-                            is Resource.Error -> { completedRequests++ }
-                        }
-                    }
-                }
-            val job7 =
-                launch {
-                    searchRepository.getSearchDataPodcast(query).collect { values ->
-                        when (values) {
-                            is Resource.Success -> { completedRequests++; values.data?.let { podcast = it } }
-                            is Resource.Error -> { completedRequests++ }
-                        }
-                    }
-                }
-            job1.join()
-            job2.join()
-            job3.join()
-            job4.join()
-            job5.join()
-            job6.join()
-            job7.join()
 
-            if (completedRequests == 0) {
-                log("Search All completed without any repository result emissions", LogLevel.ERROR)
-                _searchScreenUIState.value = SearchScreenUIState.Error
-                return@launch
-            }
-            if (completedRequests < 7) {
-                log("Search All returned partial results ($completedRequests/7 categories)", LogLevel.WARN)
-            }
+                if (successfulCategories.none { it }) {
+                    log("Search All failed: all seven category requests failed or returned no success", LogLevel.ERROR)
+                    _searchScreenUIState.value = SearchScreenUIState.Error
+                    return@launch
+                }
 
-            try {
+                val combinedResults = ArrayList<SearchResultType>()
                 if (artist.size >= 3) {
-                    for (i in 0..2) {
-                        temp += artist[i]
-                    }
-                    temp.addAll(song)
-                    temp.addAll(video)
-                    temp.addAll(album)
-                    temp.addAll(playlist)
-                    temp.addAll(featuredPlaylist)
-                    temp.addAll(podcast)
+                    combinedResults.addAll(artist.take(3))
                 } else {
-                    temp.addAll(artist)
-                    temp.addAll(song)
-                    temp.addAll(video)
-                    temp.addAll(album)
-                    temp.addAll(playlist)
-                    temp.addAll(featuredPlaylist)
-                    temp.addAll(podcast)
+                    combinedResults.addAll(artist)
                 }
+                combinedResults.addAll(song)
+                combinedResults.addAll(video)
+                combinedResults.addAll(album)
+                combinedResults.addAll(playlist)
+                combinedResults.addAll(featuredPlaylist)
+                combinedResults.addAll(podcast)
 
                 _searchScreenState.update { state ->
                     state.copy(
                         searchType = SearchType.ALL,
-                        searchAllResult = temp,
+                        searchAllResult = combinedResults,
                         searchSongsResult = song,
                         searchArtistsResult = artist,
                         searchAlbumsResult = album,
@@ -391,11 +356,36 @@ class SearchViewModel(
                     )
                 }
                 _searchScreenUIState.value = SearchScreenUIState.Success
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _searchScreenUIState.value = SearchScreenUIState.Error
+                log(
+                    "Search All completed: successful categories=${successfulCategories.count { it }}/7, results=${combinedResults.size}",
+                )
             }
+    }
+
+    private suspend fun <T> collectSearchCategory(
+        category: String,
+        results: Flow<Resource<T>>,
+        onSuccess: (T?) -> Unit,
+    ): Boolean {
+        var receivedSuccess = false
+        try {
+            results.collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        receivedSuccess = true
+                        onSuccess(resource.data)
+                    }
+                    is Resource.Error -> {
+                        log("Search category '$category' returned an error: ${resource.message}", LogLevel.ERROR)
+                    }
+                }
+            }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (exception: Exception) {
+            logSearchFailure("$category search retrieval", exception)
         }
+        return receivedSuccess
     }
 
     fun logSearchEvent(message: String) {
