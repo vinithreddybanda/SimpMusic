@@ -1283,7 +1283,7 @@ fun SearchScreen(
                                 text = stringResource(id.toStringRes()),
                                 backdrop = chipBackdrop,
                             ) {
-                                searchViewModel.setSearchType(id, requery = isSearchSubmitted)
+                                searchViewModel.setSearchType(id)
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                         }
