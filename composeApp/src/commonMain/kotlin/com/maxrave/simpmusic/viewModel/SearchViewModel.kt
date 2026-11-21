@@ -592,5 +592,6 @@ class SearchViewModel(
         // category, so changing a filter must display cached results, not launch duplicate requests.
         _searchScreenState.update { state ->
             state.copy(searchType = searchType)
-        }    }
+        }
+    }
 }
