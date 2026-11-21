@@ -114,7 +114,11 @@ class SearchViewModel(
 
     private val requestedArtwork = mutableSetOf<String>()
 
-    // Suggestions are requested for every edit. Keep only the latest request alive.
+    // Keep the active query and full-search job so changing a filter cannot show stale results.
+    private var currentSearchQuery: String = ""
+    private var activeSearchJob: Job? = null
+
+    // Suggestions are requested for every non-empty edit. Keep only the latest request alive.
     private var suggestQueryJob: Job? = null
     private var suggestQueryGeneration: Long = 0L
 
@@ -193,9 +197,28 @@ class SearchViewModel(
         }
     }
 
-    fun searchSongs(query: String) {
+    private fun prepareSearch(query: String, type: SearchType) {
+        currentSearchQuery = query.trim()
+        activeSearchJob?.cancel()
         _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        _searchScreenState.update { state ->
+            state.copy(
+                searchType = type,
+                searchAllResult = emptyList(),
+                searchSongsResult = emptyList(),
+                searchVideosResult = emptyList(),
+                searchAlbumsResult = emptyList(),
+                searchArtistsResult = emptyList(),
+                searchPlaylistsResult = emptyList(),
+                searchFeaturedPlaylistsResult = emptyList(),
+                searchPodcastsResult = emptyList(),
+            )
+        }
+    }
+
+    fun searchSongs(query: String) {
+        prepareSearch(query, SearchType.SONGS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataSong(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -216,8 +239,8 @@ class SearchViewModel(
     }
 
     fun searchAll(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.ALL)
+        activeSearchJob = viewModelScope.launch {
             var song = ArrayList<SongsResult>()
             val video = ArrayList<VideosResult>()
             var album = ArrayList<AlbumsResult>()
@@ -358,7 +381,7 @@ class SearchViewModel(
         val requestGeneration = ++suggestQueryGeneration
 
         val normalizedQuery = query.trim()
-        if (normalizedQuery.length < 2) {
+        if (normalizedQuery.isEmpty()) {
             _searchScreenState.update { state ->
                 state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
             }
@@ -373,8 +396,6 @@ class SearchViewModel(
         Logger.d(tag, "Search suggestions queued (queryLength=${normalizedQuery.length}, generation=$requestGeneration)")
         suggestQueryJob =
             viewModelScope.launch {
-                delay(300)
-
                 try {
                     Logger.d(tag, "Search suggestions request started (generation=$requestGeneration)")
                     searchRepository.getSuggestQuery(normalizedQuery).collectLatest { values ->
@@ -425,8 +446,8 @@ class SearchViewModel(
     }
 
     fun searchAlbums(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.ALBUMS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataAlbum(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -450,8 +471,8 @@ class SearchViewModel(
     }
 
     fun searchFeaturedPlaylist(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.FEATURED_PLAYLISTS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataFeaturedPlaylist(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -475,8 +496,8 @@ class SearchViewModel(
     }
 
     fun searchPodcast(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.PODCASTS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataPodcast(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -500,8 +521,8 @@ class SearchViewModel(
     }
 
     fun searchArtists(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.ARTISTS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataArtist(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -525,8 +546,8 @@ class SearchViewModel(
     }
 
     fun searchPlaylists(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.PLAYLISTS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataPlaylist(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -550,8 +571,8 @@ class SearchViewModel(
     }
 
     fun searchVideos(query: String) {
-        _searchScreenUIState.value = SearchScreenUIState.Loading
-        viewModelScope.launch {
+        prepareSearch(query, SearchType.VIDEOS)
+        activeSearchJob = viewModelScope.launch {
             searchRepository.getSearchDataVideo(query).collect { values ->
                 when (values) {
                     is Resource.Success -> {
@@ -574,9 +595,24 @@ class SearchViewModel(
         }
     }
 
-    fun setSearchType(searchType: SearchType) {
+    fun setSearchType(
+        searchType: SearchType,
+        requery: Boolean = true,
+    ) {
         _searchScreenState.update { state ->
             state.copy(searchType = searchType)
+        }
+        if (requery && currentSearchQuery.isNotBlank()) {
+            when (searchType) {
+                SearchType.ALL -> searchAll(currentSearchQuery)
+                SearchType.SONGS -> searchSongs(currentSearchQuery)
+                SearchType.VIDEOS -> searchVideos(currentSearchQuery)
+                SearchType.ALBUMS -> searchAlbums(currentSearchQuery)
+                SearchType.ARTISTS -> searchArtists(currentSearchQuery)
+                SearchType.PLAYLISTS -> searchPlaylists(currentSearchQuery)
+                SearchType.FEATURED_PLAYLISTS -> searchFeaturedPlaylist(currentSearchQuery)
+                SearchType.PODCASTS -> searchPodcast(currentSearchQuery)
+            }
         }
     }
 }
