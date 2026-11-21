@@ -468,9 +468,21 @@ fun SearchScreen(
     ) {
         // Content scrolls under the bar (it is the haze source), so it needs top padding
         // equal to the bar's measured height to keep its first item clear of it.
+        // Keep the backdrop recorder outside the glass surfaces that sample it.
+        // Recording the Crossfade subtree also records the suggestions glass itself,
+        // creating a RuntimeShader feedback loop when the first suggestion is composed.
+        if (LocalLiquidGlassEnabled.current) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .layerBackdrop(chipBackdrop),
+            )
+        }
         Crossfade(
             targetState = searchUIType,
-            modifier = Modifier.fillMaxSize().then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(chipBackdrop) else Modifier).hazeSource(hazeState),
+            modifier = Modifier.fillMaxSize().hazeSource(hazeState),
         ) {
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
