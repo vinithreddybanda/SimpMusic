@@ -21,6 +21,7 @@ import com.maxrave.simpmusic.viewModel.base.BaseViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -216,22 +217,44 @@ class SearchViewModel(
         }
     }
 
+    private suspend fun <T> collectSearchResults(
+        results: Flow<Resource<T>>,
+        onSuccess: (T?) -> Unit,
+    ) {
+        var receivedEmission = false
+        try {
+            results.collect { resource ->
+                receivedEmission = true
+                when (resource) {
+                    is Resource.Success -> {
+                        onSuccess(resource.data)
+                        _searchScreenUIState.value = SearchScreenUIState.Success
+                    }
+                    is Resource.Error -> {
+                        log("Search repository error: ${resource.message}", LogLevel.ERROR)
+                        _searchScreenUIState.value = SearchScreenUIState.Error
+                    }
+                }
+            }
+            if (!receivedEmission) {
+                log("Search repository completed without a result emission", LogLevel.ERROR)
+                _searchScreenUIState.value = SearchScreenUIState.Error
+            }
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (exception: Exception) {
+            logSearchFailure("full search request", exception)
+            _searchScreenUIState.value = SearchScreenUIState.Error
+        }
+    }
+
     fun searchSongs(query: String) {
         prepareSearch(query, SearchType.SONGS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataSong(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { songsList ->
-                            _searchScreenState.update { state ->
-                                state.copy(searchSongsResult = songsList)
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataSong(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchSongsResult = results)
                     }
                 }
             }
@@ -448,22 +471,10 @@ class SearchViewModel(
     fun searchAlbums(query: String) {
         prepareSearch(query, SearchType.ALBUMS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataAlbum(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { albumsList ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    searchType = SearchType.ALBUMS,
-                                    searchAlbumsResult = albumsList,
-                                )
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataAlbum(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchAlbumsResult = results)
                     }
                 }
             }
@@ -473,22 +484,10 @@ class SearchViewModel(
     fun searchFeaturedPlaylist(query: String) {
         prepareSearch(query, SearchType.FEATURED_PLAYLISTS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataFeaturedPlaylist(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { featuredPlaylistList ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    searchType = SearchType.FEATURED_PLAYLISTS,
-                                    searchFeaturedPlaylistsResult = featuredPlaylistList,
-                                )
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataFeaturedPlaylist(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchFeaturedPlaylistsResult = results)
                     }
                 }
             }
@@ -498,22 +497,10 @@ class SearchViewModel(
     fun searchPodcast(query: String) {
         prepareSearch(query, SearchType.PODCASTS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataPodcast(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { podcastList ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    searchType = SearchType.PODCASTS,
-                                    searchPodcastsResult = podcastList,
-                                )
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataPodcast(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchPodcastsResult = results)
                     }
                 }
             }
@@ -523,22 +510,10 @@ class SearchViewModel(
     fun searchArtists(query: String) {
         prepareSearch(query, SearchType.ARTISTS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataArtist(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { artistsList ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    searchType = SearchType.ARTISTS,
-                                    searchArtistsResult = artistsList,
-                                )
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataArtist(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchArtistsResult = results)
                     }
                 }
             }
@@ -548,22 +523,10 @@ class SearchViewModel(
     fun searchPlaylists(query: String) {
         prepareSearch(query, SearchType.PLAYLISTS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataPlaylist(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { playlistsList ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    searchType = SearchType.PLAYLISTS,
-                                    searchPlaylistsResult = playlistsList,
-                                )
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataPlaylist(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchPlaylistsResult = results)
                     }
                 }
             }
@@ -573,22 +536,10 @@ class SearchViewModel(
     fun searchVideos(query: String) {
         prepareSearch(query, SearchType.VIDEOS)
         activeSearchJob = viewModelScope.launch {
-            searchRepository.getSearchDataVideo(query).collect { values ->
-                when (values) {
-                    is Resource.Success -> {
-                        values.data?.let { videosList ->
-                            _searchScreenState.update { state ->
-                                state.copy(
-                                    searchType = SearchType.VIDEOS,
-                                    searchVideosResult = videosList,
-                                )
-                            }
-                        }
-                        _searchScreenUIState.value = SearchScreenUIState.Success
-                    }
-
-                    is Resource.Error -> {
-                        _searchScreenUIState.value = SearchScreenUIState.Error
+            collectSearchResults(searchRepository.getSearchDataVideo(query)) { results ->
+                if (results != null) {
+                    _searchScreenState.update { state ->
+                        state.copy(searchVideosResult = results)
                     }
                 }
             }
