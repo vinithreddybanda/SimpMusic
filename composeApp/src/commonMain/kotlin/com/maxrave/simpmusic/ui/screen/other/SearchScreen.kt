@@ -11,6 +11,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.WindowInsets
@@ -49,8 +52,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -73,6 +74,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -80,6 +82,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -1106,227 +1109,192 @@ fun SearchScreen(
             }
         }
         Box(
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter),
         ) {
-            // Animate only the background so scrolling keeps the search input and its focus.
-            AnimatedVisibility(
-                visible = true,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = if (isKeyboardVisible) 12.dp else if (isMiniPlayerVisible) 140.dp else 76.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .widthIn(max = 344.dp)
-                        .height(48.dp),
-                enter = fadeIn(tween(300)),
-                exit = fadeOut(tween(300)),
-                label = "search_bar_scrim",
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .liquidGlass(
-                                backdrop = chipBackdrop,
-                                shape = CircleShape,
-                                interactive = true,
-                                minScrim = 0.04f,
-                                maxScrim = 0.16f,
-                            ),
-                )
-            }
             Column(
                 modifier =
                     Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(
+                            bottom = if (isKeyboardVisible) 4.dp else if (isMiniPlayerVisible) 140.dp else 76.dp,
+                        )
                         .fillMaxWidth()
-                        .padding(bottom = if (isKeyboardVisible) 12.dp else if (isMiniPlayerVisible) 140.dp else 76.dp, top = 4.dp)
-                        // Measure the dock itself, not its keyboard inset, for list offsets.
-                        .onGloballyPositioned { searchBarHeightPx = it.size.height },
+                        .padding(horizontal = 16.dp)
+                        .widthIn(max = 344.dp)
+                        .onGloballyPositioned { searchBarHeightPx = it.size.height }
+                        .liquidGlass(
+                            backdrop = chipBackdrop,
+                            shape = RoundedCornerShape(28.dp),
+                            interactive = true,
+                            minScrim = 0.04f,
+                            maxScrim = 0.16f,
+                        )
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-        AnimatedVisibility(visible = selectionState.isActive) {
-            SongSelectionTopAppBar(
-                state = selectionState,
-                onSelectAll = {
-                    val visible =
-                        when (searchScreenState.searchType) {
-                            SearchType.SONGS -> searchScreenState.searchSongsResult.map { it.videoId }
-                            SearchType.VIDEOS -> searchScreenState.searchVideosResult.map { it.videoId }
-                            SearchType.ALL ->
-                                searchScreenState.searchAllResult.mapNotNull {
-                                    (it as? SongsResult)?.videoId ?: (it as? VideosResult)?.videoId
+                AnimatedVisibility(visible = selectionState.isActive) {
+                    SongSelectionTopAppBar(
+                        state = selectionState,
+                        onSelectAll = {
+                            val visible =
+                                when (searchScreenState.searchType) {
+                                    SearchType.SONGS -> searchScreenState.searchSongsResult.map { it.videoId }
+                                    SearchType.VIDEOS -> searchScreenState.searchVideosResult.map { it.videoId }
+                                    SearchType.ALL ->
+                                        searchScreenState.searchAllResult.mapNotNull {
+                                            (it as? SongsResult)?.videoId ?: (it as? VideosResult)?.videoId
+                                        }
+                                    else -> emptyList()
                                 }
-                            else -> emptyList()
-                        }
-                    selectionState.toggleSelectAll(visible)
-                },
-                onOpenActions = { showSelectionSheet = true },
-                containerColor = Color.Transparent,
-                // Zero here AND on the SearchBar below: the Column that holds them both consumes
-                // the status bar once, for the whole stack. Leaving it on either child reserves it
-                // a second time — which is the slab of padding this screen used to show.
-                windowInsets = WindowInsets(0),
-            )
-        }
-        // Search Bar with Animated Placeholder
-        SearchBar(
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = searchText,
-                    onQueryChange = { newText ->
-                        searchText = newText
-                        searchViewModel.logSearchEvent("Search input changed (length=${newText.length})")
-                    },
-                    onSearch = { query ->
-                        // A pasted YouTube link is a destination, not a query. Translating it into
-                        // the app's own deep link hands it to the same intent flow that handles
-                        // shared links, so it plays or opens straight away instead of being
-                        // searched for as text. Anything else falls through to a normal search.
-                        val deepLink = query.toAppDeepLinkOrNull()
-                        if (deepLink != null) {
-                            focusManager.clearFocus()
-                            sharedViewModel.setIntent(GenericIntent(data = deepLink))
-                        } else if (query.isNotEmpty()) {
-                            isSearchSubmitted = true
-                            focusManager.clearFocus()
-                            searchViewModel.insertSearchHistory(query)
-                            when (searchScreenState.searchType) {
-                                SearchType.ALL -> searchViewModel.searchAll(query)
-                                SearchType.SONGS -> searchViewModel.searchSongs(query)
-                                SearchType.VIDEOS -> searchViewModel.searchVideos(query)
-                                SearchType.ALBUMS -> searchViewModel.searchAlbums(query)
-                                SearchType.ARTISTS -> searchViewModel.searchArtists(query)
-                                SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(query)
-                                SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(query)
-                                SearchType.PODCASTS -> searchViewModel.searchPodcast(query)
+                            selectionState.toggleSelectAll(visible)
+                        },
+                        onOpenActions = { showSelectionSheet = true },
+                        containerColor = Color.Transparent,
+                        windowInsets = WindowInsets(0),
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Crossfade(
+                        targetState = isSearchPanelVisible,
+                        modifier = Modifier.size(44.dp),
+                        animationSpec = tween(200),
+                        label = "search_back_icon",
+                    ) { showBack ->
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            if (showBack) {
+                                IconButton(onClick = dismissSearchPanel) {
+                                    Icon(
+                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                        contentDescription = "Back",
+                                    )
+                                }
+                            } else {
+                                Icon(
+                                    imageVector = SimpIcons.Search,
+                                    contentDescription = "Search",
+                                )
                             }
                         }
-                    },
-                    expanded = false,
-                    onExpandedChange = {},
-                    enabled = true,
-                    placeholder = {
-                        // Animated placeholder text
-                        AnimatedContent(
-                            targetState = currentPlaceholderIndex,
-                            transitionSpec = {
-                                (
-                                    fadeIn(animationSpec = tween(500)) +
-                                        slideInVertically { height -> height }
-                                ).togetherWith(
-                                    fadeOut(animationSpec = tween(500)) +
-                                        slideOutVertically { height -> -height },
-                                )
-                            },
-                            label = "placeholder_animation",
-                        ) { index ->
-                            Text(
-                                text = placeholderTexts[index],
-                                style = typo().labelMedium,
-                            )
-                        }
-                    },
-                    leadingIcon = {
-                        Crossfade(
-                            targetState = isSearchPanelVisible,
-                            modifier = Modifier.size(48.dp),
-                            animationSpec = tween(200),
-                            label = "search_back_icon",
-                        ) { showBack ->
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (showBack) {
-                                    IconButton(
-                                        onClick = dismissSearchPanel,
-                                        enabled = isSearchPanelVisible,
-                                    ) {
-                                        Icon(
-                                            imageVector = SimpIcons.ArrowBackIosNew,
-                                            contentDescription = "Back",
+                    }
+
+                    BasicTextField(
+                        value = searchText,
+                        onValueChange = { newText ->
+                            searchText = newText
+                            searchViewModel.logSearchEvent("Search input changed (length=${newText.length})")
+                        },
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester)
+                                .onFocusChanged { isFocused = it.isFocused },
+                        singleLine = true,
+                        textStyle = typo().bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions =
+                            KeyboardActions(
+                                onSearch = {
+                                    val query = searchText.trim()
+                                    val deepLink = query.toAppDeepLinkOrNull()
+                                    if (deepLink != null) {
+                                        focusManager.clearFocus()
+                                        sharedViewModel.setIntent(GenericIntent(data = deepLink))
+                                    } else if (query.isNotEmpty()) {
+                                        isSearchSubmitted = true
+                                        focusManager.clearFocus()
+                                        searchViewModel.insertSearchHistory(query)
+                                        when (searchScreenState.searchType) {
+                                            SearchType.ALL -> searchViewModel.searchAll(query)
+                                            SearchType.SONGS -> searchViewModel.searchSongs(query)
+                                            SearchType.VIDEOS -> searchViewModel.searchVideos(query)
+                                            SearchType.ALBUMS -> searchViewModel.searchAlbums(query)
+                                            SearchType.ARTISTS -> searchViewModel.searchArtists(query)
+                                            SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(query)
+                                            SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(query)
+                                            SearchType.PODCASTS -> searchViewModel.searchPodcast(query)
+                                        }
+                                    }
+                                },
+                            ),
+                        decorationBox = { innerTextField ->
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (searchText.isEmpty()) {
+                                    AnimatedContent(
+                                        targetState = currentPlaceholderIndex,
+                                        transitionSpec = {
+                                            (
+                                                fadeIn(animationSpec = tween(500)) +
+                                                    slideInVertically { height -> height }
+                                            ).togetherWith(
+                                                fadeOut(animationSpec = tween(500)) +
+                                                    slideOutVertically { height -> -height },
+                                            )
+                                        },
+                                        label = "placeholder_animation",
+                                    ) { index ->
+                                        Text(
+                                            text = placeholderTexts[index],
+                                            style = typo().labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
                                         )
                                     }
-                                } else {
-                                    Icon(
-                                        imageVector = SimpIcons.Search,
-                                        contentDescription = "Search",
-                                    )
                                 }
+                                innerTextField()
                             }
+                        },
+                    )
+
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            modifier = Modifier.clip(CircleShape),
+                            onClick = {
+                                searchText = ""
+                                isSearchSubmitted = false
+                            },
+                        ) {
+                            Icon(imageVector = SimpIcons.Close, contentDescription = "Clear search")
                         }
-                    },
-                    trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(
-                                modifier = Modifier.clip(CircleShape),
-                                onClick = { navController.navigate(AppLogDestination) },
-                            ) {
-                                Icon(
-                                    imageVector = SimpIcons.Error,
-                                    contentDescription = "Open app logs",
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                            if (searchText.isNotEmpty()) {
-                                IconButton(
-                                    modifier = Modifier.clip(CircleShape),
-                                    onClick = {
-                                        searchText = ""
-                                        isSearchSubmitted = false
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = SimpIcons.Close,
-                                        contentDescription = "Clear search",
-                                    )
-                                }
-                            } else if (getPlatform() == Platform.Android) {
-                                IconButton(
-                                    modifier = Modifier.clip(CircleShape),
-                                    onClick = { showRecognition = true },
-                                ) {
-                                    Icon(
-                                        imageVector = SimpIcons.GraphicEq,
-                                        contentDescription = stringResource(Res.string.recognize_song),
-                                    )
-                                }
-                            }
+                    } else if (getPlatform() == Platform.Android) {
+                        IconButton(
+                            modifier = Modifier.clip(CircleShape),
+                            onClick = { showRecognition = true },
+                        ) {
+                            Icon(
+                                imageVector = SimpIcons.GraphicEq,
+                                contentDescription = stringResource(Res.string.recognize_song),
+                            )
                         }
-                    },
-                )
-            },
-            expanded = false,
-            onExpandedChange = {},
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .widthIn(max = 344.dp)
-                    .height(48.dp)
-                    .focusRequester(focusRequester)
-                    .onFocusChanged {
-                        isFocused = it.isFocused
-                    },
-            shape = CircleShape,
-            colors = SearchBarDefaults.colors(containerColor = Color.Transparent),
-            // See the note on SongSelectionTopAppBar above — the Column owns the status-bar inset.
-            windowInsets = WindowInsets(0),
-            content = {},
-        )
-                // Filter chips ride along inside the blurred block instead of sitting in the
-                // results branch. That way searchBarHeight covers them too, results scroll
-                // underneath the whole thing, and the glass has something to blur.
-                AnimatedVisibility(visible = isKeyboardVisible || searchUIType == SearchUIType.SEARCH_RESULTS) {
+                    }
+                    IconButton(
+                        modifier = Modifier.clip(CircleShape),
+                        onClick = { navController.navigate(AppLogDestination) },
+                    ) {
+                        Icon(
+                            imageVector = SimpIcons.Error,
+                            contentDescription = "Open app logs",
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = isKeyboardVisible || searchUIType == SearchUIType.SEARCH_RESULTS,
+                ) {
                     Row(
                         modifier =
                             Modifier
+                                .fillMaxWidth()
                                 .horizontalScroll(chipRowState)
-                                .padding(top = 10.dp)
-                                .padding(horizontal = 12.dp),
+                                .padding(top = 6.dp, bottom = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         SearchType.entries.forEach { id ->
                             val isSelected = id == searchScreenState.searchType
