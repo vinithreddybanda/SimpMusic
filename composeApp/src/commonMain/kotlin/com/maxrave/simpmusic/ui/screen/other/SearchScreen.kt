@@ -338,6 +338,20 @@ fun SearchScreen(
         }
     }
 
+    LaunchedEffect(searchUIType) {
+        searchViewModel.logSearchEvent("Search UI state: $searchUIType")
+    }
+
+    LaunchedEffect(isKeyboardVisible) {
+        if (isKeyboardVisible) {
+            delay(150)
+            val imeBottomPx = WindowInsets.ime.getBottom(LocalDensity.current)
+            searchViewModel.logSearchEvent("Keyboard shown (IME bottom inset=${imeBottomPx}px)")
+        } else {
+            searchViewModel.logSearchEvent("Keyboard hidden")
+        }
+    }
+
     LaunchedEffect(isExpanded, searchText, isFocused) {
         searchUIType =
             if (searchText.trim().length >= 2 && isExpanded) {
@@ -501,12 +515,6 @@ fun SearchScreen(
                                     )
                                 }
                                 TextButton(onClick = { navController.navigate(AppLogDestination) }) {
-                                    Icon(
-                                        imageVector = SimpIcons.Error,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                    Spacer(Modifier.width(6.dp))
                                     Text("Logs")
                                 }
                             }
@@ -1182,6 +1190,7 @@ fun SearchScreen(
                     query = searchText,
                     onQueryChange = { newText ->
                         searchText = newText
+                        searchViewModel.logSearchEvent("Search input changed (length=${newText.length})")
                     },
                     onSearch = { query ->
                         // A pasted YouTube link is a destination, not a query. Translating it into
