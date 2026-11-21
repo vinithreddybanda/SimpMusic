@@ -272,13 +272,14 @@ class SearchViewModel(
             var featuredPlaylist = ArrayList<PlaylistsResult>()
             var podcast = ArrayList<PlaylistsResult>()
             val temp: ArrayList<SearchResultType> = ArrayList()
+            var completedRequests = 0
 
             val job1 =
                 launch {
                     searchRepository.getSearchDataSong(query).collect { values ->
                         when (values) {
-                            is Resource.Success -> values.data?.let { song = it }
-                            is Resource.Error -> {}
+                            is Resource.Success -> { completedRequests++; values.data?.let { song = it } }
+                            is Resource.Error -> { completedRequests++ }
                         }
                     }
                 }
@@ -286,8 +287,8 @@ class SearchViewModel(
                 launch {
                     searchRepository.getSearchDataArtist(query).collect { values ->
                         when (values) {
-                            is Resource.Success -> values.data?.let { artist = it }
-                            is Resource.Error -> {}
+                            is Resource.Success -> { completedRequests++; values.data?.let { artist = it } }
+                            is Resource.Error -> { completedRequests++ }
                         }
                     }
                 }
@@ -297,8 +298,8 @@ class SearchViewModel(
                         .getSearchDataAlbum(query)
                         .collect { values ->
                             when (values) {
-                                is Resource.Success -> values.data?.let { album = it }
-                                is Resource.Error -> {}
+                                is Resource.Success -> { completedRequests++; values.data?.let { album = it } }
+                                is Resource.Error -> { completedRequests++ }
                             }
                         }
                 }
@@ -306,8 +307,8 @@ class SearchViewModel(
                 launch {
                     searchRepository.getSearchDataPlaylist(query).collect { values ->
                         when (values) {
-                            is Resource.Success -> values.data?.let { playlist = it }
-                            is Resource.Error -> {}
+                            is Resource.Success -> { completedRequests++; values.data?.let { playlist = it } }
+                            is Resource.Error -> { completedRequests++ }
                         }
                     }
                 }
@@ -315,8 +316,8 @@ class SearchViewModel(
                 launch {
                     searchRepository.getSearchDataVideo(query).collect { values ->
                         when (values) {
-                            is Resource.Success -> values.data?.let { video.addAll(it) }
-                            is Resource.Error -> {}
+                            is Resource.Success -> { completedRequests++; values.data?.let { video.addAll(it) } }
+                            is Resource.Error -> { completedRequests++ }
                         }
                     }
                 }
@@ -324,8 +325,8 @@ class SearchViewModel(
                 launch {
                     searchRepository.getSearchDataFeaturedPlaylist(query).collect { values ->
                         when (values) {
-                            is Resource.Success -> values.data?.let { featuredPlaylist = it }
-                            is Resource.Error -> {}
+                            is Resource.Success -> { completedRequests++; values.data?.let { featuredPlaylist = it } }
+                            is Resource.Error -> { completedRequests++ }
                         }
                     }
                 }
@@ -333,8 +334,8 @@ class SearchViewModel(
                 launch {
                     searchRepository.getSearchDataPodcast(query).collect { values ->
                         when (values) {
-                            is Resource.Success -> values.data?.let { podcast = it }
-                            is Resource.Error -> {}
+                            is Resource.Success -> { completedRequests++; values.data?.let { podcast = it } }
+                            is Resource.Error -> { completedRequests++ }
                         }
                     }
                 }
@@ -345,6 +346,15 @@ class SearchViewModel(
             job5.join()
             job6.join()
             job7.join()
+
+            if (completedRequests == 0) {
+                log("Search All completed without any repository result emissions", LogLevel.ERROR)
+                _searchScreenUIState.value = SearchScreenUIState.Error
+                return@launch
+            }
+            if (completedRequests < 7) {
+                log("Search All returned partial results ($completedRequests/7 categories)", LogLevel.WARN)
+            }
 
             try {
                 if (artist.size >= 3) {
