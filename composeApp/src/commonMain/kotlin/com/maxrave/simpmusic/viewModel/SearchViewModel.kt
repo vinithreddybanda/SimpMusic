@@ -584,12 +584,7 @@ class SearchViewModel(
         }
     }
 
-    fun setSearchType(
-        searchType: SearchType,
-        @Suppress("UNUSED_PARAMETER") requery: Boolean = true,
-    ) {
-        // Upstream only switches the selected category. Search All already fetched every
-        // category, so changing a filter must display cached results, not launch duplicate requests.
+    fun setSearchType(searchType: SearchType) {
         _searchScreenState.update { state ->
             state.copy(searchType = searchType)
         }
