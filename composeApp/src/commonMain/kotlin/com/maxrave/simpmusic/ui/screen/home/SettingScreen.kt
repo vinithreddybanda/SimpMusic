@@ -112,6 +112,8 @@ import com.maxrave.domain.utils.LocalResource
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.Platform
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.expect.ui.LibrarySyncDialog
 import com.maxrave.simpmusic.expect.ui.LoginSyncDialog
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
@@ -133,6 +135,7 @@ import com.maxrave.simpmusic.ui.component.AmbientThemeGlow
 import com.maxrave.simpmusic.ui.component.CenterLoadingBox
 import com.maxrave.simpmusic.ui.component.EndOfPage
 import com.maxrave.simpmusic.ui.component.LoadingDialog
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.component.RippleIconButton
 import com.maxrave.simpmusic.ui.component.SettingGroup
 import com.maxrave.simpmusic.ui.component.SettingItem
@@ -609,6 +612,7 @@ fun SettingScreen(
 
     val hazeState =
         rememberHazeState()
+    val settingGlassBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
 
     val checkForUpdateSubtitle by remember {
         derivedStateOf {
@@ -687,6 +691,7 @@ fun SettingScreen(
         modifier =
             Modifier
                 .padding(horizontal = listSidePadding)
+                .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(settingGlassBackdrop) else Modifier)
                 .hazeSource(hazeState),
     ) {
         item(key = "user_interface") {
@@ -3298,7 +3303,16 @@ fun SettingScreen(
             // The house recipe from AlbumScreen's bars, thinned: ultraThin's built-in tint stacked
             // on this page's dark ground read as a solid lid. 0.3 keeps the blur doing the work and
             // the tint only settling legibility.
-            modifier = Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(settingBarTint, 0.3f)),
+            modifier =
+                Modifier
+                    .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(settingBarTint, 0.3f))
+                    .then(
+                        if (LocalLiquidGlassEnabled.current) {
+                            Modifier.liquidGlass(settingGlassBackdrop, RoundedCornerShape(28.dp), interactive = false)
+                        } else {
+                            Modifier
+                        },
+                    ),
         )
     }
 }
