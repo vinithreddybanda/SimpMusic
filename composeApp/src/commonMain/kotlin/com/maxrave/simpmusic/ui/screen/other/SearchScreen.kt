@@ -521,61 +521,46 @@ fun SearchScreen(
                             }
                         }
                         items(searchScreenState.suggestYTItems) { item ->
-                            try {
-                                SuggestItemRow(
-                                    searchResult = item,
-                                onItemClick = { item ->
+                            SuggestItemRow(
+                                searchResult = item,
+                                onItemClick = { selectedItem ->
                                     try {
-                                        when (item) {
-                                        is SongsResult, is VideosResult -> {
-                                            focusManager.clearFocus()
-                                            val firstTrack: Track = (item as? SongsResult)?.toTrack() ?: (item as VideosResult).toTrack()
-                                            searchViewModel.setQueueData(
-                                                QueueData.Data(
-                                                    listTracks = arrayListOf(firstTrack),
-                                                    firstPlayedTrack = firstTrack,
-                                                    playlistId = "RDAMVM${firstTrack.videoId}",
-                                                    playlistName = "\"${searchText}\" ${getStringBlocking(Res.string.in_search)}",
-                                                    playlistType = PlaylistType.RADIO,
-                                                    continuation = null,
-                                                ),
-                                            )
-                                            searchViewModel.loadMediaItem(firstTrack, type = Config.SONG_CLICK)
-                                        }
+                                        when (selectedItem) {
+                                            is SongsResult, is VideosResult -> {
+                                                focusManager.clearFocus()
+                                                val firstTrack: Track =
+                                                    (selectedItem as? SongsResult)?.toTrack()
+                                                        ?: (selectedItem as VideosResult).toTrack()
+                                                searchViewModel.setQueueData(
+                                                    QueueData.Data(
+                                                        listTracks = arrayListOf(firstTrack),
+                                                        firstPlayedTrack = firstTrack,
+                                                        playlistId = "RDAMVM${firstTrack.videoId}",
+                                                        playlistName = "\"\${searchText}\" ${getStringBlocking(Res.string.in_search)}",
+                                                        playlistType = PlaylistType.RADIO,
+                                                        continuation = null,
+                                                    ),
+                                                )
+                                                searchViewModel.loadMediaItem(firstTrack, type = Config.SONG_CLICK)
+                                            }
 
-                                        is ArtistsResult -> {
-                                            navController.navigate(
-                                                ArtistDestination(item.browseId),
-                                            )
-                                        }
+                                            is ArtistsResult -> {
+                                                navController.navigate(ArtistDestination(selectedItem.browseId))
+                                            }
 
-                                        is AlbumsResult -> {
-                                            navController.navigate(
-                                                AlbumDestination(item.browseId),
-                                            )
-                                        }
+                                            is AlbumsResult -> {
+                                                navController.navigate(AlbumDestination(selectedItem.browseId))
+                                            }
 
-                                        is PlaylistsResult -> {
-                                            navController.navigate(
-                                                PlaylistDestination(
-                                                    item.browseId,
-                                                ),
-                                            )
+                                            is PlaylistsResult -> {
+                                                navController.navigate(PlaylistDestination(selectedItem.browseId))
+                                            }
                                         }
                                     } catch (exception: Exception) {
                                         searchViewModel.logSearchFailure("suggestion selection", exception)
                                     }
                                 },
-                                )
-                            } catch (exception: Exception) {
-                                searchViewModel.logSearchFailure("suggestion row composition", exception)
-                                Text(
-                                    text = "This suggestion could not be displayed.",
-                                    style = typo().bodySmall,
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                                )
-                            }
+                            )
                         }
                         items(searchScreenState.suggestQueries) { suggestion ->
                             Row(
