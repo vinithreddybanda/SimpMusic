@@ -60,6 +60,8 @@ import com.maxrave.domain.utils.toTrack
 import com.maxrave.simpmusic.Platform
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.extension.angledGradientBackground
 import com.maxrave.simpmusic.extension.artworkScrimBrush
 import com.maxrave.simpmusic.extension.barBlurStyle
@@ -72,10 +74,12 @@ import com.maxrave.simpmusic.ui.component.HomeContentCard
 import com.maxrave.simpmusic.ui.component.MoodMomentAndGenreHomeItem
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
 import com.maxrave.simpmusic.ui.component.RippleIconButton
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.component.homeCardAspectRatio
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
+import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.theme.desktopPanelDark
 import com.maxrave.simpmusic.ui.theme.typo
 import com.maxrave.simpmusic.viewModel.BrowseUIState
@@ -137,6 +141,7 @@ fun BrowseScreen(
         } else {
             backgroundColor
         }
+    val glassBackdrop = rememberBackdrop(pageBackground)
     var topHeaderColor by remember { mutableStateOf(backgroundColor) }
     val animatedColor by animateColorAsState(topHeaderColor, tween(500))
     val httpClient = remember { HttpClient(CIO) }
@@ -180,6 +185,7 @@ fun BrowseScreen(
         Box(
             Modifier
                 .fillMaxSize()
+                .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(glassBackdrop) else Modifier)
                 .hazeSource(hazeState),
         ) {
             // Drawn before the list and scrolled away with it, as on Mix for you: the draw-phase
@@ -311,6 +317,16 @@ fun BrowseScreen(
                 ),
             ) {
                 TopAppBar(
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .then(
+                                if (LocalLiquidGlassEnabled.current) {
+                                    Modifier.liquidGlass(glassBackdrop, RoundedCornerShape(28.dp), interactive = false)
+                                } else {
+                                    Modifier
+                                },
+                            ),
                     title = {
                         Text(
                             text = (uiState as? BrowseUIState.Success)?.page?.title ?: title.orEmpty(),
