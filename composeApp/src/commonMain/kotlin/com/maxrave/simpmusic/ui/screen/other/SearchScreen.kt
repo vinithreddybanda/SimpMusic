@@ -235,7 +235,8 @@ fun SearchScreen(
     val moodGridState = rememberLazyGridState()
     val resultsState = rememberLazyListState()
     var searchBarHeightPx by remember { mutableIntStateOf(0) }
-    val searchBarHeight = with(LocalDensity.current) { searchBarHeightPx.toDp() }
+    val density = LocalDensity.current
+    val searchBarHeight = with(density) { searchBarHeightPx.toDp() }
     val isKeyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val isContentAtTop by remember {
         derivedStateOf {
@@ -345,7 +346,7 @@ fun SearchScreen(
     LaunchedEffect(isKeyboardVisible) {
         if (isKeyboardVisible) {
             delay(150)
-            val imeBottomPx = WindowInsets.ime.getBottom(LocalDensity.current)
+            val imeBottomPx = WindowInsets.ime.getBottom(density)
             searchViewModel.logSearchEvent("Keyboard shown (IME bottom inset=${imeBottomPx}px)")
         } else {
             searchViewModel.logSearchEvent("Keyboard hidden")
