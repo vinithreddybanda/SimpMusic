@@ -116,7 +116,6 @@ class SearchViewModel(
     private val requestedArtwork = mutableSetOf<String>()
 
     // Keep the active query and full-search job so changing a filter cannot show stale results.
-    private var currentSearchQuery: String = ""
     private var activeSearchJob: Job? = null
 
     // Suggestions are requested for every non-empty edit. Keep only the latest request alive.
@@ -199,7 +198,6 @@ class SearchViewModel(
     }
 
     private fun prepareSearch(query: String, type: SearchType) {
-        currentSearchQuery = query.trim()
         activeSearchJob?.cancel()
         _searchScreenUIState.value = SearchScreenUIState.Loading
         _searchScreenState.update { state ->
@@ -588,22 +586,11 @@ class SearchViewModel(
 
     fun setSearchType(
         searchType: SearchType,
-        requery: Boolean = true,
+        @Suppress("UNUSED_PARAMETER") requery: Boolean = true,
     ) {
+        // Upstream only switches the selected category. Search All already fetched every
+        // category, so changing a filter must display cached results, not launch duplicate requests.
         _searchScreenState.update { state ->
             state.copy(searchType = searchType)
         }
-        if (requery && currentSearchQuery.isNotBlank()) {
-            when (searchType) {
-                SearchType.ALL -> searchAll(currentSearchQuery)
-                SearchType.SONGS -> searchSongs(currentSearchQuery)
-                SearchType.VIDEOS -> searchVideos(currentSearchQuery)
-                SearchType.ALBUMS -> searchAlbums(currentSearchQuery)
-                SearchType.ARTISTS -> searchArtists(currentSearchQuery)
-                SearchType.PLAYLISTS -> searchPlaylists(currentSearchQuery)
-                SearchType.FEATURED_PLAYLISTS -> searchFeaturedPlaylist(currentSearchQuery)
-                SearchType.PODCASTS -> searchPodcast(currentSearchQuery)
-            }
-        }
-    }
 }
