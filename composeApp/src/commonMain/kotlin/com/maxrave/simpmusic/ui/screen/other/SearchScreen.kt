@@ -536,7 +536,7 @@ fun SearchScreen(
                                                         listTracks = arrayListOf(firstTrack),
                                                         firstPlayedTrack = firstTrack,
                                                         playlistId = "RDAMVM${firstTrack.videoId}",
-                                                        playlistName = "\"\${searchText}\" ${getStringBlocking(Res.string.in_search)}",
+                                                    playlistName = "\"${searchText}\" ${getStringBlocking(Res.string.in_search)}",
                                                         playlistType = PlaylistType.RADIO,
                                                         continuation = null,
                                                     ),
