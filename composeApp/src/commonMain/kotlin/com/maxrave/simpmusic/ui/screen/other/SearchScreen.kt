@@ -344,10 +344,11 @@ fun SearchScreen(
         searchViewModel.logSearchEvent("Search UI state: $searchUIType")
     }
 
-    LaunchedEffect(isKeyboardVisible) {
+    // Read the Compose window inset during composition; the effect only logs the captured value.
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+    LaunchedEffect(isKeyboardVisible, imeBottomPx) {
         if (isKeyboardVisible) {
             delay(150)
-            val imeBottomPx = WindowInsets.ime.getBottom(density)
             searchViewModel.logSearchEvent("Keyboard shown (IME bottom inset=${imeBottomPx}px)")
         } else {
             searchViewModel.logSearchEvent("Keyboard hidden")
