@@ -85,6 +85,7 @@
             android:supportsPictureInPicture="true"
             android:enableOnBackInvokedCallback="true"
             android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.SimpMusic"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>

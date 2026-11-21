@@ -312,10 +312,11 @@ fun SearchScreen(
             isSearchSubmitted = false
             isExpanded = true
         }
-        if (searchText.isNotEmpty() && isFocused) {
-            searchViewModel.suggestQuery(searchText)
-        } else if (searchText.isEmpty()) {
-            // Cancel an in-flight request when the user clears the field.
+        val normalizedQuery = searchText.trim()
+        if (isFocused && normalizedQuery.length >= 2) {
+            searchViewModel.suggestQuery(normalizedQuery)
+        } else {
+            // Do not request suggestions for one character or after focus leaves the field.
             searchViewModel.suggestQuery("")
         }
     }
@@ -448,7 +449,7 @@ fun SearchScreen(
                     Box(
                         // Only the suggestion surface follows the IME. The page behind it
                         // remains full-height, avoiding a second full-screen lift.
-                        modifier = Modifier.fillMaxSize().imePadding(),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.BottomCenter,
                     ) {
                     LazyColumn(
@@ -1061,9 +1062,7 @@ fun SearchScreen(
         Box(
             modifier =
                 Modifier
-                    .align(Alignment.BottomCenter)
-                    // Move only the floating search dock above the keyboard.
-                    .imePadding(),
+                    .align(Alignment.BottomCenter),
         ) {
             // Animate only the background so scrolling keeps the search input and its focus.
             AnimatedVisibility(

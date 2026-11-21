@@ -345,20 +345,22 @@ class SearchViewModel(
         suggestQueryJob?.cancel()
 
         val normalizedQuery = query.trim()
-        if (normalizedQuery.isEmpty()) {
+        if (normalizedQuery.length < 2) {
             _searchScreenState.update { state ->
                 state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
             }
             return
         }
 
+        // Clear results immediately so a previous query cannot flash under the new text.
+        _searchScreenState.update { state ->
+            state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
+        }
+
         suggestQueryJob =
             viewModelScope.launch {
-                // Avoid firing a network request for every intermediate keystroke.
+                // Debounce edits so only the settled query reaches the network.
                 delay(300)
-                _searchScreenState.update { state ->
-                    state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
-                }
 
                 try {
                     searchRepository.getSuggestQuery(normalizedQuery).collectLatest { values ->
