@@ -54,17 +54,23 @@ fun Chip(
     onClick: () -> Unit,
 ) {
     val glassOn = LocalLiquidGlassEnabled.current
-    val glassBackdrop = backdrop?.takeIf { glassOn && !isSelected }
+    val glassBackdrop = backdrop?.takeIf { glassOn }
     ChipFrame(isAnimated = isAnimated && isSelected) {
         ChipBody(
             text = text,
             selected = isSelected,
             // The 1dp uniform rim every small glass control here carries: the default rim lights one
             // side only, which on a chip this small does not show at all.
-            modifier = if (glassBackdrop != null) Modifier.liquidGlass(glassBackdrop, highlight = Highlight(width = 1.dp)) else Modifier,
-            // outlineVariant, per M3's Aug 2024 chip update: a softer stroke than outline.
-            // Glass draws its own rim, so the outline goes.
+            modifier = if (glassBackdrop != null) Modifier.liquidGlass(
+                glassBackdrop,
+                interactive = !isSelected,
+                highlight = Highlight(width = 1.dp, alpha = if (isSelected) 1f else 0.72f),
+            ) else Modifier,
+            // The glass rim replaces the Material outline. Selected chips stay translucent and
+            // use a brighter label/rim instead of turning into an opaque filled Material pill.
             borderColor = if (glassBackdrop != null) Color.Transparent else MaterialTheme.colorScheme.outlineVariant,
+            selectedFillColor = if (glassBackdrop != null) Color.Transparent else MaterialTheme.colorScheme.primary,
+            selectedLabelColor = if (glassBackdrop != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary,
             onClick = onClick,
             compact = compact,
         )
@@ -217,6 +223,8 @@ private fun ChipBody(
     containerColor: Color = Color.Transparent,
     labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     compact: Boolean = false,
+    selectedFillColor: Color = MaterialTheme.colorScheme.primary,
+    selectedLabelColor: Color = MaterialTheme.colorScheme.onPrimary,
 ) {
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
         ElevatedFilterChip(
@@ -229,12 +237,12 @@ private fun ChipBody(
             colors =
                 FilterChipDefaults.elevatedFilterChipColors(
                     containerColor = containerColor,
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedContainerColor = selectedFillColor,
                     labelColor = labelColor,
                     // `primary` is a pale #B2C5FF on the dark theme, so the label has to be its
                     // matching `on` token — a hand-picked white would read on one theme and
                     // vanish on the other.
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedLabelColor = selectedLabelColor,
                 ),
             onClick = onClick,
             label = {
