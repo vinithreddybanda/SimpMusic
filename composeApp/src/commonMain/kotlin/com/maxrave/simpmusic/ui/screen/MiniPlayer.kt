@@ -293,7 +293,7 @@ fun MiniPlayer(
                 modifier
                     .then(
                         if (useGlassSurface) {
-                            Modifier.liquidGlass(backdrop, layer, luminance, RoundedCornerShape(16.dp))
+                            Modifier.liquidGlass(backdrop, layer, luminance, miniPlayerShape)
                         } else {
                             Modifier
                         },

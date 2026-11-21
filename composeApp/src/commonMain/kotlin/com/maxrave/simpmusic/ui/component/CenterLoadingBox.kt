@@ -24,6 +24,9 @@ import androidx.compose.material3.MaterialTheme
  */
 @Composable
 fun CenterLoadingBox(modifier: Modifier) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f)
+    val secondaryColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.52f)
     val transition = rememberInfiniteTransition(label = "glassLoading")
     val rotation = transition.animateFloat(
         initialValue = 0f,
@@ -51,18 +54,18 @@ fun CenterLoadingBox(modifier: Modifier) {
         ) {
             val stroke = 3.dp.toPx()
             drawCircle(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f),
+                color = trackColor,
                 style = Stroke(width = stroke),
             )
             drawArc(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.95f),
+                color = primaryColor.copy(alpha = 0.95f),
                 startAngle = rotation.value,
                 sweepAngle = 238f,
                 useCenter = false,
                 style = Stroke(width = stroke, cap = StrokeCap.Round),
             )
             drawArc(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.52f),
+                color = secondaryColor,
                 startAngle = secondaryRotation.value,
                 sweepAngle = 62f,
                 useCenter = false,
