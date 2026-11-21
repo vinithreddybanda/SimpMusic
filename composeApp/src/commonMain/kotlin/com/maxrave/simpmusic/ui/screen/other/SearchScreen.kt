@@ -135,6 +135,7 @@ import com.maxrave.simpmusic.ui.component.selection.rememberSongSelectionState
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.ArrowOutward
 import com.maxrave.simpmusic.ui.icon.Close
+import com.maxrave.simpmusic.ui.icon.Error
 import com.maxrave.simpmusic.ui.icon.GraphicEq
 import com.maxrave.simpmusic.ui.icon.History
 import com.maxrave.simpmusic.ui.icon.Search
@@ -1258,30 +1259,40 @@ fun SearchScreen(
                         }
                     },
                     trailingIcon = {
-                        // X button only shows when there's text
-                        if (searchText.isNotEmpty()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 modifier = Modifier.clip(CircleShape),
-                                onClick = {
-                                    searchText = ""
-                                    isSearchSubmitted = false
-                                },
+                                onClick = { navController.navigate(AppLogDestination) },
                             ) {
                                 Icon(
-                                    imageVector = SimpIcons.Close,
-                                    contentDescription = "Clear search",
+                                    imageVector = SimpIcons.Error,
+                                    contentDescription = "Open app logs",
+                                    modifier = Modifier.size(20.dp),
                                 )
                             }
-                        } else if (getPlatform() == Platform.Android) {
-                            // An empty field offers song recognition instead (Android only).
-                            IconButton(
-                                modifier = Modifier.clip(CircleShape),
-                                onClick = { showRecognition = true },
-                            ) {
-                                Icon(
-                                    imageVector = SimpIcons.GraphicEq,
-                                    contentDescription = stringResource(Res.string.recognize_song),
-                                )
+                            if (searchText.isNotEmpty()) {
+                                IconButton(
+                                    modifier = Modifier.clip(CircleShape),
+                                    onClick = {
+                                        searchText = ""
+                                        isSearchSubmitted = false
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = SimpIcons.Close,
+                                        contentDescription = "Clear search",
+                                    )
+                                }
+                            } else if (getPlatform() == Platform.Android) {
+                                IconButton(
+                                    modifier = Modifier.clip(CircleShape),
+                                    onClick = { showRecognition = true },
+                                ) {
+                                    Icon(
+                                        imageVector = SimpIcons.GraphicEq,
+                                        contentDescription = stringResource(Res.string.recognize_song),
+                                    )
+                                }
                             }
                         }
                     },
