@@ -389,7 +389,8 @@ class SearchViewModel(
     }
 
     fun logSearchEvent(message: String) {
-        Logger.d(tag, message)
+        // Persist search/IME diagnostics in App Logs, not only transient Logcat output.
+        Logger.i(tag, message)
     }
 
     fun logSearchFailure(stage: String, throwable: Throwable) {
