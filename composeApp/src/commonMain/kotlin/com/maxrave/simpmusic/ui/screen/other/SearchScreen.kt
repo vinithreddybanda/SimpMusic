@@ -145,6 +145,7 @@ import com.maxrave.simpmusic.ui.navigation.destination.list.PlaylistDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.PodcastDestination
 import com.maxrave.simpmusic.ui.navigation.destination.search.SearchDestination
 import com.maxrave.simpmusic.ui.navigation.destination.home.MoodDestination
+import com.maxrave.simpmusic.ui.navigation.destination.home.AppLogDestination
 import com.maxrave.simpmusic.ui.theme.ArtworkShape
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.theme.typo
@@ -482,11 +483,41 @@ fun SearchScreen(
                                 bottom = if (isKeyboardVisible) 8.dp else searchBarHeight + 76.dp,
                             ),
                     ) {
+                        item(key = "search_diagnostics") {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Suggestions",
+                                        style = typo().labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = "Search activity is recorded for troubleshooting",
+                                        style = typo().labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                TextButton(onClick = { navController.navigate(AppLogDestination) }) {
+                                    Icon(
+                                        imageVector = SimpIcons.Error,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Logs")
+                                }
+                            }
+                        }
                         items(searchScreenState.suggestYTItems) { item ->
-                            SuggestItemRow(
-                                searchResult = item,
+                            try {
+                                SuggestItemRow(
+                                    searchResult = item,
                                 onItemClick = { item ->
-                                    when (item) {
+                                    try {
+                                        when (item) {
                                         is SongsResult, is VideosResult -> {
                                             focusManager.clearFocus()
                                             val firstTrack: Track = (item as? SongsResult)?.toTrack() ?: (item as VideosResult).toTrack()
@@ -522,9 +553,20 @@ fun SearchScreen(
                                                 ),
                                             )
                                         }
+                                    } catch (exception: Exception) {
+                                        searchViewModel.logSearchFailure("suggestion selection", exception)
                                     }
                                 },
-                            )
+                                )
+                            } catch (exception: Exception) {
+                                searchViewModel.logSearchFailure("suggestion row composition", exception)
+                                Text(
+                                    text = "This suggestion could not be displayed.",
+                                    style = typo().bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                )
+                            }
                         }
                         items(searchScreenState.suggestQueries) { suggestion ->
                             Row(
