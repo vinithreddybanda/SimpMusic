@@ -417,18 +417,18 @@ class SearchViewModel(
             state.copy(suggestQueries = emptyList(), suggestYTItems = emptyList())
         }
 
-        Logger.d(tag, "Search suggestions queued (queryLength=${normalizedQuery.length}, generation=$requestGeneration)")
+        Logger.i(tag, "Search suggestions queued (queryLength=${normalizedQuery.length}, generation=$requestGeneration)")
         suggestQueryJob =
             viewModelScope.launch {
                 try {
-                    Logger.d(tag, "Search suggestions request started (generation=$requestGeneration)")
+                    Logger.i(tag, "Search suggestions request started (generation=$requestGeneration)")
                     searchRepository.getSuggestQuery(normalizedQuery).collectLatest { values ->
                         if (requestGeneration != suggestQueryGeneration) return@collectLatest
 
                         when (values) {
                             is Resource.Success -> {
                                 val suggestions = values.data
-                                Logger.d(
+                                Logger.i(
                                     tag,
                                     "Search suggestions received (queries=${suggestions?.queries?.size ?: 0}, items=${suggestions?.recommendedItems?.size ?: 0}, generation=$requestGeneration)",
                                 )
