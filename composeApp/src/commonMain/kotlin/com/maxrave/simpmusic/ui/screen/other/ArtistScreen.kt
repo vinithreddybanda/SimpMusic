@@ -189,6 +189,7 @@ fun ArtistScreen(
     navController: NavController,
 ) {
     val artistScreenState by viewModel.artistScreenState.collectAsStateWithLifecycle()
+    val artworkBackdrop = rememberBackdrop(Color.Black)
     val isFollowed by viewModel.followed.collectAsStateWithLifecycle()
     val artistMotion by viewModel.artistMotion.collectAsStateWithLifecycle()
     // Header plays the artist's animated artwork by default; the top-right toggle swaps it for
@@ -319,7 +320,6 @@ fun ArtistScreen(
                                 // Edge-to-edge artwork (the artist's video plays on top of it when available).
                                 // Glass back button MUST be a sibling of the backdrop source
                                 // (not a child) to avoid render feedback loop / RuntimeShader crash.
-                                val artworkBackdrop = rememberBackdrop(Color.Black)
                                 // Portrait fills a SQUARE frame, so the URL is clamped to a square
                                 // size there (logic from commit 5e596c5b). Landscape keeps YouTube's
                                 // own wide banner (e.g. w2880-h1200) instead: squaring the source
@@ -699,6 +699,7 @@ onClick = { navController.navigateUp() },
                         }
                         item(contentType = "sections") {
                             ArtistSections(
+                                artworkBackdrop = artworkBackdrop,
                                 channelId = channelId,
                                 state = state,
                                 selectionState = selectionState,
@@ -844,6 +845,7 @@ onClick = { navController.navigateUp() },
  */
 @Composable
 private fun ArtistSections(
+    artworkBackdrop: com.maxrave.simpmusic.expect.ui.PlatformBackdrop,
     channelId: String,
     state: ArtistScreenState.Success,
     selectionState: SongSelectionState,
