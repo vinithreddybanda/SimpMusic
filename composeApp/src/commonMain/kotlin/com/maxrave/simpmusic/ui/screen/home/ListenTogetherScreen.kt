@@ -970,19 +970,19 @@ private fun TextAction(
 @Composable
 private fun MemberActionDialog(
     member: RoomMember,
-    backdrop: PlatformBackdrop,
     onTransferHost: () -> Unit,
     onKick: () -> Unit,
     onBlock: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        LiquidGlassCard(
-            backdrop = backdrop,
-            modifier = Modifier.width(320.dp),
-            shape = CARD_SHAPE,
+        Column(
+            modifier = Modifier
+                .width(320.dp)
+                .clip(CARD_SHAPE)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .padding(20.dp),
         ) {
-            Column(Modifier.fillMaxWidth().padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Avatar(initialOf(member.username), tintFor(member.userId), 40.dp)
                 Text(
@@ -996,21 +996,18 @@ private fun MemberActionDialog(
             Spacer(Modifier.height(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 DialogAction(
-                    backdrop,
                     stringResource(Res.string.lt_transfer_host),
                     stringResource(Res.string.lt_transfer_host_desc),
                     MaterialTheme.colorScheme.onSurface,
                     onTransferHost,
                 )
                 DialogAction(
-                    backdrop,
                     stringResource(Res.string.lt_kick),
                     stringResource(Res.string.lt_kick_desc),
                     MaterialTheme.colorScheme.error,
                     onKick,
                 )
                 DialogAction(
-                    backdrop,
                     stringResource(Res.string.lt_block),
                     stringResource(Res.string.lt_block_desc),
                     MaterialTheme.colorScheme.error,
@@ -1148,25 +1145,21 @@ private fun SecondaryButton(
 
 @Composable
 private fun DialogAction(
-    backdrop: PlatformBackdrop,
     title: String,
     subtitle: String,
     tint: Color,
     onClick: () -> Unit,
 ) {
-    LiquidGlassCard(
-        backdrop = backdrop,
-        modifier = Modifier.fillMaxWidth(),
-        shape = ROW_SHAPE,
-        tint = tint,
-        interactive = true,
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(ROW_SHAPE)
+            .border(1.dp, tint.copy(alpha = 0.25f), ROW_SHAPE)
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 12.dp),
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 14.dp, vertical = 12.dp),
-        ) {
-            Text(title, style = typo().bodyMedium, color = tint)
-            Text(subtitle, style = typo().bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        Text(title, style = typo().bodyMedium, color = tint)
+        Text(subtitle, style = typo().bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
