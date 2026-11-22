@@ -347,18 +347,12 @@ fun AlbumScreen(
                                                 }
                                             }
                                             // Back button — liquid glass effect (Kyant backdrop)
-                                            LiquidGlassIconButton(
+                                            AppBackButton(
                                                 backdrop = artworkBackdrop,
-                                                imageVector = SimpIcons.ArrowBackIosNew,
-                                                modifier =
-                                                    Modifier
-                                                        .align(Alignment.TopStart)
-                                                        .padding(12.dp)
-                                                        .windowInsetsPadding(WindowInsets.statusBars)
-                                                        .size(48.dp),
-                                            ) {
-                                                navController.navigateUp()
-                                            }
+                                                modifier = Modifier.align(Alignment.TopStart).padding(12.dp).windowInsetsPadding(WindowInsets.statusBars).size(48.dp),
+                                                tint = Color.White,
+                                                onClick = { navController.navigateUp() },
+                                            )
                                             // Heart + More — liquid glass pill
                                             Row(
                                                 modifier =
