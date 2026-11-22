@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,6 +68,8 @@ import coil3.toBitmap
 import com.kmpalette.rememberPaletteState
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.ui.toImageBitmap
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.extension.getColorFromPalette
 import com.maxrave.simpmusic.extension.getScreenSizeInfo
 import com.maxrave.simpmusic.extension.rgbFactor
@@ -128,6 +129,8 @@ fun CollapsingToolbarParallaxEffect(
         mutableStateOf<ImageBitmap?>(null)
     }
     var color by remember { mutableStateOf(Color.Black) }
+    val headerBackdrop = rememberBackdrop(color)
+    val toolbarBackdrop = rememberBackdrop(color)
     var showBackButton by rememberSaveable {
         mutableStateOf(true)
     }
@@ -151,6 +154,7 @@ fun CollapsingToolbarParallaxEffect(
 
     Box(modifier = modifier) {
         Header(
+            backdrop = headerBackdrop,
             scroll = scroll,
             headerHeightPx = headerHeightPx,
             imageUrl = headerImageUrl,
@@ -170,6 +174,7 @@ fun CollapsingToolbarParallaxEffect(
             content(color)
         }
         Toolbar(
+            backdrop = toolbarBackdrop,
             scroll = scroll,
             headerHeightPx = headerHeightPx,
             toolbarHeightPx = toolbarHeightPx,
@@ -202,14 +207,12 @@ fun CollapsingToolbarParallaxEffect(
                             12.dp,
                         ),
             ) {
-                IconButton(
+                GlassBackButton(
+                    backdrop = headerBackdrop,
+                    modifier = Modifier.size(44.dp),
+                    tint = Color.White,
                     onClick = onBack,
-                    modifier = Modifier.size(44.dp).clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.12f))
-                        .border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
-                ) {
-                    Icon(SimpIcons.ArrowBackIosNew, "Back")
-                }
+                )
             }
         }
     }
@@ -217,6 +220,7 @@ fun CollapsingToolbarParallaxEffect(
 
 @Composable
 private fun Header(
+    backdrop: com.maxrave.simpmusic.expect.ui.PlatformBackdrop,
     modifier: Modifier = Modifier,
     scroll: ScrollState,
     imageUrl: String? = null,
@@ -232,7 +236,7 @@ private fun Header(
                     alpha = (-1f / headerHeightPx) * scroll.value + 1
                 }.background(
                     backgroundColor.rgbFactor(0.5f),
-                ),
+                ).layerBackdrop(backdrop),
     ) {
         AsyncImage(
             model =
@@ -302,6 +306,7 @@ private fun Body(
 @Composable
 @ExperimentalMaterial3Api
 private fun Toolbar(
+    backdrop: com.maxrave.simpmusic.expect.ui.PlatformBackdrop,
     modifier: Modifier = Modifier,
     scroll: ScrollState,
     headerHeightPx: Float,
@@ -345,7 +350,8 @@ private fun Toolbar(
                             0.84f to backgroundColor.copy(alpha = 0.12f),
                             1.0f to Color.Transparent,
                         ),
-                    ),
+                    )
+                    .layerBackdrop(backdrop),
             )
             TopAppBar(
             windowInsets =
@@ -354,24 +360,12 @@ private fun Toolbar(
                 ),
             modifier = Modifier,
             navigationIcon = {
-                IconButton(
-                    onClick = {
-                        onBack.invoke()
-                    },
-                    modifier =
-                        Modifier
-                            .padding(start = 12.dp)
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.12f))
-                            .border(1.dp, Color.White.copy(alpha = 0.18f), CircleShape),
-                ) {
-                    Icon(
-                        imageVector = SimpIcons.ArrowBackIosNew,
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
-                }
+                GlassBackButton(
+                    backdrop = backdrop,
+                    modifier = Modifier.padding(start = 12.dp).size(44.dp),
+                    tint = Color.White,
+                    onClick = onBack,
+                )
             },
             title = {},
             colors =
