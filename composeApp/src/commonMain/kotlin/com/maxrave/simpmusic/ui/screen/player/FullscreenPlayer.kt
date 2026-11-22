@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.player
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
@@ -357,14 +358,11 @@ fun FullscreenPlayer(
                             },
                             navigationIcon = {
                                 Box(Modifier.padding(horizontal = 5.dp)) {
-                                    RippleIconButton(
-                                        SimpIcons.ArrowBackIosNew,
-                                        Modifier
-                                            .size(32.dp),
-                                        true,
-                                    ) {
-                                        navController.navigateUp()
-                                    }
+                                    AppBackButton(
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    onClick = { navController.navigateUp() },
+                )
                                 }
                             },
                             actions = {
