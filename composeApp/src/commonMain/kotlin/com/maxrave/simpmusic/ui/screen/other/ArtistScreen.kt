@@ -568,22 +568,16 @@ fun ArtistScreen(
                                         }
                                     }
                                     // Back button — liquid glass, sibling of the backdrop source.
-                                    LiquidGlassIconButton(
-                                        backdrop = artworkBackdrop,
-                                        imageVector = SimpIcons.ArrowBackIosNew,
-                                        shape = RoundedCornerShape(24.dp),
-                                        // Matching the other three headers: the pill-style directional rim, thickened
-                                        // from the 0.5.dp default so it stays visible around a 48dp circle.
-                                        highlight = Highlight(width = 1.dp),
-                                        modifier =
-                                            Modifier
+                                    AppBackButton(
+backdrop = artworkBackdrop,
+modifier = Modifier
                                                 .align(Alignment.TopStart)
                                                 .padding(12.dp)
                                                 .windowInsetsPadding(WindowInsets.statusBars)
                                                 .size(48.dp),
-                                    ) {
-                                        navController.navigateUp()
-                                    }
+tint = Color.White,
+onClick = { navController.navigateUp() },
+)
                                     // Top-right pill mirroring the back button, shaped like the
                                     // Playlist header's: [video ⇄ picture] when the artist has an animated
                                     // artwork, then share. A sibling of the backdrop source, like the back button.
