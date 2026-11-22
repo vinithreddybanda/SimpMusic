@@ -162,10 +162,6 @@ import com.maxrave.simpmusic.viewModel.SearchViewModel
 import com.maxrave.simpmusic.viewModel.SharedViewModel
 import com.maxrave.simpmusic.viewModel.SongSelectionViewModel
 import com.maxrave.simpmusic.viewModel.toStringRes
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.HazeInput
-import dev.chrisbanes.haze.blur.hazeBlur
-import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -235,7 +231,6 @@ fun SearchScreen(
     val isMobilePortrait = getPlatform() == Platform.Android && screenInfo.wDP < screenInfo.hDP
     val moodGridColumns = if (isMobilePortrait) 2 else 4
 
-    val hazeState = rememberHazeState()
     // The floating chip row refracts the page scrolling under it, so the page is the glass source and
     // the row its sibling (nesting the row inside the source is the RuntimeShader feedback loop).
     val chipBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
@@ -487,7 +482,7 @@ fun SearchScreen(
         }
         Crossfade(
             targetState = searchUIType,
-            modifier = Modifier.fillMaxSize().hazeSource(hazeState),
+            modifier = Modifier.fillMaxSize(),
         ) {
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
@@ -1078,17 +1073,7 @@ fun SearchScreen(
                         )
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .widthIn(max = 344.dp)
-                        .onGloballyPositioned { searchBarHeightPx = it.size.height }
-                        .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
-                        .liquidGlass(
-                            backdrop = chipBackdrop,
-                            shape = RoundedCornerShape(28.dp),
-                            interactive = true,
-                            minScrim = 0.12f,
-                            maxScrim = 0.5f,
-                        )
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                        .widthIn(max = 344.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 AnimatedVisibility(visible = selectionState.isActive) {
@@ -1114,7 +1099,17 @@ fun SearchScreen(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .onGloballyPositioned { searchBarHeightPx = it.size.height }
+                            .liquidGlass(
+                                backdrop = chipBackdrop,
+                                shape = RoundedCornerShape(28.dp),
+                                interactive = true,
+                            )
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Crossfade(
@@ -1230,13 +1225,6 @@ fun SearchScreen(
                             onClick = { showRecognition = true },
                         )
                     }
-                    GlassDockIconButton(
-                        imageVector = SimpIcons.Error,
-                        contentDescription = "Open app logs",
-                        modifier = Modifier.size(40.dp),
-                        iconSize = 20.dp,
-                        onClick = { navController.navigate(AppLogDestination) },
-                    )
                 }
 
                 AnimatedVisibility(
