@@ -87,6 +87,9 @@ import com.maxrave.simpmusic.extension.angledGradientBackground
 import com.maxrave.simpmusic.extension.artworkScrimBrush
 import com.maxrave.simpmusic.extension.rgbFactor
 import com.maxrave.simpmusic.ui.component.EndOfPage
+import com.maxrave.simpmusic.ui.component.LiquidGlassCard
+import com.maxrave.simpmusic.ui.component.LiquidGlassTextButton
+import com.maxrave.simpmusic.ui.component.LiquidGlassButtonStyle
 import com.maxrave.simpmusic.ui.component.LiquidGlassIconButton
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.ArrowForwardIos
@@ -265,7 +268,7 @@ fun ListenTogetherScreen(
                         TitleBlock(inRoom = state.inRoom)
                         ConnectionLine(state.connection, viewModel::connect, viewModel::disconnect)
                         AnimatedVisibility(visible = state.inRoom) {
-                            RoomCodePoster(state, copyCode, shareCode)
+                            RoomCodePoster(backdrop, state, copyCode, shareCode)
                         }
                     }
                     VerticalScrollBar(
@@ -285,7 +288,7 @@ fun ListenTogetherScreen(
                                 .animateContentSize(),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        WorkArea(state, displayName, codeInput, viewModel, { managing = it }, openSettings)
+                        WorkArea(state, backdrop, displayName, codeInput, viewModel, { managing = it }, openSettings)
                     }
                     VerticalScrollBar(
                         scrollState = workScroll,
@@ -338,6 +341,7 @@ fun ListenTogetherScreen(
                 managing = null
             },
             onDismiss = { managing = null },
+            backdrop = backdrop,
         )
     }
 }
@@ -351,6 +355,7 @@ fun ListenTogetherScreen(
 @Composable
 private fun ColumnScope.WorkArea(
     state: ListenTogetherRoom,
+    backdrop: PlatformBackdrop,
     displayName: String,
     codeInput: String,
     viewModel: ListenTogetherViewModel,
@@ -362,13 +367,13 @@ private fun ColumnScope.WorkArea(
     var lastError by remember { mutableStateOf("") }
     LaunchedEffect(state.error) { state.error?.let { lastError = it } }
     AnimatedVisibility(visible = state.error != null) {
-        ErrorCard(message = lastError, onDismiss = viewModel::clearError)
+        ErrorCard(backdrop = backdrop, message = lastError, onDismiss = viewModel::clearError)
     }
 
     when {
         state.inRoom -> {
             AnimatedVisibility(visible = state.waitingFor.isNotEmpty()) {
-                BufferBanner(state.waitingForNames)
+                BufferBanner(backdrop, state.waitingForNames)
             }
             AnimatedVisibility(visible = state.isHost && state.joinRequests.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -386,18 +391,19 @@ private fun ColumnScope.WorkArea(
                 canManage = state.isHost,
                 onManage = onManage,
             )
-            FooterActions(onLeave = viewModel::leaveRoom, onSettings = onSettings)
+            FooterActions(backdrop, onLeave = viewModel::leaveRoom, onSettings = onSettings)
         }
 
         state.pendingJoinCode != null -> {
-            WaitingForApproval(state.pendingJoinCode.orEmpty(), viewModel::cancelJoin)
-            FooterActions(onLeave = null, onSettings = onSettings)
+            WaitingForApproval(backdrop, state.pendingJoinCode.orEmpty(), viewModel::cancelJoin)
+            FooterActions(backdrop, onLeave = null, onSettings = onSettings)
         }
 
         else -> {
             NameField(displayName, viewModel::onDisplayNameChange)
 
             PrimaryButton(
+                backdrop = backdrop,
                 text = stringResource(Res.string.lt_create_room),
                 enabled = displayName.isNotBlank() && state.isConnected,
                 onClick = viewModel::createRoom,
@@ -408,6 +414,7 @@ private fun ColumnScope.WorkArea(
             CodeInput(codeInput, viewModel::onRoomCodeChange)
 
             SecondaryButton(
+                backdrop = backdrop,
                 text = stringResource(Res.string.lt_join_room),
                 enabled = displayName.isNotBlank() && codeInput.length == ROOM_CODE_LENGTH && state.isConnected,
                 onClick = viewModel::joinRoom,
@@ -597,6 +604,7 @@ private fun ConnectionLine(
  */
 @Composable
 private fun RoomCodePoster(
+    backdrop: PlatformBackdrop,
     state: ListenTogetherRoom,
     onCopyCode: () -> Unit,
     onShareCode: () -> Unit,
@@ -658,12 +666,12 @@ private fun RoomCodePoster(
                 // A silent clipboard write is indistinguishable from a dead button, and this one
                 // is the whole point of the screen — the tick is the only proof it did anything.
                 Crossfade(targetState = copied, label = "ltCopied") { done ->
-                    GlyphButton(if (done) SimpIcons.Check else SimpIcons.ContentCopy) {
+                    GlyphButton(backdrop, if (done) SimpIcons.Check else SimpIcons.ContentCopy) {
                         onCopyCode()
                         copied = true
                     }
                 }
-                GlyphButton(SimpIcons.Share, onShareCode)
+                GlyphButton(backdrop, SimpIcons.Share, onShareCode)
             }
         }
     }
@@ -676,8 +684,8 @@ private fun RoomCodePoster(
  * what stops the silence reading as the app having hung.
  */
 @Composable
-private fun BufferBanner(names: List<String>) {
-    Surface(tint = MaterialTheme.colorScheme.tertiary) {
+private fun BufferBanner(backdrop: PlatformBackdrop, names: List<String>) {
+    Surface(backdrop, tint = MaterialTheme.colorScheme.tertiary) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
                 text = if (names.isEmpty()) "Waiting for everyone" else "Waiting for ${names.joinToString(", ")}",
@@ -695,10 +703,11 @@ private fun BufferBanner(names: List<String>) {
 
 @Composable
 private fun WaitingForApproval(
+    backdrop: PlatformBackdrop,
     code: String,
     onCancel: () -> Unit,
 ) {
-    Surface(tint = MaterialTheme.colorScheme.tertiary) {
+    Surface(backdrop, tint = MaterialTheme.colorScheme.tertiary) {
         Column(
             Modifier.fillMaxWidth().padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -721,17 +730,18 @@ private fun WaitingForApproval(
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(4.dp))
-            Chip(stringResource(Res.string.lt_cancel_join), onClick = onCancel)
+            Chip(backdrop, stringResource(Res.string.lt_cancel_join), onClick = onCancel)
         }
     }
 }
 
 @Composable
 private fun ErrorCard(
+    backdrop: PlatformBackdrop,
     message: String,
     onDismiss: () -> Unit,
 ) {
-    Surface(tint = MaterialTheme.colorScheme.error) {
+    Surface(backdrop, tint = MaterialTheme.colorScheme.error) {
         Row(
             Modifier.fillMaxWidth().clickable { onDismiss() }.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -914,6 +924,7 @@ private fun Members(
  */
 @Composable
 private fun FooterActions(
+    backdrop: PlatformBackdrop,
     onLeave: (() -> Unit)?,
     onSettings: () -> Unit,
 ) {
@@ -924,6 +935,7 @@ private fun FooterActions(
     ) {
         if (onLeave != null) {
             TextAction(
+                backdrop = backdrop,
                 icon = SimpIcons.Logout,
                 text = stringResource(Res.string.lt_leave_room),
                 color = MaterialTheme.colorScheme.error,
@@ -931,6 +943,7 @@ private fun FooterActions(
             )
         }
         TextAction(
+            backdrop = backdrop,
             icon = SimpIcons.Settings,
             text = stringResource(Res.string.settings),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -941,32 +954,28 @@ private fun FooterActions(
 
 @Composable
 private fun TextAction(
+    backdrop: PlatformBackdrop,
     icon: ImageVector,
     text: String,
     color: Color,
     onClick: () -> Unit,
 ) {
-    // A real Material button, not a Row with clickable on it: that hand-rolled version had no
-    // ripple, no pressed state and no guaranteed minimum touch target.
-    FilledTonalButton(
+    LiquidGlassTextButton(
+        backdrop = backdrop,
+        text = text,
+        icon = icon,
+        modifier = Modifier,
+        height = 44.dp,
+        style = if (color == MaterialTheme.colorScheme.error) LiquidGlassButtonStyle.DANGER else LiquidGlassButtonStyle.SECONDARY,
+        textStyle = typo().bodyMedium,
         onClick = onClick,
-        shape = CircleShape,
-        colors =
-            ButtonDefaults.filledTonalButtonColors(
-                containerColor = color.copy(alpha = 0.12f),
-                contentColor = color,
-            ),
-        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
-    ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(text, style = typo().bodyMedium)
-    }
+    )
 }
 
 @Composable
 private fun MemberActionDialog(
     member: RoomMember,
+    backdrop: PlatformBackdrop,
     onTransferHost: () -> Unit,
     onKick: () -> Unit,
     onBlock: () -> Unit,
@@ -1021,22 +1030,17 @@ private fun MemberActionDialog(
 /** One card. Every panel on this screen is one of these, so they cannot drift apart. */
 @Composable
 private fun Surface(
+    backdrop: PlatformBackdrop,
     tint: Color? = null,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(CARD_SHAPE)
-                .background(
-                    tint?.copy(alpha = 0.07f) ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.06f),
-                ).border(
-                    1.dp,
-                    tint?.copy(alpha = 0.22f) ?: MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-                    CARD_SHAPE,
-                ),
-    ) { content() }
+    LiquidGlassCard(
+        backdrop = backdrop,
+        modifier = Modifier.fillMaxWidth(),
+        shape = CARD_SHAPE,
+        tint = tint ?: MaterialTheme.colorScheme.onSurfaceVariant,
+        content = content,
+    )
 }
 
 @Composable
@@ -1077,49 +1081,35 @@ private fun Avatar(
 
 @Composable
 private fun Chip(
+    backdrop: PlatformBackdrop,
     text: String,
     filled: Boolean = false,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .height(36.dp)
-                .clip(CircleShape)
-                .then(
-                    if (filled) {
-                        Modifier.background(MaterialTheme.colorScheme.primary)
-                    } else {
-                        Modifier.border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), CircleShape)
-                    },
-                ).clickable { onClick() }
-                .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text,
-            style = typo().labelMedium,
-            color = if (filled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    LiquidGlassTextButton(
+        backdrop = backdrop,
+        text = text,
+        modifier = Modifier,
+        height = 36.dp,
+        style = if (filled) LiquidGlassButtonStyle.PRIMARY else LiquidGlassButtonStyle.SECONDARY,
+        textStyle = typo().labelMedium,
+        onClick = onClick,
+    )
 }
 
 @Composable
 private fun GlyphButton(
+    backdrop: PlatformBackdrop,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f))
-                .clickable { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(18.dp))
-    }
+    LiquidGlassIconButton(
+        backdrop = backdrop,
+        imageVector = icon,
+        modifier = Modifier.size(42.dp),
+        tint = MaterialTheme.colorScheme.onSurface,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -1143,63 +1133,36 @@ private fun ActionGlyph(
 
 @Composable
 private fun PrimaryButton(
+    backdrop: PlatformBackdrop,
     text: String,
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .clip(CircleShape)
-                // primary/onPrimary, never primary/surface: on the light theme `surface` is nearly
-                // white and the filled button became white text on pale cyan. onPrimary is generated
-                // against primary, so it is the only text colour guaranteed to survive both themes.
-                .background(
-                    if (enabled) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)
-                    },
-                ).clickable(enabled = enabled) { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text,
-            style = typo().titleSmall,
-            color =
-                if (enabled) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-        )
-    }
+    LiquidGlassTextButton(
+        backdrop = backdrop,
+        text = text,
+        modifier = Modifier.fillMaxWidth(),
+        enabled = enabled,
+        style = LiquidGlassButtonStyle.PRIMARY,
+        onClick = onClick,
+    )
 }
 
 @Composable
 private fun SecondaryButton(
+    backdrop: PlatformBackdrop,
     text: String,
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .clip(CircleShape)
-                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 0.35f else 0.15f), CircleShape)
-                .clickable(enabled = enabled) { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text,
-            style = typo().titleSmall,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = if (enabled) 1f else 0.4f),
-        )
-    }
+    LiquidGlassTextButton(
+        backdrop = backdrop,
+        text = text,
+        modifier = Modifier.fillMaxWidth(),
+        enabled = enabled,
+        style = LiquidGlassButtonStyle.SECONDARY,
+        onClick = onClick,
+    )
 }
 
 @Composable
