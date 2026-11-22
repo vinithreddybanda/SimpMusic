@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,8 +20,6 @@ import com.maxrave.simpmusic.ui.component.CenterLoadingBox
 import com.maxrave.simpmusic.ui.component.EndOfPage
 import com.maxrave.simpmusic.ui.component.MoodAndGenresContentItem
 import com.maxrave.simpmusic.ui.component.NormalAppBar
-import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
-import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.theme.typo
 import com.maxrave.simpmusic.viewModel.MoodViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -53,14 +49,7 @@ fun MoodScreen(
                     style = typo().labelMedium,
                 )
             },
-            leftIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        SimpIcons.ArrowBackIosNew,
-                        contentDescription = "Back",
-                    )
-                }
-            },
+            onBack = { navController.navigateUp() },
         )
         AnimatedVisibility(visible = !loading) {
             val listState = rememberLazyListState()
