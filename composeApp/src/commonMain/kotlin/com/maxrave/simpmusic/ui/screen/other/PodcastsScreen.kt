@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.other
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
@@ -200,11 +201,11 @@ fun PodcastScreen(
                                             .padding(16.dp)
                                             .windowInsetsPadding(WindowInsets.statusBars),
                                 ) {
-                                    RippleIconButton(
-                                        imageVector = SimpIcons.ArrowBackIosNew,
-                                    ) {
-                                        navController.navigateUp()
-                                    }
+                                    AppBackButton(
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        onClick = { navController.navigateUp() },
+                    )
                                 }
                                 Column(
                                     horizontalAlignment = Alignment.Start,
@@ -441,13 +442,11 @@ fun PodcastScreen(
                         },
                         navigationIcon = {
                             Box(Modifier.padding(horizontal = 5.dp)) {
-                                RippleIconButton(
-                                    SimpIcons.ArrowBackIosNew,
-                                    Modifier.size(32.dp),
-                                    true,
-                                ) {
-                                    navController.navigateUp()
-                                }
+                                AppBackButton(
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        onClick = { navController.navigateUp() },
+                    )
                             }
                         },
                         colors =
