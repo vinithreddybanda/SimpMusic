@@ -340,7 +340,6 @@ fun ListenTogetherScreen(
                 managing = null
             },
             onDismiss = { managing = null },
-            backdrop = backdrop,
         )
     }
 }
@@ -700,7 +699,7 @@ private fun WaitingForApproval(
     code: String,
     onCancel: () -> Unit,
 ) {
-    Surface(backdrop, tint = MaterialTheme.colorScheme.tertiary) {
+    LiquidGlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth(), shape = CARD_SHAPE, tint = MaterialTheme.colorScheme.tertiary) {
         Column(
             Modifier.fillMaxWidth().padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -786,7 +785,7 @@ private fun Suggestions(
 ) {
     SectionHeader(stringResource(Res.string.lt_suggestions), suggestions.size)
     suggestions.forEach { suggestion ->
-        Surface(backdrop) {
+        LiquidGlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth(), shape = CARD_SHAPE, tint = MaterialTheme.colorScheme.onSurfaceVariant) {
             Row(
                 Modifier.fillMaxWidth().padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1013,7 +1012,6 @@ private fun MemberActionDialog(
                     MaterialTheme.colorScheme.error,
                     onBlock,
                 )
-            }
             }
         }
     }
