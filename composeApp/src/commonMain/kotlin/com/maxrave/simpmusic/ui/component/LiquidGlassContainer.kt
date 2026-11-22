@@ -321,8 +321,10 @@ fun GlassSearchField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    leadingIcon: ImageVector = SimpIcons.ArrowBackIosNew,
+    leadingContentDescription: String? = "Back",
     onClear: (() -> Unit)? = null,
     onSearch: () -> Unit = {},
 ) {
@@ -336,14 +338,28 @@ fun GlassSearchField(
             modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            GlassDockIconButton(
-                imageVector = SimpIcons.ArrowBackIosNew,
-                contentDescription = "Back",
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.onSurface,
-                iconSize = 22.dp,
-                onClick = onBack,
-            )
+            if (onBack != null) {
+                GlassDockIconButton(
+                    imageVector = leadingIcon,
+                    contentDescription = leadingContentDescription,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    iconSize = 22.dp,
+                    onClick = onBack,
+                )
+            } else {
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = leadingContentDescription,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
