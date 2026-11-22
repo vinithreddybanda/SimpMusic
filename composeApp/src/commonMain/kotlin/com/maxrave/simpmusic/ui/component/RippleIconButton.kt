@@ -19,8 +19,8 @@ fun RippleIconButton(
     modifier: Modifier = Modifier,
     fillMaxSize: Boolean = false,
     tint: Color = Color.White,
-    onClick: () -> Unit,
     contentDescription: String? = null,
+    onClick: () -> Unit,
 ) {
     IconButton(
         onClick = onClick,
