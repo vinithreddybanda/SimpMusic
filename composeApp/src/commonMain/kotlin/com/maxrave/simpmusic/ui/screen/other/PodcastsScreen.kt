@@ -1,6 +1,7 @@
 package com.maxrave.simpmusic.ui.screen.other
 
 import com.maxrave.simpmusic.ui.component.AppBackButton
+import com.maxrave.simpmusic.ui.component.GlassBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
@@ -53,6 +54,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
 import com.maxrave.simpmusic.ui.component.rememberHolderPainter
 import com.maxrave.simpmusic.expect.ui.toImageBitmap
@@ -141,6 +144,7 @@ fun PodcastScreen(
 
     // Background gradient from the artwork, held and faded (see UIExt.rememberPaletteColor).
     val gradientColors = listOf(rememberPaletteColor(paletteState.palette) { it.getColorFromPalette() }, Color.Black)
+    val headerBackdrop = rememberBackdrop(Color.Black)
 
     LaunchedEffect(key1 = podcastId) {
         if ((uiState as? PodcastUIState.Success)?.id == podcastId) {
@@ -201,11 +205,12 @@ fun PodcastScreen(
                                             .padding(16.dp)
                                             .windowInsetsPadding(WindowInsets.statusBars),
                                 ) {
-                                    AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
+                                    GlassBackButton(
+                                        backdrop = headerBackdrop,
+                                        modifier = Modifier.size(44.dp),
+                                        tint = Color.White,
+                                        onClick = { navController.navigateUp() },
+                                    )
                                 }
                                 Column(
                                     horizontalAlignment = Alignment.Start,
