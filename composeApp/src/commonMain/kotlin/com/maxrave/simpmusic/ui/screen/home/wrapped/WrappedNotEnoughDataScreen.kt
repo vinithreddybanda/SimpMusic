@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.home.wrapped
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.maxrave.simpmusic.ui.component.RippleIconButton
-import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.viewModel.WrappedUiState
 import org.jetbrains.compose.resources.stringResource
@@ -77,8 +77,7 @@ fun WrappedNotEnoughDataScreen(
             // behind the button to refract, and glass over a flat colour is a border pretending to
             // be a surface. The reel's own close button floats over artwork, which is the case
             // glass exists for.
-            RippleIconButton(
-                imageVector = SimpIcons.ArrowBackIosNew,
+            AppBackButton(
                 tint = MaterialTheme.colorScheme.onSurface,
                 onClick = onBack,
             )
