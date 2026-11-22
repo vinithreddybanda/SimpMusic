@@ -509,8 +509,8 @@ fun SearchScreen(
                                     backdrop = chipBackdrop,
                                     shape = RoundedCornerShape(28.dp),
                                     interactive = false,
-                                    minScrim = 0.04f,
-                                    maxScrim = 0.16f,
+                                    minScrim = 0.12f,
+                                    maxScrim = 0.5f,
                                 ),
                         state = suggestionsState,
                         contentPadding =
