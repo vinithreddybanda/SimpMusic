@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.home
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -292,20 +293,16 @@ fun ListenTogetherSettingsScreen(
 
         // Floats over the strip the header row reserves — a sibling of both the scroll column and
         // the backdrop source, exactly the arrangement the main Listen Together page uses.
-        LiquidGlassIconButton(
+        AppBackButton(
             backdrop = backdrop,
-            imageVector = SimpIcons.ArrowBackIosNew,
             tint = MaterialTheme.colorScheme.onSurface,
-            shape = RoundedCornerShape(24.dp),
-            modifier =
-                Modifier
-                    .align(Alignment.TopStart)
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(start = 12.dp, top = 8.dp)
-                    .size(48.dp),
-        ) {
-            navController.navigateUp()
-        }
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(start = 12.dp, top = 8.dp)
+                .size(48.dp),
+            onClick = { navController.navigateUp() },
+        )
     }
 }
 
