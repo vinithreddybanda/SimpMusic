@@ -3,13 +3,22 @@ package com.maxrave.simpmusic.ui.component
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -27,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
@@ -47,6 +57,7 @@ import com.kyant.backdrop.highlight.Highlight
 import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
 import com.maxrave.simpmusic.ui.theme.LocalIsDarkTheme
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
+import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.sign
@@ -179,7 +190,8 @@ fun LiquidGlassIconButton(
     shape: Shape = CircleShape,
     tint: Color = Color.White,
     interactive: Boolean = true,
-    highlight: Highlight = Highlight.Default,
+    highlight: Highlight = Highlight(width = 1.dp),
+    contentDescription: String? = null,
     onClick: () -> Unit,
 ) {
     LiquidGlassContainer(
@@ -192,9 +204,123 @@ fun LiquidGlassIconButton(
         RippleIconButton(
             imageVector = imageVector,
             tint = tint,
+            contentDescription = contentDescription,
             onClick = onClick,
         )
     }
+}
+
+/**
+ * The app-wide back control. Header screens should use this rather than rebuilding a
+ * translucent circle or a Material IconButton. The 1dp highlight keeps the rim visible
+ * on compact circular geometry.
+ */
+@Composable
+fun GlassBackButton(
+    backdrop: PlatformBackdrop,
+    modifier: Modifier = Modifier.size(48.dp),
+    tint: Color = Color.White,
+    onClick: () -> Unit,
+) {
+    LiquidGlassIconButton(
+        backdrop = backdrop,
+        imageVector = SimpIcons.ArrowBackIosNew,
+        modifier = modifier,
+        tint = tint,
+        highlight = Highlight(width = 1.dp),
+        contentDescription = "Back",
+        onClick = onClick,
+    )
+}
+
+/**
+ * An icon action placed INSIDE an existing glass dock or glass panel.
+ * It deliberately does not draw another glass surface, avoiding nested refraction.
+ */
+@Composable
+fun GlassDockIconButton(
+    imageVector: ImageVector,
+    contentDescription: String?,
+    modifier: Modifier = Modifier.size(40.dp),
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+    iconSize: androidx.compose.ui.unit.Dp = 20.dp,
+    onClick: () -> Unit,
+) {
+    androidx.compose.material3.IconButton(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(iconSize),
+        )
+    }
+}
+
+/**
+ * Shared row for search suggestions and recent searches. The row itself stays clear
+ * because it lives inside one glass suggestion panel; only the panel refracts.
+ */
+@Composable
+fun GlassSuggestionRow(
+    text: String,
+    trailingIcon: ImageVector,
+    onClick: () -> Unit,
+    onTrailingClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: ImageVector? = null,
+    trailingContentDescription: String? = "Search suggestion",
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (leadingIcon != null) {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(12.dp))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        GlassDockIconButton(
+            imageVector = trailingIcon,
+            contentDescription = trailingContentDescription,
+            onClick = onTrailingClick,
+        )
+    }
+}
+
+/** Static glass panel for content cards; controls inside it remain independently clickable. */
+@Composable
+fun LiquidGlassCard(
+    backdrop: PlatformBackdrop,
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(24.dp),
+    content: @Composable BoxScope.() -> Unit,
+) {
+    LiquidGlassContainer(
+        backdrop = backdrop,
+        modifier = modifier,
+        shape = shape,
+        interactive = false,
+        content = content,
+    )
 }
 
 /**
