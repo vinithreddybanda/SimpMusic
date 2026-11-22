@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -207,6 +206,36 @@ fun LiquidGlassIconButton(
             tint = tint,
             contentDescription = contentDescription,
             onClick = onClick,
+        )
+    }
+}
+
+/**
+ * One back-button API for the whole app. Supply a recorded backdrop when the control floats
+ * over artwork or other live content; otherwise it remains a clean, transparent icon action
+ * rather than pretending a flat page background is a glass source.
+ */
+@Composable
+fun AppBackButton(
+    backdrop: PlatformBackdrop? = null,
+    modifier: Modifier = Modifier.size(48.dp),
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+    onClick: () -> Unit,
+) {
+    if (backdrop != null) {
+        GlassBackButton(
+            backdrop = backdrop,
+            modifier = modifier,
+            tint = tint,
+            onClick = onClick,
+        )
+    } else {
+        RippleIconButton(
+            imageVector = SimpIcons.ArrowBackIosNew,
+            modifier = modifier,
+            tint = tint,
+            onClick = onClick,
+            contentDescription = "Back",
         )
     }
 }
