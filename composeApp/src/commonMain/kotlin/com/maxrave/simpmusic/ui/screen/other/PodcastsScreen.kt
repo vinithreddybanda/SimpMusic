@@ -176,7 +176,8 @@ fun PodcastScreen(
                             Box(
                                 modifier =
                                     Modifier
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth()
+                                        .layerBackdrop(headerBackdrop),
                             ) {
                                 Box(
                                     modifier =
