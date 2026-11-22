@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.library
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -1730,16 +1731,12 @@ fun LocalPlaylistScreen(
                 )
             },
             navigationIcon = {
-                Box(Modifier.padding(horizontal = 5.dp)) {
-                    RippleIconButton(
-                        SimpIcons.ArrowBackIosNew,
-                        Modifier
-                            .size(32.dp),
-                        true,
-                    ) {
-                        navController.navigateUp()
-                    }
-                }
+                AppBackButton(
+                    backdrop = artworkBackdrop,
+                    modifier = Modifier.size(44.dp),
+                    tint = Color.White,
+                    onClick = { navController.navigateUp() },
+                )
             },
             colors =
                 TopAppBarDefaults.topAppBarColors(
