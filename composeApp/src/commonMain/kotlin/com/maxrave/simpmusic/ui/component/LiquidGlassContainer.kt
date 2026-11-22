@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -35,10 +39,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -61,6 +67,7 @@ import com.maxrave.simpmusic.expect.ui.PlatformBackdrop
 import com.maxrave.simpmusic.ui.theme.LocalIsDarkTheme
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
+import com.maxrave.simpmusic.ui.icon.Close
 import com.maxrave.simpmusic.ui.icon.SimpIcons
 import com.maxrave.simpmusic.ui.theme.typo
 import kotlinx.coroutines.CoroutineScope
@@ -322,6 +329,76 @@ fun GlassDockIconButton(
             tint = tint,
             modifier = Modifier.size(iconSize),
         )
+    }
+}
+
+/**
+ * Reusable search field for screens that need a simple query bar. The whole field is one
+ * glass surface; its back and clear controls stay transparent inside it instead of nesting
+ * additional glass layers.
+ */
+@Composable
+fun GlassSearchField(
+    backdrop: PlatformBackdrop,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    onClear: (() -> Unit)? = null,
+    onSearch: () -> Unit = {},
+) {
+    LiquidGlassContainer(
+        backdrop = backdrop,
+        modifier = modifier.height(52.dp),
+        shape = RoundedCornerShape(28.dp),
+        interactive = true,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GlassDockIconButton(
+                imageVector = SimpIcons.ArrowBackIosNew,
+                contentDescription = "Back",
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.onSurface,
+                iconSize = 22.dp,
+                onClick = onBack,
+            )
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                singleLine = true,
+                textStyle = typo().bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { onSearch() }),
+                decorationBox = { innerTextField ->
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text = placeholder,
+                                style = typo().bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                        innerTextField()
+                    }
+                },
+            )
+            if (value.isNotEmpty() && onClear != null) {
+                GlassDockIconButton(
+                    imageVector = SimpIcons.Close,
+                    contentDescription = "Clear search",
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    onClick = onClear,
+                )
+            }
+        }
     }
 }
 
