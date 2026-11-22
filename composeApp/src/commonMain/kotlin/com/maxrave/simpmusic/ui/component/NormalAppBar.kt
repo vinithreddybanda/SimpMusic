@@ -41,6 +41,7 @@ fun NormalAppBar(
     modifier: Modifier = Modifier,
     leftIcon: @Composable (() -> Unit)? = null,
     rightIcon: @Composable (RowScope.() -> Unit)? = null,
+    onBack: (() -> Unit)? = null,
 ) {
     val backdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
     Box(modifier = modifier.fillMaxWidth().height(64.dp)) {
@@ -72,8 +73,14 @@ fun NormalAppBar(
             .padding(horizontal = 12.dp, vertical = 4.dp)
             .then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(backdrop, RoundedCornerShape(26.dp), interactive = false) else Modifier),
         navigationIcon = {
-            if (leftIcon != null) {
-                Box(
+            when {
+                onBack != null -> GlassBackButton(
+                    backdrop = backdrop,
+                    modifier = Modifier.padding(start = 12.dp).size(44.dp),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    onClick = onBack,
+                )
+                leftIcon != null -> Box(
                     modifier = Modifier.padding(start = 12.dp).size(44.dp),
                     contentAlignment = androidx.compose.ui.Alignment.Center,
                 ) {
