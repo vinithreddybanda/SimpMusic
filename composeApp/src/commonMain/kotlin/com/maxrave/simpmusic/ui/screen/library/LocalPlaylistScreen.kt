@@ -1,6 +1,7 @@
 package com.maxrave.simpmusic.ui.screen.library
 
 import com.maxrave.simpmusic.ui.component.AppBackButton
+import com.maxrave.simpmusic.ui.component.GlassSearchField
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -1618,68 +1619,21 @@ fun LocalPlaylistScreen(
                     .fillMaxSize()
                     .background(mutedPaletteBg),
         ) {
-            // Same bar as the one on Playlist and Album: blurred over the content behind it,
-            // back on the left, clear on the right.
-            Box(
-                Modifier
+            GlassSearchField(
+                backdrop = artworkBackdrop,
+                value = searchQuery,
+                onValueChange = viewModel::setSearchQuery,
+                placeholder = stringResource(Res.string.search),
+                onBack = { navController.navigateUp() },
+                modifier = Modifier
                     .fillMaxWidth()
-                    .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.55f)),
-            ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .windowInsetsPadding(WindowInsets.statusBars),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RippleIconButton(
-                        imageVector = SimpIcons.ArrowBackIosNew,
-                    ) {
-                        navController.navigateUp()
-                    }
-                    SearchBar(
-                        modifier =
-                            Modifier
-                                .height(50.dp)
-                                .padding(horizontal = 12.dp)
-                                .weight(1f),
-                        colors =
-                            SearchBarDefaults.colors().copy(
-                                containerColor = Color.Transparent,
-                            ),
-                        inputField = {
-                            CompositionLocalProvider(LocalTextStyle provides typo().bodySmall) {
-                                SearchBarDefaults.InputField(
-                                    query = searchQuery,
-                                    onQueryChange = { viewModel.setSearchQuery(it) },
-                                    onSearch = {},
-                                    expanded = showSearchBar,
-                                    onExpandedChange = { showSearchBar = it },
-                                    placeholder = {
-                                        Text(
-                                            stringResource(Res.string.search),
-                                            style = typo().bodyMedium,
-                                        )
-                                    },
-                                )
-                            }
-                        },
-                        expanded = false,
-                        onExpandedChange = {},
-                        windowInsets = WindowInsets(0, 0, 0, 0),
-                    ) {
-                    }
-                    IconButton(
-                        onClick = {
-                            showSearchBar = false
-                            viewModel.setSearchQuery("")
-                        },
-                    ) {
-                        Icon(SimpIcons.Close, null, tint = Color.White)
-                    }
-                }
-            }
+                    .padding(16.dp)
+                    .windowInsetsPadding(WindowInsets.statusBars),
+                onClear = {
+                    showSearchBar = false
+                    viewModel.setSearchQuery("")
+                },
+            )
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(
                     searchResults,
