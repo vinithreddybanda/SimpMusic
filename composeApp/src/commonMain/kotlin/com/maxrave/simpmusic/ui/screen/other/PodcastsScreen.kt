@@ -206,7 +206,7 @@ fun PodcastScreen(
                                             .padding(16.dp)
                                             .windowInsetsPadding(WindowInsets.statusBars),
                                 ) {
-                                    GlassBackButton(
+                                    AppBackButton(
                                         backdrop = headerBackdrop,
                                         modifier = Modifier.size(44.dp),
                                         tint = Color.White,
