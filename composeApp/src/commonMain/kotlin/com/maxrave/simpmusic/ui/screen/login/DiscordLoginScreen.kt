@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.login
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -113,14 +114,11 @@ fun DiscordLoginScreen(
             },
             navigationIcon = {
                 Box(Modifier.padding(horizontal = 5.dp)) {
-                    RippleIconButton(
-                        SimpIcons.ArrowBackIosNew,
-                        Modifier.size(32.dp),
-                        true,
+                    AppBackButton(
+                        modifier = Modifier.size(44.dp),
                         tint = MaterialTheme.colorScheme.onSurface,
-                    ) {
-                        navController.navigateUp()
-                    }
+                        onClick = { navController.navigateUp() },
+                    )
                 }
             },
             actions = {
