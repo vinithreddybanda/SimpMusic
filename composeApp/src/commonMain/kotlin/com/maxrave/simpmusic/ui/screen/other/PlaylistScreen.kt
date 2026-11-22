@@ -1,6 +1,7 @@
 package com.maxrave.simpmusic.ui.screen.other
 
 import com.maxrave.simpmusic.ui.component.AppBackButton
+import com.maxrave.simpmusic.ui.component.AppIconButton
 import com.maxrave.simpmusic.ui.component.GlassSearchField
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -1319,13 +1320,14 @@ fun PlaylistScreen(
                             )
                         },
                         actions = {
-                            IconButton(
-                                onClick = {
-                                    showSearchBar = !showSearchBar
-                                },
-                            ) {
-                                Icon(SimpIcons.Search, null, tint = Color.White)
-                            }
+                            AppIconButton(
+                                imageVector = SimpIcons.Search,
+                                backdrop = artworkBackdrop,
+                                modifier = Modifier.size(44.dp),
+                                tint = Color.White,
+                                contentDescription = "Search playlist",
+                                onClick = { showSearchBar = !showSearchBar },
+                            )
                         },
                         colors =
                             TopAppBarDefaults.topAppBarColors(
