@@ -389,7 +389,7 @@ fun GlassSearchField(
                     }
                 },
             )
-            if (value.isNotEmpty() && onClear != null) {
+            if (onClear != null) {
                 GlassDockIconButton(
                     imageVector = SimpIcons.Close,
                     contentDescription = "Clear search",
