@@ -20,6 +20,7 @@ fun RippleIconButton(
     fillMaxSize: Boolean = false,
     tint: Color = Color.White,
     contentDescription: String? = null,
+    iconSize: androidx.compose.ui.unit.Dp = 24.dp,
     onClick: () -> Unit,
 ) {
     IconButton(
@@ -30,7 +31,7 @@ fun RippleIconButton(
             imageVector,
             contentDescription,
             tint = tint,
-            modifier = if (fillMaxSize) Modifier.fillMaxSize().padding(4.dp) else Modifier,
+            modifier = if (fillMaxSize) Modifier.fillMaxSize().padding(4.dp) else Modifier.size(iconSize),
         )
     }
 }
