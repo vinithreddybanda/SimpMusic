@@ -312,9 +312,9 @@ fun ListenTogetherScreen(
                 TitleBlock(inRoom = state.inRoom)
                 ConnectionLine(state.connection, viewModel::connect, viewModel::disconnect)
                 AnimatedVisibility(visible = state.inRoom) {
-                    RoomCodePoster(state, copyCode, shareCode)
+                    RoomCodePoster(backdrop, state, copyCode, shareCode)
                 }
-                WorkArea(state, displayName, codeInput, viewModel, { managing = it }, openSettings)
+                WorkArea(state, backdrop, displayName, codeInput, viewModel, { managing = it }, openSettings)
             }
             VerticalScrollBar(
                 scrollState = pageScroll,
@@ -427,7 +427,7 @@ private fun ColumnScope.WorkArea(
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             )
 
-            FooterActions(onLeave = null, onSettings = onSettings)
+            FooterActions(backdrop, onLeave = null, onSettings = onSettings)
         }
     }
 
