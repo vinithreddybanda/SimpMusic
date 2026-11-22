@@ -8,6 +8,9 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -342,6 +346,7 @@ fun LiquidGlassCard(
     backdrop: PlatformBackdrop,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(24.dp),
+    tint: Color? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     LiquidGlassContainer(
@@ -349,8 +354,80 @@ fun LiquidGlassCard(
         modifier = modifier,
         shape = shape,
         interactive = false,
-        content = content,
-    )
+    ) {
+        if (tint != null) {
+            Box(Modifier.matchParentSize().background(tint.copy(alpha = 0.07f)))
+        }
+        content()
+    }
+}
+
+/** Shared text action for glass forms, chips and dialog actions. */
+enum class LiquidGlassButtonStyle {
+    PRIMARY,
+    SECONDARY,
+    DANGER,
+}
+
+@Composable
+fun LiquidGlassTextButton(
+    backdrop: PlatformBackdrop,
+    text: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    style: LiquidGlassButtonStyle = LiquidGlassButtonStyle.SECONDARY,
+    shape: Shape = CircleShape,
+    height: androidx.compose.ui.unit.Dp = 52.dp,
+    icon: ImageVector? = null,
+    textStyle: TextStyle = MaterialTheme.typography.titleSmall,
+    onClick: () -> Unit,
+) {
+    val scheme = MaterialTheme.colorScheme
+    val accent = when (style) {
+        LiquidGlassButtonStyle.PRIMARY -> scheme.primary
+        LiquidGlassButtonStyle.SECONDARY -> scheme.onSurfaceVariant
+        LiquidGlassButtonStyle.DANGER -> scheme.error
+    }
+    val contentColor = when (style) {
+        LiquidGlassButtonStyle.PRIMARY -> scheme.primary
+        LiquidGlassButtonStyle.SECONDARY -> scheme.onSurface
+        LiquidGlassButtonStyle.DANGER -> scheme.error
+    }
+    Box(
+        modifier = modifier
+            .height(height)
+            .clip(shape)
+            .liquidGlass(backdrop, shape, interactive = enabled)
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .matchParentSize()
+                .background(accent.copy(alpha = if (enabled) 0.10f else 0.05f)),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (enabled) contentColor else scheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                style = textStyle,
+                color = if (enabled) contentColor else scheme.onSurfaceVariant.copy(alpha = 0.4f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
 }
 
 /**
