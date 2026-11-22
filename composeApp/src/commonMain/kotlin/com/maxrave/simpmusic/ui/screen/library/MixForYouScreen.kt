@@ -43,6 +43,11 @@ import com.maxrave.simpmusic.Platform
 import com.maxrave.simpmusic.extension.angledGradientBackground
 import com.maxrave.simpmusic.extension.artworkScrimBrush
 import com.maxrave.simpmusic.extension.barBlurStyle
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.ui.component.liquidGlass
+import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.maxrave.simpmusic.extension.copy
 import com.maxrave.simpmusic.extension.rgbFactor
 import com.maxrave.simpmusic.getPlatform
@@ -85,6 +90,7 @@ fun MixForYouScreen(
     val density = LocalDensity.current
     val mixForYou by viewModel.youTubeMixForYou.collectAsStateWithLifecycle()
     val hazeState = rememberHazeState()
+    val headerBackdrop = rememberBackdrop(pageBackground)
     val gridState = rememberLazyGridState()
     // Home's rule, verbatim: transparent only while pixel-0 is on screen. onScrolling is too
     // coarse for this — it stays "on top" through the whole first row. The frost itself is kept
@@ -137,7 +143,7 @@ fun MixForYouScreen(
         }
     }
 
-    Box(Modifier.hazeSource(hazeState)) {
+    Box(Modifier.hazeSource(hazeState).then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(headerBackdrop) else Modifier)) {
         // Drawn before the grid, and it SCROLLS AWAY with it like Home's — the draw-phase
         // translation tracks the first row exactly and parks once it has passed; whatever remains
         // at the hand-off sits deep in the scrim tail, so the switch does not pop. Inside the haze
@@ -189,7 +195,7 @@ fun MixForYouScreen(
                         Modifier.background(Color.Transparent)
                     } else {
                         // AlbumScreen's bar recipe, thinned to 0.3 — see SettingScreen.
-                        Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(pageBackground, 0.3f))
+                        Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(pageBackground, 0.3f)).then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false) else Modifier)
                     },
                 ).onGloballyPositioned { coordinates ->
                     topAppBarHeight = with(density) { coordinates.size.height.toDp() }
