@@ -349,13 +349,14 @@ fun LiquidGlassCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(24.dp),
     tint: Color? = null,
+    interactive: Boolean = false,
     content: @Composable BoxScope.() -> Unit,
 ) {
     LiquidGlassContainer(
         backdrop = backdrop,
         modifier = modifier,
         shape = shape,
-        interactive = false,
+        interactive = interactive,
     ) {
         if (tint != null) {
             Box(Modifier.matchParentSize().background(tint.copy(alpha = 0.07f)))
