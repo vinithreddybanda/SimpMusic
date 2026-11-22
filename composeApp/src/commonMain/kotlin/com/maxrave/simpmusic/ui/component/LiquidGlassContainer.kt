@@ -62,6 +62,7 @@ import com.maxrave.simpmusic.ui.theme.LocalIsDarkTheme
 import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.SimpIcons
+import com.maxrave.simpmusic.ui.theme.typo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.sign
@@ -332,7 +333,7 @@ fun GlassSuggestionRow(
         }
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
+            style = typo().bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
