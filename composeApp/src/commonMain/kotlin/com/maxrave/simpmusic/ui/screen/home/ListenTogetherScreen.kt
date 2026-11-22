@@ -90,6 +90,7 @@ import com.maxrave.simpmusic.ui.component.LiquidGlassCard
 import com.maxrave.simpmusic.ui.component.LiquidGlassTextButton
 import com.maxrave.simpmusic.ui.component.LiquidGlassButtonStyle
 import com.maxrave.simpmusic.ui.component.LiquidGlassIconButton
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.icon.ArrowBackIosNew
 import com.maxrave.simpmusic.ui.icon.ArrowForwardIos
 import com.maxrave.simpmusic.ui.icon.Check
@@ -475,16 +476,23 @@ private fun BoxScope.BackButton(
     // column it used to sit in, what is behind it is the flat page background, and glass with
     // nothing to refract renders as a grey coin. Floating it over the content gives it the page to
     // refract — and keeps it reachable once the page has scrolled, which the in-flow one did not.
-    AppBackButton(
-        backdrop = backdrop,
-        tint = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(start = 12.dp, top = 8.dp)
-            .size(48.dp),
-        onClick = onBack,
-    )
+    Box(
+        modifier =
+            Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .height(56.dp)
+                .liquidGlass(backdrop, RoundedCornerShape(28.dp), interactive = false),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        AppBackButton(
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 4.dp).size(48.dp),
+            onClick = onBack,
+        )
+    }
 }
 
 /**
