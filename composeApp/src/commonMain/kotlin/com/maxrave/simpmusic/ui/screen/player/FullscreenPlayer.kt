@@ -359,10 +359,10 @@ fun FullscreenPlayer(
                             navigationIcon = {
                                 Box(Modifier.padding(horizontal = 5.dp)) {
                                     AppBackButton(
-                    modifier = Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    onClick = { navController.navigateUp() },
-                )
+                                        modifier = Modifier.size(44.dp),
+                                        tint = Color.White,
+                                        onClick = { navController.navigateUp() },
+                                    )
                                 }
                             },
                             actions = {
