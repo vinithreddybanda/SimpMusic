@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -279,29 +280,6 @@ fun AppBackButton(
         tint = tint,
         contentDescription = "Back",
         iconSize = 22.dp,
-        onClick = onClick,
-    )
-}
-
-/**
- * The app-wide back control. Header screens should use this rather than rebuilding a
- * translucent circle or a Material IconButton. The 1dp highlight keeps the rim visible
- * on compact circular geometry.
- */
-@Composable
-fun GlassBackButton(
-    backdrop: PlatformBackdrop,
-    modifier: Modifier = Modifier.size(48.dp),
-    tint: Color = Color.White,
-    onClick: () -> Unit,
-) {
-    LiquidGlassIconButton(
-        backdrop = backdrop,
-        imageVector = SimpIcons.ArrowBackIosNew,
-        modifier = modifier,
-        tint = tint,
-        highlight = Highlight(width = 1.dp),
-        contentDescription = "Back",
         onClick = onClick,
     )
 }
