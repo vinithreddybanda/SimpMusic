@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.home
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -204,12 +205,11 @@ fun NotificationScreen(
                     )
                 },
                 navigationIcon = {
-                    RippleIconButton(
-                        imageVector = SimpIcons.ArrowBackIosNew,
+                    AppBackButton(
+                        modifier = Modifier.size(44.dp),
                         tint = MaterialTheme.colorScheme.onSurface,
-                    ) {
-                        navController.navigateUp()
-                    }
+                        onClick = { navController.navigateUp() },
+                    )
                 },
                 // Transparent, or the default surface container paints an opaque strip over the
                 // very top of AmbientThemeGlow — the one part of it that actually carries colour.
