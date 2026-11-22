@@ -182,6 +182,7 @@ fun PlaylistScreen(
     val tag = "PlaylistScreen"
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val artworkBackdrop = rememberBackdrop(Color.Black)
     val continuation by viewModel.continuation.collectAsStateWithLifecycle()
     val listColors by viewModel.listColors.collectAsStateWithLifecycle()
     val downloadState by viewModel.downloadState.collectAsStateWithLifecycle()
@@ -395,7 +396,6 @@ fun PlaylistScreen(
                                             // Apple Music-style: edge-to-edge artwork + liquid glass buttons.
                                             // Glass buttons MUST be siblings of the backdrop source (not children)
                                             // to avoid render feedback loop / RuntimeShader crash.
-                                            val artworkBackdrop = rememberBackdrop(Color.Black)
                                             Box(
                                                 modifier =
                                                     Modifier
