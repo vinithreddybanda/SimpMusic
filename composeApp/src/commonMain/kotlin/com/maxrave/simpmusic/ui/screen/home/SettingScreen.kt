@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.home
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
@@ -3266,20 +3267,15 @@ fun SettingScreen(
                                 )
                             },
                             navigationIcon = {
-                                Box(Modifier.padding(horizontal = 5.dp)) {
-                                    RippleIconButton(
-                                        SimpIcons.ArrowBackIosNew,
-                                        Modifier
-                                            .size(32.dp),
-                                        true,
-                                        tint = MaterialTheme.colorScheme.onSurface,
-                                    ) {
+                                AppBackButton(
+                                    modifier = Modifier.size(44.dp),
+                                    onClick = {
                                         coroutineScope.launch {
                                             sheetState.hide()
                                             showThirdPartyLibraries = false
                                         }
-                                    }
-                                }
+                                    },
+                                )
                             },
                         )
                     }
@@ -3337,16 +3333,10 @@ private fun SettingTopBar(
             )
         },
         navigationIcon = {
-            Box(Modifier.padding(horizontal = 5.dp)) {
-                RippleIconButton(
-                    SimpIcons.ArrowBackIosNew,
-                    Modifier.size(32.dp),
-                    true,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                ) {
-                    onBack()
-                }
-            }
+            AppBackButton(
+                modifier = Modifier.size(44.dp),
+                onClick = onBack,
+            )
         },
         windowInsets = windowInsets,
         modifier = modifier,
