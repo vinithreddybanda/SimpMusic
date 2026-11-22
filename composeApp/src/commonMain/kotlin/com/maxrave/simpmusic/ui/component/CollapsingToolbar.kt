@@ -207,7 +207,7 @@ fun CollapsingToolbarParallaxEffect(
                             12.dp,
                         ),
             ) {
-                GlassBackButton(
+                AppBackButton(
                     backdrop = headerBackdrop,
                     modifier = Modifier.size(44.dp),
                     tint = Color.White,
