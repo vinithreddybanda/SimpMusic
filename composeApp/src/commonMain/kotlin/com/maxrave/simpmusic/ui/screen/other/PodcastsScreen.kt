@@ -1,7 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.other
 
 import com.maxrave.simpmusic.ui.component.AppBackButton
-import com.maxrave.simpmusic.ui.component.GlassBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
