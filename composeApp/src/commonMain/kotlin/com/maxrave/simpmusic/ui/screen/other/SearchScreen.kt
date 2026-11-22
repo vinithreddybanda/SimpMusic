@@ -47,13 +47,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -129,6 +127,8 @@ import com.maxrave.simpmusic.ui.component.Chip
 import com.maxrave.simpmusic.ui.component.EndOfPage
 import com.maxrave.simpmusic.ui.component.GlassDockIconButton
 import com.maxrave.simpmusic.ui.component.GlassSuggestionRow
+import com.maxrave.simpmusic.ui.component.LiquidGlassTextButton
+import com.maxrave.simpmusic.ui.component.LiquidGlassButtonStyle
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
 import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.component.PlaylistFullWidthItems
@@ -621,14 +621,14 @@ fun SearchScreen(
                                                     .fillMaxWidth()
                                                     .background(MaterialTheme.colorScheme.background),
                                         ) {
-                                            TextButton(
+                                            LiquidGlassTextButton(
+                                                backdrop = chipBackdrop,
+                                                text = stringResource(Res.string.clear_search_history),
+                                                height = 36.dp,
+                                                style = LiquidGlassButtonStyle.SECONDARY,
+                                                textStyle = typo().labelMedium,
                                                 onClick = { searchViewModel.deleteSearchHistory() },
-                                            ) {
-                                                Text(
-                                                    text = stringResource(Res.string.clear_search_history),
-                                                    color = MaterialTheme.colorScheme.onBackground,
-                                                )
-                                            }
+                                            )
                                         }
                                     }
                                 }
@@ -1026,13 +1026,18 @@ fun SearchScreen(
                                                     modifier = Modifier.fillMaxWidth(),
                                                 )
                                                 Spacer(modifier = Modifier.height(10.dp))
-                                                Button(onClick = {
-                                                    if (searchText.isNotEmpty()) {
-                                                        searchViewModel.searchAll(searchText)
-                                                    }
-                                                }) {
-                                                    Text(text = stringResource(Res.string.retry))
-                                                }
+                                                LiquidGlassTextButton(
+                                                    backdrop = chipBackdrop,
+                                                    text = stringResource(Res.string.retry),
+                                                    height = 44.dp,
+                                                    style = LiquidGlassButtonStyle.PRIMARY,
+                                                    textStyle = typo().labelMedium,
+                                                    onClick = {
+                                                        if (searchText.isNotEmpty()) {
+                                                            searchViewModel.searchAll(searchText)
+                                                        }
+                                                    },
+                                                )
                                             }
                                         }
                                     }
