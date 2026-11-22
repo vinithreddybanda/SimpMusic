@@ -793,7 +793,7 @@ private fun Suggestions(
 ) {
     SectionHeader(stringResource(Res.string.lt_suggestions), suggestions.size)
     suggestions.forEach { suggestion ->
-        Surface {
+        Surface(backdrop) {
             Row(
                 Modifier.fillMaxWidth().padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -820,8 +820,8 @@ private fun Suggestions(
                         maxLines = 1,
                     )
                 }
-                ActionGlyph(SimpIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(suggestion.suggestionId) }
-                ActionGlyph(SimpIcons.Close, MaterialTheme.colorScheme.error) { onReject(suggestion.suggestionId) }
+                ActionGlyph(backdrop, SimpIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(suggestion.suggestionId) }
+                ActionGlyph(backdrop, SimpIcons.Close, MaterialTheme.colorScheme.error) { onReject(suggestion.suggestionId) }
             }
         }
     }
