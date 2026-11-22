@@ -58,9 +58,6 @@ import com.maxrave.simpmusic.ui.component.DownloadingIndicator
 import com.maxrave.simpmusic.ui.icon.Search
 import com.maxrave.simpmusic.ui.icon.Close
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -142,7 +139,6 @@ import com.maxrave.simpmusic.ui.component.LiquidGlassIconButton
 import com.maxrave.simpmusic.ui.component.LoadingDialog
 import com.maxrave.simpmusic.ui.component.LocalPlaylistBottomSheet
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
-import com.maxrave.simpmusic.ui.component.RippleIconButton
 import com.maxrave.simpmusic.ui.component.SongFullWidthItems
 import com.maxrave.simpmusic.ui.component.selection.SelectedSongsBottomSheet
 import com.maxrave.simpmusic.ui.component.selection.SongSelectionAction
