@@ -1,6 +1,8 @@
 package com.maxrave.simpmusic.ui.screen.library
 
 import com.maxrave.simpmusic.ui.component.AppBackButton
+import com.maxrave.simpmusic.ui.component.AppIconButton
+import com.maxrave.simpmusic.ui.component.GlassSearchField
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,14 +22,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +50,8 @@ import com.maxrave.domain.utils.LocalResource
 import com.maxrave.domain.utils.toArrayListTrack
 import com.maxrave.domain.utils.toTrack
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
 import com.maxrave.simpmusic.extension.getStringBlocking
 import com.maxrave.simpmusic.extension.ultraThinBarStyle
@@ -162,6 +162,7 @@ fun LibraryDynamicPlaylistScreen(
     var tempTopAlbums by remember { mutableStateOf(analyticsUIState.topAlbums.data ?: emptyList()) }
     val hazeState =
         rememberHazeState()
+    val searchBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
 
     // The other lists are observed from the database and are already loaded by the time this
     // screen opens; a recap is one month's ranking, so it can only be fetched once the route says
@@ -212,7 +213,7 @@ fun LibraryDynamicPlaylistScreen(
     val listState = rememberLazyListState()
     LazyColumn(
         state = listState,
-        modifier = Modifier.hazeSource(hazeState),
+        modifier = Modifier.hazeSource(hazeState).layerBackdrop(searchBackdrop),
         contentPadding = innerPadding,
     ) {
         item {
@@ -607,13 +608,12 @@ fun LibraryDynamicPlaylistScreen(
                     }
                 },
                 navigationIcon = {
-                    Box(Modifier.padding(horizontal = 5.dp)) {
-                        AppBackButton(
-                    modifier = Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    onClick = { navController.navigateUp() },
-                )
-                    }
+                    AppBackButton(
+                        backdrop = searchBackdrop,
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        onClick = { navController.navigateUp() },
+                    )
                 },
                 actions = {
                     if (isSongType) {
@@ -680,17 +680,14 @@ fun LibraryDynamicPlaylistScreen(
                             }
                         }
                     }
-                    Box(Modifier.padding(horizontal = 5.dp)) {
-                        RippleIconButton(
-                            if (showSearchBar) SimpIcons.Close else SimpIcons.Search,
-                            Modifier
-                                .size(32.dp),
-                            true,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        ) {
-                            showSearchBar = !showSearchBar
-                        }
-                    }
+                    AppIconButton(
+                        imageVector = if (showSearchBar) SimpIcons.Close else SimpIcons.Search,
+                        backdrop = searchBackdrop,
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = if (showSearchBar) "Close search" else "Search",
+                        onClick = { showSearchBar = !showSearchBar },
+                    )
                 },
                 modifier =
                     Modifier
@@ -752,35 +749,16 @@ fun LibraryDynamicPlaylistScreen(
             enter = SearchBarEnter,
             exit = SearchBarExit,
         ) {
-            SearchBar(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(45.dp)
-                        .padding(horizontal = 12.dp),
-                inputField = {
-                    CompositionLocalProvider(LocalTextStyle provides typo().bodySmall) {
-                        SearchBarDefaults.InputField(
-                            query = query,
-                            onQueryChange = { query = it },
-                            onSearch = { showSearchBar = false },
-                            expanded = showSearchBar,
-                            onExpandedChange = { showSearchBar = it },
-                            placeholder = {
-                                Text(
-                                    stringResource(Res.string.search),
-                                    style = typo().bodySmall,
-                                )
-                            },
-                            leadingIcon = { Icon(SimpIcons.Search, contentDescription = null) },
-                        )
-                    }
-                },
-                expanded = false,
-                onExpandedChange = {},
-                windowInsets = WindowInsets(0, 0, 0, 0),
-            ) {
-            }
+            GlassSearchField(
+                backdrop = searchBackdrop,
+                value = query,
+                onValueChange = { query = it },
+                placeholder = stringResource(Res.string.search),
+                leadingIcon = SimpIcons.Search,
+                leadingContentDescription = stringResource(Res.string.search),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                onSearch = { showSearchBar = false },
+            )
         }
     }
 }
