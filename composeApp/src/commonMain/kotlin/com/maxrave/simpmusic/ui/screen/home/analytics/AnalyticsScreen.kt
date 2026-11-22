@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.home.analytics
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -468,22 +469,16 @@ fun AnalyticsScreen(
         // window edge; its like/more pill sits at the header's own 32dp gutter.
         val backGutter = if (isPortrait) 12.dp else 24.dp
         val pillGutter = if (isPortrait) 16.dp else LANDSCAPE_GUTTER
-        LiquidGlassIconButton(
+        AppBackButton(
             backdrop = headerBackdrop,
-            imageVector = SimpIcons.ArrowBackIosNew,
-            shape = RoundedCornerShape(24.dp),
-            // A 48dp circle catches only a short arc of the default directional sweep and reads
-            // as rimless; 1.dp is the smallest step that stays visible without looking a border.
-            highlight = Highlight(width = 1.dp),
-            modifier =
-                Modifier
-                    .align(Alignment.TopStart)
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(start = backGutter, top = 16.dp)
-                    .size(48.dp),
-        ) {
-            navController.navigateUp()
-        }
+            tint = Color.White,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(start = backGutter, top = 16.dp)
+                .size(48.dp),
+            onClick = { navController.navigateUp() },
+        )
 
         // The receipt button shares the pill's row instead of taking a corner of its own, so the pill
         // keeps its place and the button appears beside it once there is a list to print.
