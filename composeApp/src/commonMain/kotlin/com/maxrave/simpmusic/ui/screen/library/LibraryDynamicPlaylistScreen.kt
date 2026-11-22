@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.library
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -607,15 +608,11 @@ fun LibraryDynamicPlaylistScreen(
                 },
                 navigationIcon = {
                     Box(Modifier.padding(horizontal = 5.dp)) {
-                        RippleIconButton(
-                            SimpIcons.ArrowBackIosNew,
-                            Modifier
-                                .size(32.dp),
-                            true,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        ) {
-                            navController.navigateUp()
-                        }
+                        AppBackButton(
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    onClick = { navController.navigateUp() },
+                )
                     }
                 },
                 actions = {
