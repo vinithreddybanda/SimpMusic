@@ -159,6 +159,7 @@ fun AlbumScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val artworkBackdrop = rememberBackdrop(Color.Black)
 
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var albumBottomSheetShow by rememberSaveable { mutableStateOf(false) }
@@ -255,7 +256,6 @@ fun AlbumScreen(
                                         // ~half screen height) with title overlay + liquid glass buttons.
                                         // Glass buttons MUST be siblings of the backdrop source (not children)
                                         // to avoid render feedback loop / RuntimeShader crash.
-                                        val artworkBackdrop = rememberBackdrop(Color.Black)
                                         Box(
                                             modifier =
                                                 Modifier
