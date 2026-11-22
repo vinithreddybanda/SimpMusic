@@ -1,6 +1,7 @@
 package com.maxrave.simpmusic.ui.screen.other
 
 import com.maxrave.simpmusic.ui.component.AppBackButton
+import com.maxrave.simpmusic.ui.component.LiquidGlassCard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -43,8 +44,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -1313,13 +1312,12 @@ private fun ArtistSections(
             )
         }
         val urlHandler = LocalUriHandler.current
-        ElevatedCard(
+        LiquidGlassCard(
+            backdrop = artworkBackdrop,
             modifier = Modifier.padding(horizontal = 20.dp),
             shape = RoundedCornerShape(8.dp),
-            colors =
-                CardDefaults.elevatedCardColors().copy(
-                    containerColor = descriptionTint.rgbFactor(0.5f),
-                ),
+            tint = descriptionTint,
+            tintAlpha = 0.14f,
         ) {
             DescriptionView(
                 modifier = Modifier.padding(16.dp),
