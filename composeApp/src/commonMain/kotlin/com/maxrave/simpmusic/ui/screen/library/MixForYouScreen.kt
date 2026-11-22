@@ -90,7 +90,6 @@ fun MixForYouScreen(
     val density = LocalDensity.current
     val mixForYou by viewModel.youTubeMixForYou.collectAsStateWithLifecycle()
     val hazeState = rememberHazeState()
-    val headerBackdrop = rememberBackdrop(pageBackground)
     val gridState = rememberLazyGridState()
     // Home's rule, verbatim: transparent only while pixel-0 is on screen. onScrolling is too
     // coarse for this — it stays "on top" through the whole first row. The frost itself is kept
@@ -113,6 +112,7 @@ fun MixForYouScreen(
         } else {
             backgroundColor
         }
+    val headerBackdrop = rememberBackdrop(pageBackground)
     var topHeaderColor by remember { mutableStateOf(backgroundColor) }
     val animatedColor by animateColorAsState(topHeaderColor, tween(500))
     val networkLoader = rememberNetworkLoader(HttpClient(CIO))
