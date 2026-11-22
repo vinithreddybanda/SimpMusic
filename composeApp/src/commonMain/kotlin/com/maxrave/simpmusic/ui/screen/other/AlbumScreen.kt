@@ -962,7 +962,14 @@ onClick = { navController.navigateUp() },
                                 containerColor = Color.Transparent,
                             ),
                         modifier =
-                            Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.55f)),
+                            Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.3f))
+                                .then(
+                                    if (LocalLiquidGlassEnabled.current) {
+                                        Modifier.liquidGlass(artworkBackdrop, RoundedCornerShape(28.dp), interactive = false)
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
                     )
                 }
                 AnimatedVisibility(
