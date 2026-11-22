@@ -377,12 +377,12 @@ private fun ColumnScope.WorkArea(
             }
             AnimatedVisibility(visible = state.isHost && state.joinRequests.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    JoinRequests(state.joinRequests, viewModel::approveJoin, viewModel::rejectJoin)
+                    JoinRequests(backdrop, state.joinRequests, viewModel::approveJoin, viewModel::rejectJoin)
                 }
             }
             AnimatedVisibility(visible = state.isHost && state.suggestions.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Suggestions(state.suggestions, viewModel::approveSuggestion, viewModel::rejectSuggestion)
+                    Suggestions(backdrop, state.suggestions, viewModel::approveSuggestion, viewModel::rejectSuggestion)
                 }
             }
             Members(
@@ -755,13 +755,14 @@ private fun ErrorCard(
 
 @Composable
 private fun JoinRequests(
+    backdrop: PlatformBackdrop,
     requests: List<RoomJoinRequest>,
     onApprove: (String) -> Unit,
     onReject: (String) -> Unit,
 ) {
     SectionHeader(stringResource(Res.string.lt_join_requests), requests.size)
     requests.forEach { request ->
-        Surface {
+        Surface(backdrop) {
             Row(
                 Modifier.fillMaxWidth().padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -776,8 +777,8 @@ private fun JoinRequests(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                ActionGlyph(SimpIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(request.userId) }
-                ActionGlyph(SimpIcons.Close, MaterialTheme.colorScheme.error) { onReject(request.userId) }
+                ActionGlyph(backdrop, SimpIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(request.userId) }
+                ActionGlyph(backdrop, SimpIcons.Close, MaterialTheme.colorScheme.error) { onReject(request.userId) }
             }
         }
     }
@@ -785,6 +786,7 @@ private fun JoinRequests(
 
 @Composable
 private fun Suggestions(
+    backdrop: PlatformBackdrop,
     suggestions: List<RoomSuggestion>,
     onApprove: (String) -> Unit,
     onReject: (String) -> Unit,
@@ -982,14 +984,12 @@ private fun MemberActionDialog(
     onDismiss: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier =
-                Modifier
-                    .width(320.dp)
-                    .clip(CARD_SHAPE)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(20.dp),
+        LiquidGlassCard(
+            backdrop = backdrop,
+            modifier = Modifier.width(320.dp),
+            shape = CARD_SHAPE,
         ) {
+            Column(Modifier.fillMaxWidth().padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Avatar(initialOf(member.username), tintFor(member.userId), 40.dp)
                 Text(
@@ -1003,23 +1003,27 @@ private fun MemberActionDialog(
             Spacer(Modifier.height(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 DialogAction(
+                    backdrop,
                     stringResource(Res.string.lt_transfer_host),
                     stringResource(Res.string.lt_transfer_host_desc),
                     MaterialTheme.colorScheme.onSurface,
                     onTransferHost,
                 )
                 DialogAction(
+                    backdrop,
                     stringResource(Res.string.lt_kick),
                     stringResource(Res.string.lt_kick_desc),
                     MaterialTheme.colorScheme.error,
                     onKick,
                 )
                 DialogAction(
+                    backdrop,
                     stringResource(Res.string.lt_block),
                     stringResource(Res.string.lt_block_desc),
                     MaterialTheme.colorScheme.error,
                     onBlock,
                 )
+            }
             }
         }
     }
@@ -1114,21 +1118,19 @@ private fun GlyphButton(
 
 @Composable
 private fun ActionGlyph(
+    backdrop: PlatformBackdrop,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     tint: Color,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(tint.copy(alpha = 0.16f))
-                .clickable { onClick() },
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
-    }
+    LiquidGlassIconButton(
+        backdrop = backdrop,
+        imageVector = icon,
+        modifier = Modifier.size(32.dp),
+        tint = tint,
+        iconSize = 16.dp,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -1166,46 +1168,26 @@ private fun SecondaryButton(
 }
 
 @Composable
-private fun DangerButton(
-    text: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .clip(CircleShape)
-                .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f), CircleShape)
-                .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(text, style = typo().titleSmall, color = MaterialTheme.colorScheme.error)
-    }
-}
-
-@Composable
 private fun DialogAction(
+    backdrop: PlatformBackdrop,
     title: String,
     subtitle: String,
     tint: Color,
     onClick: () -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(ROW_SHAPE)
-                .border(1.dp, tint.copy(alpha = 0.25f), ROW_SHAPE)
-                .clickable { onClick() }
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+    LiquidGlassCard(
+        backdrop = backdrop,
+        modifier = Modifier.fillMaxWidth(),
+        shape = ROW_SHAPE,
+        tint = tint,
+        interactive = true,
     ) {
-        Text(title, style = typo().bodyMedium, color = tint)
-        Text(subtitle, style = typo().bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(
+            modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 14.dp, vertical = 12.dp),
+        ) {
+            Text(title, style = typo().bodyMedium, color = tint)
+            Text(subtitle, style = typo().bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
