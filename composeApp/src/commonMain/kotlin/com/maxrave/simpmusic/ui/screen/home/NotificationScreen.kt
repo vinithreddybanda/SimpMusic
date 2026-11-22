@@ -65,6 +65,11 @@ import com.maxrave.domain.data.entities.NotificationEntity
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
 import com.maxrave.simpmusic.extension.barBlurStyle
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.ui.component.liquidGlass
+import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.maxrave.simpmusic.extension.formatTimeAgo
 import com.maxrave.simpmusic.extension.mouseDragScroll
 import com.maxrave.simpmusic.ui.component.AmbientThemeGlow
@@ -103,6 +108,7 @@ fun NotificationScreen(
     val listState = rememberLazyListState()
     val density = LocalDensity.current
     val hazeState = rememberHazeState()
+    val headerBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
     var topAppBarHeight by remember { mutableStateOf(0.dp) }
     // Home's rule: transparent only while pixel-0 is on screen; the frost itself stays light.
     val isAtTop by remember {
@@ -123,7 +129,7 @@ fun NotificationScreen(
                     }
             },
     )
-    Box(Modifier.fillMaxSize().hazeSource(hazeState)) {
+    Box(Modifier.fillMaxSize().hazeSource(hazeState).then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(headerBackdrop) else Modifier)) {
         Crossfade(targetState = listNotification) {
             if (it == null) {
                 Box(
@@ -191,7 +197,7 @@ fun NotificationScreen(
                         Modifier
                     } else {
                         // AlbumScreen's bar recipe, thinned to 0.3 — see SettingScreen.
-                        Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(barTint, 0.3f))
+                        Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(barTint, 0.3f)).then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false) else Modifier)
                     },
                 ).onGloballyPositioned { coordinates ->
                     topAppBarHeight = with(density) { coordinates.size.height.toDp() }
