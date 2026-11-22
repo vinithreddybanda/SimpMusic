@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.home
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -475,20 +476,14 @@ private fun BoxScope.BackButton(
     // column it used to sit in, what is behind it is the flat page background, and glass with
     // nothing to refract renders as a grey coin. Floating it over the content gives it the page to
     // refract — and keeps it reachable once the page has scrolled, which the in-flow one did not.
-    LiquidGlassIconButton(
+    AppBackButton(
         backdrop = backdrop,
-        imageVector = SimpIcons.ArrowBackIosNew,
-        // NOT the default Color.White: every other caller sits on a ForceDark screen, but this page
-        // follows the theme — at light theme a white glyph sits on light glass (or on the light
-        // fallback pill) and disappears. onSurface flips with the scheme.
         tint = MaterialTheme.colorScheme.onSurface,
-        shape = RoundedCornerShape(24.dp),
-        modifier =
-            Modifier
-                .align(Alignment.TopStart)
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(start = 12.dp, top = 8.dp)
-                .size(48.dp),
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(start = 12.dp, top = 8.dp)
+            .size(48.dp),
         onClick = onBack,
     )
 }
