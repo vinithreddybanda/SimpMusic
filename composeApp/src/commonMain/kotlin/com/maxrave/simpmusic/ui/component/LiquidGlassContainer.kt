@@ -196,6 +196,7 @@ fun LiquidGlassIconButton(
     interactive: Boolean = true,
     highlight: Highlight = Highlight(width = 1.dp),
     contentDescription: String? = null,
+    iconSize: androidx.compose.ui.unit.Dp = 24.dp,
     onClick: () -> Unit,
 ) {
     LiquidGlassContainer(
@@ -209,6 +210,7 @@ fun LiquidGlassIconButton(
             imageVector = imageVector,
             tint = tint,
             contentDescription = contentDescription,
+            iconSize = iconSize,
             onClick = onClick,
         )
     }
