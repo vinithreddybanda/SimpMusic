@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.other
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -346,15 +347,11 @@ fun BrowseScreen(
                     },
                     navigationIcon = {
                         Box(Modifier.padding(horizontal = 5.dp)) {
-                            RippleIconButton(
-                                SimpIcons.ArrowBackIosNew,
-                                Modifier
-                                    .size(32.dp),
-                                true,
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            ) {
-                                navController.navigateUp()
-                            }
+                            AppBackButton(
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        onClick = { navController.navigateUp() },
+                    )
                         }
                     },
                     colors =
