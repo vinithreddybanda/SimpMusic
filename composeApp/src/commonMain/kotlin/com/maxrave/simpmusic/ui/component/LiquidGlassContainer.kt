@@ -206,13 +206,17 @@ fun LiquidGlassIconButton(
         interactive = interactive,
         highlight = highlight,
     ) {
-        RippleIconButton(
-            imageVector = imageVector,
-            tint = tint,
-            contentDescription = contentDescription,
-            iconSize = iconSize,
-            onClick = onClick,
-        )
+        Box(
+            modifier = Modifier.fillMaxSize().clickable(onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = contentDescription,
+                tint = tint,
+                modifier = Modifier.size(iconSize),
+            )
+        }
     }
 }
 
