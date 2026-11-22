@@ -678,7 +678,7 @@ private fun RoomCodePoster(
  */
 @Composable
 private fun BufferBanner(backdrop: PlatformBackdrop, names: List<String>) {
-    Surface(backdrop, tint = MaterialTheme.colorScheme.tertiary) {
+    LiquidGlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth(), shape = CARD_SHAPE, tint = MaterialTheme.colorScheme.tertiary) {
         Column(Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
                 text = if (names.isEmpty()) "Waiting for everyone" else "Waiting for ${names.joinToString(", ")}",
@@ -734,7 +734,7 @@ private fun ErrorCard(
     message: String,
     onDismiss: () -> Unit,
 ) {
-    Surface(backdrop, tint = MaterialTheme.colorScheme.error) {
+    LiquidGlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth(), shape = CARD_SHAPE, tint = MaterialTheme.colorScheme.error) {
         Row(
             Modifier.fillMaxWidth().clickable { onDismiss() }.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -755,7 +755,7 @@ private fun JoinRequests(
 ) {
     SectionHeader(stringResource(Res.string.lt_join_requests), requests.size)
     requests.forEach { request ->
-        Surface(backdrop) {
+        LiquidGlassCard(backdrop = backdrop, modifier = Modifier.fillMaxWidth(), shape = CARD_SHAPE, tint = MaterialTheme.colorScheme.onSurfaceVariant) {
             Row(
                 Modifier.fillMaxWidth().padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1023,22 +1023,6 @@ private fun MemberActionDialog(
 }
 
 // ───────────────────────────────── building blocks ─────────────────────────────────
-
-/** One card. Every panel on this screen is one of these, so they cannot drift apart. */
-@Composable
-private fun Surface(
-    backdrop: PlatformBackdrop,
-    tint: Color? = null,
-    content: @Composable BoxScope.() -> Unit,
-) {
-    LiquidGlassCard(
-        backdrop = backdrop,
-        modifier = Modifier.fillMaxWidth(),
-        shape = CARD_SHAPE,
-        tint = tint ?: MaterialTheme.colorScheme.onSurfaceVariant,
-        content = content,
-    )
-}
 
 @Composable
 private fun SectionHeader(
