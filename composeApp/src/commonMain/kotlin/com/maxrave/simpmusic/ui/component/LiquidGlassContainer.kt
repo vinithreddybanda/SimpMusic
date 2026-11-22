@@ -227,28 +227,53 @@ fun LiquidGlassIconButton(
  * rather than pretending a flat page background is a glass source.
  */
 @Composable
+fun AppIconButton(
+    imageVector: ImageVector,
+    backdrop: PlatformBackdrop? = null,
+    modifier: Modifier = Modifier.size(44.dp),
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+    contentDescription: String? = null,
+    iconSize: androidx.compose.ui.unit.Dp = 20.dp,
+    onClick: () -> Unit,
+) {
+    if (backdrop != null) {
+        LiquidGlassIconButton(
+            backdrop = backdrop,
+            imageVector = imageVector,
+            modifier = modifier,
+            tint = tint,
+            contentDescription = contentDescription,
+            iconSize = iconSize,
+            onClick = onClick,
+        )
+    } else {
+        RippleIconButton(
+            imageVector = imageVector,
+            modifier = modifier,
+            tint = tint,
+            contentDescription = contentDescription,
+            iconSize = iconSize,
+            onClick = onClick,
+        )
+    }
+}
+
+@Composable
 fun AppBackButton(
     backdrop: PlatformBackdrop? = null,
     modifier: Modifier = Modifier.size(48.dp),
     tint: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
 ) {
-    if (backdrop != null) {
-        GlassBackButton(
-            backdrop = backdrop,
-            modifier = modifier,
-            tint = tint,
-            onClick = onClick,
-        )
-    } else {
-        RippleIconButton(
-            imageVector = SimpIcons.ArrowBackIosNew,
-            modifier = modifier,
-            tint = tint,
-            onClick = onClick,
-            contentDescription = "Back",
-        )
-    }
+    AppIconButton(
+        imageVector = SimpIcons.ArrowBackIosNew,
+        backdrop = backdrop,
+        modifier = modifier,
+        tint = tint,
+        contentDescription = "Back",
+        iconSize = 22.dp,
+        onClick = onClick,
+    )
 }
 
 /**
