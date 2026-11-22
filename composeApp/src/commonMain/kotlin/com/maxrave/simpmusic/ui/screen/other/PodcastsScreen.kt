@@ -56,6 +56,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.extension.barBlurStyle
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
 import com.maxrave.simpmusic.ui.component.rememberHolderPainter
 import com.maxrave.simpmusic.expect.ui.toImageBitmap
@@ -97,6 +99,10 @@ import com.maxrave.simpmusic.ui.theme.typo
 import com.maxrave.simpmusic.viewModel.PodcastUIEvent
 import com.maxrave.simpmusic.viewModel.PodcastUIState
 import com.maxrave.simpmusic.viewModel.PodcastViewModel
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
+import dev.chrisbanes.haze.blur.hazeBlur
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -145,6 +151,7 @@ fun PodcastScreen(
     // Background gradient from the artwork, held and faded (see UIExt.rememberPaletteColor).
     val gradientColors = listOf(rememberPaletteColor(paletteState.palette) { it.getColorFromPalette() }, Color.Black)
     val headerBackdrop = rememberBackdrop(Color.Black)
+    val hazeState = rememberHazeState()
 
     LaunchedEffect(key1 = podcastId) {
         if ((uiState as? PodcastUIState.Success)?.id == podcastId) {
@@ -162,7 +169,8 @@ fun PodcastScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .background(Color.Black),
+                            .background(Color.Black)
+                            .hazeSource(hazeState),
                     state = lazyState,
                 ) {
                     item(contentType = "header") {
@@ -459,7 +467,10 @@ fun PodcastScreen(
                             TopAppBarDefaults.topAppBarColors(
                                 containerColor = Color.Transparent,
                             ),
-                        modifier = Modifier.angledGradientBackground(gradientColors, 90f),
+                        modifier =
+                            Modifier
+                                .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(Color.Black, 0.3f))
+                                .liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false),
                     )
                 }
 
