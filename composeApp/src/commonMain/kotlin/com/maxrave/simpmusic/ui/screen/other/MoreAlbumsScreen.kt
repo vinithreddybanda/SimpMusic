@@ -36,7 +36,12 @@ import androidx.navigation.NavController
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
-import com.maxrave.simpmusic.extension.ultraThinBarStyle
+import com.maxrave.simpmusic.extension.barBlurStyle
+import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.ui.component.liquidGlass
+import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.maxrave.simpmusic.ui.component.CenterLoadingBox
 import com.maxrave.simpmusic.ui.component.EndOfPage
 import com.maxrave.simpmusic.ui.component.HomeItemContentPlaylist
@@ -66,6 +71,7 @@ fun MoreAlbumsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val hazeState = rememberHazeState()
+    val headerBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
 
     LaunchedEffect(id, type) {
         Logger.w("MoreAlbumsScreen", "id: $id, type: $type")
@@ -99,7 +105,8 @@ fun MoreAlbumsScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .hazeSource(state = hazeState),
+                            .hazeSource(state = hazeState)
+                            .then(if (LocalLiquidGlassEnabled.current) Modifier.layerBackdrop(headerBackdrop) else Modifier),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -139,7 +146,8 @@ fun MoreAlbumsScreen(
                 TopAppBar(
                     modifier =
                         Modifier
-                            .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
+                            .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
+                            .then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false) else Modifier),
                     title = {
                         Text(
                             text = state.title,
