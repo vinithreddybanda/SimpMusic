@@ -74,7 +74,7 @@ fun NormalAppBar(
             .then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(backdrop, RoundedCornerShape(26.dp), interactive = false) else Modifier),
         navigationIcon = {
             when {
-                onBack != null -> GlassBackButton(
+                onBack != null -> AppBackButton(
                     backdrop = backdrop,
                     modifier = Modifier.padding(start = 12.dp).size(44.dp),
                     tint = MaterialTheme.colorScheme.onBackground,
