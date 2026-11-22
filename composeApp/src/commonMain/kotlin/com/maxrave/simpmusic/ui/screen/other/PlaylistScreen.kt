@@ -505,15 +505,13 @@ fun PlaylistScreen(
                                                             .windowInsetsPadding(WindowInsets.statusBars),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                 ) {
-                                                    LiquidGlassIconButton(
-                                                        backdrop = artworkBackdrop,
-                                                        imageVector = SimpIcons.ArrowBackIosNew,
-                                                        modifier =
-                                                            Modifier
+                                                    AppBackButton(
+backdrop = artworkBackdrop,
+modifier = Modifier
                                                                 .size(48.dp),
-                                                    ) {
-                                                        navController.navigateUp()
-                                                    }
+tint = Color.White,
+onClick = { navController.navigateUp() },
+)
                                                     Spacer(Modifier.weight(1f))
                                                     Row(
                                                         modifier =
@@ -788,24 +786,16 @@ fun PlaylistScreen(
                                                 }
                                                 // Glass overlays — siblings of the source, over the strip the column reserved.
                                                 Box(Modifier.padding(start = 12.dp)) {
-                                                    LiquidGlassIconButton(
-                                                        backdrop = headerBackdrop,
-                                                        imageVector = SimpIcons.ArrowBackIosNew,
-                                                        shape = RoundedCornerShape(24.dp),
-                                                        // Same directional style as the like/⋯ pill, a touch thicker. The default
-                                                        // width of 0.5.dp becomes a ~2px stroke (HighlightModifier: ceil(width.toPx()) * 2),
-                                                        // which reads along the pill's long edge but vanishes around a 48dp circle. 1.dp
-                                                        // is the smallest step up that stays visible without looking like a border.
-                                                        highlight = Highlight(width = 1.dp),
-                                                        modifier =
-                                                            Modifier
+                                                    AppBackButton(
+backdrop = headerBackdrop,
+modifier = Modifier
                                                                 .align(Alignment.TopStart)
                                                                 .padding(12.dp)
                                                                 .windowInsetsPadding(WindowInsets.statusBars)
                                                                 .size(48.dp),
-                                                    ) {
-                                                        navController.navigateUp()
-                                                    }
+tint = Color.White,
+onClick = { navController.navigateUp() },
+)
                                                 }
                                                 Row(
                                                     modifier =
