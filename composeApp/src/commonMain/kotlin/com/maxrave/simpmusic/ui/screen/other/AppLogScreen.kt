@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.other
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -237,14 +238,11 @@ fun AppLogScreen(
                 },
                 navigationIcon = {
                     Box(Modifier.padding(horizontal = 5.dp)) {
-                        RippleIconButton(
-                            SimpIcons.ArrowBackIosNew,
-                            Modifier.size(32.dp),
-                            true,
-                            tint = onSurface,
-                        ) {
-                            navController.navigateUp()
-                        }
+                        AppBackButton(
+                        modifier = Modifier.size(44.dp),
+                        tint = onSurface,
+                        onClick = { navController.navigateUp() },
+                    )
                     }
                 },
                 actions = {
