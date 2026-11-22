@@ -360,7 +360,7 @@ private fun Toolbar(
                 ),
             modifier = Modifier,
             navigationIcon = {
-                GlassBackButton(
+                AppBackButton(
                     backdrop = backdrop,
                     modifier = Modifier.padding(start = 12.dp).size(44.dp),
                     tint = Color.White,
