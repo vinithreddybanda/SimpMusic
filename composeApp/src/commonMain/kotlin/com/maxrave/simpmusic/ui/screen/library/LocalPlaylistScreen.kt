@@ -227,6 +227,7 @@ fun LocalPlaylistScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val artworkBackdrop = rememberBackdrop(Color.Black)
 
     val aiPainter = rememberVectorPainter(SimpIcons.TipsAndUpdates)
     val limit = 1.5f
@@ -524,7 +525,6 @@ fun LocalPlaylistScreen(
                             // Apple Music-style: edge-to-edge artwork + liquid glass buttons.
                             // Glass buttons MUST be siblings of the backdrop source (not children)
                             // to avoid render feedback loop / RuntimeShader crash.
-                            val artworkBackdrop = rememberBackdrop(Color.Black)
                             Box(
                                 modifier =
                                     Modifier
