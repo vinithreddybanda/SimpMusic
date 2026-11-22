@@ -1123,6 +1123,7 @@ private fun PrimaryButton(
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
         style = LiquidGlassButtonStyle.PRIMARY,
+        textStyle = typo().titleSmall,
         onClick = onClick,
     )
 }
@@ -1140,6 +1141,7 @@ private fun SecondaryButton(
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
         style = LiquidGlassButtonStyle.SECONDARY,
+        textStyle = typo().titleSmall,
         onClick = onClick,
     )
 }
