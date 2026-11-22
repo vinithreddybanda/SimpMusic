@@ -127,6 +127,8 @@ import com.maxrave.simpmusic.extension.toAppDeepLinkOrNull
 import com.maxrave.simpmusic.ui.component.ArtistFullWidthItems
 import com.maxrave.simpmusic.ui.component.Chip
 import com.maxrave.simpmusic.ui.component.EndOfPage
+import com.maxrave.simpmusic.ui.component.GlassDockIconButton
+import com.maxrave.simpmusic.ui.component.GlassSuggestionRow
 import com.maxrave.simpmusic.ui.component.NowPlayingBottomSheet
 import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.ui.component.PlaylistFullWidthItems
@@ -558,51 +560,30 @@ fun SearchScreen(
                             )
                         }
                         items(searchScreenState.suggestQueries) { suggestion ->
-                            Row(
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = ripple(),
-                                            onClick = {
-                                                searchText = suggestion
-                                                focusManager.clearFocus()
-                                                isSearchSubmitted = true
-                                                searchViewModel.insertSearchHistory(suggestion)
-                                                when (searchScreenState.searchType) {
-                                                    SearchType.ALL -> searchViewModel.searchAll(suggestion)
-                                                    SearchType.SONGS -> searchViewModel.searchSongs(suggestion)
-                                                    SearchType.VIDEOS -> searchViewModel.searchVideos(suggestion)
-                                                    SearchType.ALBUMS -> searchViewModel.searchAlbums(suggestion)
-                                                    SearchType.ARTISTS -> searchViewModel.searchArtists(suggestion)
-                                                    SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(suggestion)
-                                                    SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(suggestion)
-                                                    SearchType.PODCASTS -> searchViewModel.searchPodcast(suggestion)
-                                                }
-                                            },
-                                        ).padding(horizontal = 12.dp, vertical = 2.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(
-                                    text = suggestion,
-                                    style = typo().bodyMedium,
-                                )
-                                Spacer(modifier = Modifier.weight(1f))
-                                IconButton(
-                                    onClick = {
-                                        searchText = suggestion
-                                        focusRequester.requestFocus()
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = SimpIcons.ArrowOutward,
-                                        contentDescription = "Search suggestion",
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                }
-                            }
+                            GlassSuggestionRow(
+                                text = suggestion,
+                                trailingIcon = SimpIcons.ArrowOutward,
+                                onClick = {
+                                    searchText = suggestion
+                                    focusManager.clearFocus()
+                                    isSearchSubmitted = true
+                                    searchViewModel.insertSearchHistory(suggestion)
+                                    when (searchScreenState.searchType) {
+                                        SearchType.ALL -> searchViewModel.searchAll(suggestion)
+                                        SearchType.SONGS -> searchViewModel.searchSongs(suggestion)
+                                        SearchType.VIDEOS -> searchViewModel.searchVideos(suggestion)
+                                        SearchType.ALBUMS -> searchViewModel.searchAlbums(suggestion)
+                                        SearchType.ARTISTS -> searchViewModel.searchArtists(suggestion)
+                                        SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(suggestion)
+                                        SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(suggestion)
+                                        SearchType.PODCASTS -> searchViewModel.searchPodcast(suggestion)
+                                    }
+                                },
+                                onTrailingClick = {
+                                    searchText = suggestion
+                                    focusRequester.requestFocus()
+                                },
+                            )
                         }
                         item {
                             EndOfPage(
@@ -653,52 +634,31 @@ fun SearchScreen(
                                 }
                             }
                             items(searchHistory) { historyItem ->
-                                Row(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                searchText = historyItem
-                                                focusManager.clearFocus()
-                                                isSearchSubmitted = true
-                                                searchViewModel.insertSearchHistory(historyItem)
-                                                when (searchScreenState.searchType) {
-                                                    SearchType.ALL -> searchViewModel.searchAll(historyItem)
-                                                    SearchType.SONGS -> searchViewModel.searchSongs(historyItem)
-                                                    SearchType.VIDEOS -> searchViewModel.searchVideos(historyItem)
-                                                    SearchType.ALBUMS -> searchViewModel.searchAlbums(historyItem)
-                                                    SearchType.ARTISTS -> searchViewModel.searchArtists(historyItem)
-                                                    SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(historyItem)
-                                                    SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(historyItem)
-                                                    SearchType.PODCASTS -> searchViewModel.searchPodcast(historyItem)
-                                                }
-                                            }.padding(horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Icon(
-                                        imageVector = SimpIcons.History,
-                                        contentDescription = "Search history",
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                    Spacer(modifier = Modifier.padding(horizontal = 12.dp))
-                                    Text(
-                                        text = historyItem,
-                                        style = typo().bodyMedium,
-                                    )
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    IconButton(
-                                        onClick = {
-                                            searchText = historyItem
-                                            focusRequester.requestFocus()
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = SimpIcons.ArrowOutward,
-                                            contentDescription = "Search suggestion",
-                                            modifier = Modifier.size(24.dp),
-                                        )
-                                    }
-                                }
+                                GlassSuggestionRow(
+                                    text = historyItem,
+                                    leadingIcon = SimpIcons.History,
+                                    trailingIcon = SimpIcons.ArrowOutward,
+                                    onClick = {
+                                        searchText = historyItem
+                                        focusManager.clearFocus()
+                                        isSearchSubmitted = true
+                                        searchViewModel.insertSearchHistory(historyItem)
+                                        when (searchScreenState.searchType) {
+                                            SearchType.ALL -> searchViewModel.searchAll(historyItem)
+                                            SearchType.SONGS -> searchViewModel.searchSongs(historyItem)
+                                            SearchType.VIDEOS -> searchViewModel.searchVideos(historyItem)
+                                            SearchType.ALBUMS -> searchViewModel.searchAlbums(historyItem)
+                                            SearchType.ARTISTS -> searchViewModel.searchArtists(historyItem)
+                                            SearchType.PLAYLISTS -> searchViewModel.searchPlaylists(historyItem)
+                                            SearchType.FEATURED_PLAYLISTS -> searchViewModel.searchFeaturedPlaylist(historyItem)
+                                            SearchType.PODCASTS -> searchViewModel.searchPodcast(historyItem)
+                                        }
+                                    },
+                                    onTrailingClick = {
+                                        searchText = historyItem
+                                        focusRequester.requestFocus()
+                                    },
+                                )
                             }
                             item {
                                 EndOfPage(
@@ -1156,12 +1116,13 @@ fun SearchScreen(
                     ) { showBack ->
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             if (showBack) {
-                                IconButton(onClick = dismissSearchPanel) {
-                                    Icon(
-                                        imageVector = SimpIcons.ArrowBackIosNew,
-                                        contentDescription = "Back",
-                                    )
-                                }
+                                GlassDockIconButton(
+                                    imageVector = SimpIcons.ArrowBackIosNew,
+                                    contentDescription = "Back",
+                                    modifier = Modifier.size(44.dp),
+                                    iconSize = 22.dp,
+                                    onClick = dismissSearchPanel,
+                                )
                             } else {
                                 Icon(
                                     imageVector = SimpIcons.Search,
@@ -1243,36 +1204,30 @@ fun SearchScreen(
                     )
 
                     if (searchText.isNotEmpty()) {
-                        IconButton(
-                            modifier = Modifier.clip(CircleShape),
+                        GlassDockIconButton(
+                            imageVector = SimpIcons.Close,
+                            contentDescription = "Clear search",
+                            modifier = Modifier.size(40.dp),
                             onClick = {
                                 searchText = ""
                                 isSearchSubmitted = false
                             },
-                        ) {
-                            Icon(imageVector = SimpIcons.Close, contentDescription = "Clear search")
-                        }
+                        )
                     } else if (getPlatform() == Platform.Android) {
-                        IconButton(
-                            modifier = Modifier.clip(CircleShape),
+                        GlassDockIconButton(
+                            imageVector = SimpIcons.GraphicEq,
+                            contentDescription = stringResource(Res.string.recognize_song),
+                            modifier = Modifier.size(40.dp),
                             onClick = { showRecognition = true },
-                        ) {
-                            Icon(
-                                imageVector = SimpIcons.GraphicEq,
-                                contentDescription = stringResource(Res.string.recognize_song),
-                            )
-                        }
-                    }
-                    IconButton(
-                        modifier = Modifier.clip(CircleShape),
-                        onClick = { navController.navigate(AppLogDestination) },
-                    ) {
-                        Icon(
-                            imageVector = SimpIcons.Error,
-                            contentDescription = "Open app logs",
-                            modifier = Modifier.size(20.dp),
                         )
                     }
+                    GlassDockIconButton(
+                        imageVector = SimpIcons.Error,
+                        contentDescription = "Open app logs",
+                        modifier = Modifier.size(40.dp),
+                        iconSize = 20.dp,
+                        onClick = { navController.navigate(AppLogDestination) },
+                    )
                 }
 
                 AnimatedVisibility(
