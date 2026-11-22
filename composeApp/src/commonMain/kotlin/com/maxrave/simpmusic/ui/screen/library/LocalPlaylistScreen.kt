@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.library
 
+import com.maxrave.simpmusic.ui.component.GlassDockIconButton
 import com.maxrave.simpmusic.ui.component.AppBackButton
 import com.maxrave.simpmusic.ui.component.GlassSearchField
 import androidx.compose.animation.AnimatedVisibility
@@ -683,24 +684,20 @@ fun LocalPlaylistScreen(
                                                 )
                                             }
                                         }
-                                        IconButton(
+                                        GlassDockIconButton(
+                                            imageVector = SimpIcons.Search,
+                                            contentDescription = "Search in playlist",
+                                            modifier = Modifier.size(44.dp),
+                                            tint = Color.White,
                                             onClick = { showSearchBar = true },
-                                        ) {
-                                            Icon(
-                                                imageVector = SimpIcons.Search,
-                                                contentDescription = "Search in playlist",
-                                                tint = Color.White,
-                                            )
-                                        }
-                                        IconButton(
+                                        )
+                                        GlassDockIconButton(
+                                            imageVector = SimpIcons.MoreVert,
+                                            contentDescription = "More",
+                                            modifier = Modifier.size(44.dp),
+                                            tint = Color.White,
                                             onClick = onPlaylistMoreClick,
-                                        ) {
-                                            Icon(
-                                                imageVector = SimpIcons.MoreVert,
-                                                contentDescription = "More",
-                                                tint = Color.White,
-                                            )
-                                        }
+                                        )
                                     }
                                 }
                             }
