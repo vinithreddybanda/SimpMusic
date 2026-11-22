@@ -114,6 +114,7 @@ import com.maxrave.simpmusic.expect.ui.SongRecognitionSheet
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.extension.barBlurStyle
 import com.maxrave.simpmusic.extension.getScreenSizeInfo
 import com.maxrave.simpmusic.getPlatform
 import com.maxrave.simpmusic.ui.component.AddToPlaylistModalBottomSheet
@@ -162,6 +163,7 @@ import com.maxrave.simpmusic.viewModel.SharedViewModel
 import com.maxrave.simpmusic.viewModel.SongSelectionViewModel
 import com.maxrave.simpmusic.viewModel.toStringRes
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
@@ -1077,12 +1079,13 @@ fun SearchScreen(
                         .padding(horizontal = 16.dp)
                         .widthIn(max = 344.dp)
                         .onGloballyPositioned { searchBarHeightPx = it.size.height }
+                        .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
                         .liquidGlass(
                             backdrop = chipBackdrop,
                             shape = RoundedCornerShape(28.dp),
                             interactive = true,
-                            minScrim = 0.04f,
-                            maxScrim = 0.16f,
+                            minScrim = 0.12f,
+                            maxScrim = 0.5f,
                         )
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
