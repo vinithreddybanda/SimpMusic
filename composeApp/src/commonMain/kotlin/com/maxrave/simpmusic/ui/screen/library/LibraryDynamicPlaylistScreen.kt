@@ -52,9 +52,11 @@ import com.maxrave.domain.utils.toTrack
 import com.maxrave.simpmusic.expect.ui.DesktopMiniPlayerClearance
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
+import com.maxrave.simpmusic.ui.component.liquidGlass
 import com.maxrave.simpmusic.expect.ui.VerticalScrollBar
 import com.maxrave.simpmusic.extension.getStringBlocking
-import com.maxrave.simpmusic.extension.ultraThinBarStyle
+import com.maxrave.simpmusic.extension.barBlurStyle
+import com.maxrave.simpmusic.ui.theme.LocalLiquidGlassEnabled
 import com.maxrave.simpmusic.ui.component.SearchBarExit
 import com.maxrave.simpmusic.ui.component.SearchBarEnter
 import com.maxrave.simpmusic.ui.component.AddToPlaylistModalBottomSheet
@@ -691,7 +693,14 @@ fun LibraryDynamicPlaylistScreen(
                 },
                 modifier =
                     Modifier
-                        .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
+                        .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
+                        .then(
+                            if (LocalLiquidGlassEnabled.current) {
+                                Modifier.liquidGlass(searchBackdrop, RoundedCornerShape(28.dp), interactive = false)
+                            } else {
+                                Modifier
+                            },
+                        ),
                 colors =
                     TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
