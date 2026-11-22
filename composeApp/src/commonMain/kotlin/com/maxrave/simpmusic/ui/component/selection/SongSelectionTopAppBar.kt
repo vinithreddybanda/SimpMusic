@@ -2,7 +2,7 @@ package com.maxrave.simpmusic.ui.component.selection
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.TopAppBar
@@ -14,6 +14,7 @@ import com.maxrave.simpmusic.ui.icon.Close
 import com.maxrave.simpmusic.ui.icon.MoreVert
 import com.maxrave.simpmusic.ui.icon.SelectAll
 import com.maxrave.simpmusic.ui.icon.SimpIcons
+import com.maxrave.simpmusic.ui.component.GlassDockIconButton
 import com.maxrave.simpmusic.ui.theme.typo
 import org.jetbrains.compose.resources.stringResource
 import simpmusic.composeapp.generated.resources.Res
@@ -35,7 +36,7 @@ fun SongSelectionTopAppBar(
     onOpenActions: () -> Unit,
     modifier: Modifier = Modifier,
     containerColor: Color = Color.Transparent,
-    contentColor: Color = Color.White,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
     // Defaults to the status-bar inset, like any TopAppBar. Pass WindowInsets(0) when this bar is
     // STACKED above something that already consumes that inset — a Material SearchBar does, and two
     // of them in one Column reserve the status bar twice, which reads as a slab of dead padding.
@@ -52,12 +53,14 @@ fun SongSelectionTopAppBar(
                 actionIconContentColor = contentColor,
             ),
         navigationIcon = {
-            IconButton(onClick = { state.exit() }) {
-                Icon(
-                    imageVector = SimpIcons.Close,
-                    contentDescription = stringResource(Res.string.exit_selection),
-                )
-            }
+            GlassDockIconButton(
+                imageVector = SimpIcons.Close,
+                contentDescription = stringResource(Res.string.exit_selection),
+                modifier = Modifier.size(44.dp),
+                tint = contentColor,
+                iconSize = 20.dp,
+                onClick = { state.exit() },
+            )
         },
         title = {
             Text(
@@ -67,21 +70,25 @@ fun SongSelectionTopAppBar(
             )
         },
         actions = {
-            IconButton(onClick = onSelectAll) {
-                Icon(
-                    imageVector = SimpIcons.SelectAll,
-                    contentDescription = stringResource(Res.string.select_all),
-                )
-            }
+            GlassDockIconButton(
+                imageVector = SimpIcons.SelectAll,
+                contentDescription = stringResource(Res.string.select_all),
+                modifier = Modifier.size(44.dp),
+                tint = contentColor,
+                iconSize = 20.dp,
+                onClick = onSelectAll,
+            )
             // Select-all doubles as deselect-all, so the count can be 0 while still selecting.
             // There is nothing to act on then, and an empty sheet is worse than no sheet.
             if (state.count > 0) {
-                IconButton(onClick = onOpenActions) {
-                    Icon(
-                        imageVector = SimpIcons.MoreVert,
-                        contentDescription = null,
-                    )
-                }
+                GlassDockIconButton(
+                    imageVector = SimpIcons.MoreVert,
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    tint = contentColor,
+                    iconSize = 20.dp,
+                    onClick = onOpenActions,
+                )
             }
         },
     )
