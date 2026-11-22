@@ -1,5 +1,6 @@
 package com.maxrave.simpmusic.ui.screen.other
 
+import com.maxrave.simpmusic.ui.component.AppBackButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -748,16 +749,12 @@ fun ArtistScreen(
                                 )
                             },
                             navigationIcon = {
-                                Box(Modifier.padding(horizontal = 5.dp)) {
-                                    IconButton(onClick = { navController.navigateUp() }) {
-                                        Icon(
-                                            imageVector = SimpIcons.ArrowBackIosNew,
-                                            contentDescription = "Back",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(20.dp),
-                                        )
-                                    }
-                                }
+                                AppBackButton(
+                                    backdrop = artworkBackdrop,
+                                    modifier = Modifier.size(44.dp),
+                                    tint = Color.White,
+                                    onClick = { navController.navigateUp() },
+                                )
                             },
                             colors =
                                 TopAppBarDefaults.topAppBarColors(
