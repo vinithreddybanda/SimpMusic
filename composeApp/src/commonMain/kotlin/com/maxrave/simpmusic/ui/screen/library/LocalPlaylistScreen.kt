@@ -1422,7 +1422,21 @@ onClick = { navController.navigateUp() },
         enter = fadeIn() + slideInVertically(),
         exit = fadeOut() + slideOutVertically(),
     ) {
-        SongSelection/* header removed */
+        SongSelectionTopAppBar(
+            state = selectionState,
+            onSelectAll = {
+                // peek() rather than get(): reading an item is what asks Paging to load its page,
+                // and select-all must not drag the whole playlist into memory.
+                selectionState.toggleSelectAll(
+                    (0 until trackPagingItems.itemCount).mapNotNull {
+                        trackPagingItems.peek(it)?.first?.videoId
+                    },
+                )
+            },
+            onOpenActions = { showSelectionSheet = true },
+            modifier =
+                Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.55f)),
+        )
     }
     if (showSelectionSheet) {
         val selectedIds = selectionState.selected.toList()
