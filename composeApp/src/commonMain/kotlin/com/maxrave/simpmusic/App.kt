@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -74,6 +75,7 @@ import com.maxrave.simpmusic.expect.Orientation
 import com.maxrave.simpmusic.expect.currentOrientation
 import com.maxrave.simpmusic.expect.openUrl
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
+import com.maxrave.simpmusic.expect.ui.ApplyStatusBarVisibility
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
 import com.maxrave.simpmusic.extension.copy
 import com.maxrave.simpmusic.ui.component.AppBottomNavigationBar
@@ -115,6 +117,9 @@ import com.maxrave.simpmusic.viewModel.SharedViewModel
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.blur.hazeBlur
+import com.maxrave.simpmusic.extension.ultraThinBarStyle
 import dev.chrisbanes.haze.rememberHazeState
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.first
@@ -170,6 +175,8 @@ fun App(
     // same condition that used to hide the chip inside Library.
     val isYouTubeLoggedIn by viewModel.getYouTubeLoggedIn().collectAsStateWithLifecycle(DataStoreManager.FALSE)
     val showMixForYouTab = isYouTubeLoggedIn == TRUE
+    val hideStatusBar by viewModel.hideStatusBar.collectAsStateWithLifecycle()
+    ApplyStatusBarVisibility(hidden = hideStatusBar && getPlatform() == Platform.Android)
 
     // MiniPlayer visibility: derived, never stored.
     //
@@ -766,6 +773,24 @@ fun App(
                                                 },
                                             )
                                         }
+                                        Box(
+                                            Modifier
+                                                .align(Alignment.TopCenter)
+                                                .fillMaxWidth()
+                                                .height(76.dp)
+                                                .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle())
+                                                .background(
+                                                    Brush.verticalGradient(
+                                                        listOf(
+                                                            MaterialTheme.colorScheme.background.copy(
+                                                                alpha = if (isScrolledToTop) 0.74f else 0.38f,
+                                                            ),
+                                                            MaterialTheme.colorScheme.background.copy(alpha = 0.12f),
+                                                            MaterialTheme.colorScheme.background.copy(alpha = 0f),
+                                                        ),
+                                                    ),
+                                                ),
+                                        )
                                     }
                                     if (!isDesktopShell) {
                                         tabletMiniPlayer(Modifier.padding(innerPadding).align(Alignment.BottomCenter))
