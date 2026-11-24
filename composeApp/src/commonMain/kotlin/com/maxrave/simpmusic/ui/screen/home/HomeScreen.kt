@@ -455,25 +455,8 @@ fun HomeScreen(
             }
         }
     }
-    LaunchedEffect(openAppTime, shareLyricsPermissions) {
-        Logger.w("HomeScreen", "openAppTime: $openAppTime, shareLyricsPermissions: $shareLyricsPermissions")
-        if (openAppTime >= 10 && openAppTime % 10 == 0 && openAppTime <= 50) {
-            showReviewDialog = true
-        } else if ((openAppTime == 1 || openAppTime % 15 == 0) && openAppTime <= 60 && !shareLyricsPermissions) {
-            showRequestShareLyricsPermissions = true
-        } else if (openAppTime % 10 == 6 &&
-            openAppTime <= 46 &&
-            sharedViewModel.getString(FOOTGUNS_STAR_KEY) != "true"
-        ) {
-            // kotlin-footguns star prompt: 6, 16, 26, 36, 46 - one open after each review milestone,
-            // and clear of the share-lyrics (15, 45) and blog-promo (5) milestones
-            showFootgunsDialog = true
-        } else {
-            showReviewDialog = false
-            showFootgunsDialog = false
-            showRequestShareLyricsPermissions = false
-        }
-    }
+    // All non-essential launch prompts are intentionally disabled.
+
 
     val shouldStartPaginate =
         remember {
@@ -507,44 +490,7 @@ fun HomeScreen(
 //        )
 //    }
 
-    if (showReviewDialog) {
-        ReviewDialog(
-            onDismissRequest = {
-                sharedViewModel.onDoneReview(
-                    isDismissOnly = true,
-                )
-                showReviewDialog = false
-            },
-            onDoneReview = {
-                sharedViewModel.onDoneReview(
-                    isDismissOnly = false,
-                )
-                showReviewDialog = false
-            },
-        )
-    }
-
-
-
-    if (showRequestShareLyricsPermissions) {
-        ShareSavedLyricsDialog(
-            onDismissRequest = {
-                showRequestShareLyricsPermissions = false
-                sharedViewModel.onDoneReview(
-                    isDismissOnly = true,
-                )
-            },
-            onConfirm = { contributor ->
-                sharedViewModel.onDoneRequestingShareLyrics(
-                    contributor,
-                )
-            },
-        )
-    }
-
-    val otherDialogOpen =
-        appDialogOpen || showReviewDialog || showRequestShareLyricsPermissions || showBlogPromoDialog ||
-            showFootgunsDialog || shouldShowLogInAlert
+    val otherDialogOpen = appDialogOpen || shouldShowLogInAlert
     // The launch banner, decided once per launch. It waits for Home to settle on its own dialogs (the
     // open count and the lyrics-sharing flag load just after the first frame) and for the update check
     // started at launch, however long that takes, so an update dialog comes first. Then it takes the
@@ -984,57 +930,7 @@ fun HomeScreen(
                 }
             }
         }
-        // Spotify's header: the avatar, the chips and Create on one row, with no app bar. At the
-        // top of the page it sits straight on the artwork glow; once the page scrolls under it, the blurred
-        // bar fades in behind it.
-        AnimatedContent(
-            targetState = atTop,
-            transitionSpec = {
-                fadeIn(tween(300)).togetherWith(fadeOut(tween(300)))
-            },
-        ) { target ->
-            Column(
-                modifier =
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .then(
-                            if (target) {
-                                Modifier.background(Color.Transparent)
-                            } else {
-                                Modifier
-                                    .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
-                                    .then(
-                                        if (LocalLiquidGlassEnabled.current) {
-                                            Modifier.liquidGlass(chipBackdrop, RoundedCornerShape(28.dp), interactive = false)
-                                        } else {
-                                            Modifier
-                                        },
-                                    )
-                            },
-                        ).onGloballyPositioned { coordinates ->
-                            topAppBarHeightPx = coordinates.size.height
-                        },
-            ) {
-                Spacer(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .windowInsetsPadding(
-                                WindowInsets.statusBars,
-                            ),
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "Pluto",
-                        style = typo().titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-        }
+
     }
 }
 
