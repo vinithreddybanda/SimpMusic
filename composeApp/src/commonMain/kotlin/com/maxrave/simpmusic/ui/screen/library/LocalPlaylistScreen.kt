@@ -1422,21 +1422,7 @@ onClick = { navController.navigateUp() },
         enter = fadeIn() + slideInVertically(),
         exit = fadeOut() + slideOutVertically(),
     ) {
-        SongSelectionTopAppBar(
-            state = selectionState,
-            onSelectAll = {
-                // peek() rather than get(): reading an item is what asks Paging to load its page,
-                // and select-all must not drag the whole playlist into memory.
-                selectionState.toggleSelectAll(
-                    (0 until trackPagingItems.itemCount).mapNotNull {
-                        trackPagingItems.peek(it)?.first?.videoId
-                    },
-                )
-            },
-            onOpenActions = { showSelectionSheet = true },
-            modifier =
-                Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.55f)),
-        )
+        SongSelection/* header removed */
     }
     if (showSelectionSheet) {
         val selectedIds = selectionState.selected.toList()
@@ -1657,38 +1643,6 @@ onClick = { navController.navigateUp() },
         enter = fadeIn() + slideInVertically(),
         exit = fadeOut() + slideOutVertically(),
     ) {
-        TopAppBar(
-            windowInsets =
-                TopAppBarDefaults.windowInsets.exclude(
-                    TopAppBarDefaults.windowInsets.only(WindowInsetsSides.Start),
-                ),
-            title = {
-                Text(
-                    text = uiState.title,
-                    style = typo().titleMedium,
-                )
-            },
-            navigationIcon = {
-                AppBackButton(
-                    backdrop = artworkBackdrop,
-                    modifier = Modifier.size(44.dp),
-                    tint = Color.White,
-                    onClick = { navController.navigateUp() },
-                )
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                ),
-            modifier =
-                Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.3f))
-                    .then(
-                        if (LocalLiquidGlassEnabled.current) {
-                            Modifier.liquidGlass(artworkBackdrop, RoundedCornerShape(28.dp), interactive = false)
-                        } else {
-                            Modifier
-                        },
-                    ),
-        )
+        /* header removed */
     }
 }
