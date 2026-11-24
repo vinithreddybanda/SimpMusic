@@ -83,7 +83,7 @@ fun AppNavigationGraph(
         // Only reachable as a tab while signed in to YouTube
         composable<MixForYouDestination> {
             MixForYouScreen(
-                innerPadding = innerPadding,
+                innerPadding = pagePadding,
                 navController = navController,
                 onScrolling = onScrolling,
             )
@@ -96,7 +96,7 @@ fun AppNavigationGraph(
             ForceDarkContent {
                 AnalyticsScreen(
                     navController = navController,
-                    innerPadding = innerPadding,
+                    innerPadding = pagePadding,
                 )
             }
         }
@@ -130,22 +130,22 @@ fun AppNavigationGraph(
         }
         // Home screen graph
         homeScreenGraph(
-            innerPadding = innerPadding,
+            innerPadding = pagePadding,
             navController = navController,
         )
         // Library screen graph
         libraryScreenGraph(
-            innerPadding = innerPadding,
+            innerPadding = pagePadding,
             navController = navController,
         )
         // List screen graph
         listScreenGraph(
-            innerPadding = innerPadding,
+            innerPadding = pagePadding,
             navController = navController,
         )
         // Login screen graph
         loginScreenGraph(
-            innerPadding = innerPadding,
+            innerPadding = pagePadding,
             navController = navController,
             hideBottomBar = hideNavBar,
             showBottomBar = {
