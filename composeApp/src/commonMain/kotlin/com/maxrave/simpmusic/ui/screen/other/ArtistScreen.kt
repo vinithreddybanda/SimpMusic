@@ -736,7 +736,20 @@ onClick = { navController.navigateUp() },
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically(),
                 ) {
-                    SongSelection/* header removed */
+                    SongSelectionTopAppBar(
+                        state = selectionState,
+                        onSelectAll = {
+                            selectionState.toggleSelectAll(
+                                (artistScreenState as? ArtistScreenState.Success)
+                                    ?.data
+                                    ?.popularSongs
+                                    ?.map { it.videoId }
+                                    ?: emptyList(),
+                            )
+                        },
+                        onOpenActions = { showSelectionSheet = true },
+                        containerColor = Color.Black,
+                    )
                 }
                 if (showSelectionSheet) {
                     val selectedIds = selectionState.selected.toList()
