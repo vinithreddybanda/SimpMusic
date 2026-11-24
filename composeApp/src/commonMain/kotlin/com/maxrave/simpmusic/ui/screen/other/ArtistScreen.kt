@@ -727,44 +727,7 @@ onClick = { navController.navigateUp() },
                         enter = fadeIn() + slideInVertically(),
                         exit = fadeOut() + slideOutVertically(),
                     ) {
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    text = state.data.title ?: "",
-                                    style = typo().titleMedium,
-                                    maxLines = 1,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight(align = Alignment.CenterVertically)
-                                            .basicMarquee(
-                                                iterations = Int.MAX_VALUE,
-                                                animationMode = MarqueeAnimationMode.Immediately,
-                                            ).focusable(),
-                                )
-                            },
-                            navigationIcon = {
-                                AppBackButton(
-                                    backdrop = artworkBackdrop,
-                                    modifier = Modifier.size(44.dp),
-                                    tint = Color.White,
-                                    onClick = { navController.navigateUp() },
-                                )
-                            },
-                            colors =
-                                TopAppBarDefaults.topAppBarColors(
-                                    containerColor = Color.Transparent,
-                                ),
-                            modifier =
-                                Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.3f))
-                                .then(
-                                    if (LocalLiquidGlassEnabled.current) {
-                                        Modifier.liquidGlass(artworkBackdrop, RoundedCornerShape(28.dp), interactive = false)
-                                    } else {
-                                        Modifier
-                                    },
-                                ),
-                        )
+                        /* header removed */
                     }
                 }
 
@@ -773,20 +736,7 @@ onClick = { navController.navigateUp() },
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically(),
                 ) {
-                    SongSelectionTopAppBar(
-                        state = selectionState,
-                        onSelectAll = {
-                            selectionState.toggleSelectAll(
-                                (artistScreenState as? ArtistScreenState.Success)
-                                    ?.data
-                                    ?.popularSongs
-                                    ?.map { it.videoId }
-                                    ?: emptyList(),
-                            )
-                        },
-                        onOpenActions = { showSelectionSheet = true },
-                        containerColor = Color.Black,
-                    )
+                    SongSelection/* header removed */
                 }
                 if (showSelectionSheet) {
                     val selectedIds = selectionState.selected.toList()
