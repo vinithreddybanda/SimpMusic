@@ -502,8 +502,8 @@ fun SearchScreen(
                                     backdrop = chipBackdrop,
                                     shape = RoundedCornerShape(28.dp),
                                     interactive = false,
-                                    minScrim = 0.12f,
-                                    maxScrim = 0.5f,
+                                    minScrim = 0.03f,
+                                    maxScrim = 0.16f,
                                 ),
                         state = suggestionsState,
                         contentPadding =
@@ -1070,7 +1070,16 @@ fun SearchScreen(
                         )
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .widthIn(max = 344.dp),
+                        .widthIn(max = 344.dp)
+                        .onGloballyPositioned { searchBarHeightPx = it.size.height }
+                        .liquidGlass(
+                            backdrop = chipBackdrop,
+                            shape = RoundedCornerShape(28.dp),
+                            interactive = true,
+                            minScrim = 0.03f,
+                            maxScrim = 0.16f,
+                        )
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 AnimatedVisibility(visible = selectionState.isActive) {
@@ -1099,14 +1108,7 @@ fun SearchScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(48.dp)
-                            .onGloballyPositioned { searchBarHeightPx = it.size.height }
-                            .liquidGlass(
-                                backdrop = chipBackdrop,
-                                shape = RoundedCornerShape(28.dp),
-                                interactive = true,
-                            )
-                            .padding(horizontal = 8.dp),
+                            .height(48.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Crossfade(
