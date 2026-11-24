@@ -939,7 +939,22 @@ onClick = { navController.navigateUp() },
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically(),
                 ) {
-                    SongSelection/* header removed */
+                    SongSelectionTopAppBar(
+                        state = selectionState,
+                        onSelectAll = {
+                            selectionState.toggleSelectAll(uiState.listTrack.map { it.videoId })
+                        },
+                        onOpenActions = { showSelectionSheet = true },
+                        modifier =
+                            Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(mutedPaletteBg, 0.3f))
+                                .then(
+                                    if (LocalLiquidGlassEnabled.current) {
+                                        Modifier.liquidGlass(artworkBackdrop, RoundedCornerShape(28.dp), interactive = false)
+                                    } else {
+                                        Modifier
+                                    },
+                                ),
+                    )
                 }
                 if (showSelectionSheet) {
                     val selectedIds = selectionState.selected.toList()
