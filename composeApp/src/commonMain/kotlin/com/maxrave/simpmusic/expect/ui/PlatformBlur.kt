@@ -12,3 +12,7 @@ package com.maxrave.simpmusic.expect.ui
  * mostly-transparent list, which is not the design.
  */
 expect fun isLyricsBlurSupported(): Boolean
+
+/** Applies immersive status-bar visibility on platforms that support system UI control. */
+@androidx.compose.runtime.Composable
+expect fun ApplyStatusBarVisibility(hidden: Boolean)
