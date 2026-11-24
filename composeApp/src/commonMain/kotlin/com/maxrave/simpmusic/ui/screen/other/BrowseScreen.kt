@@ -318,47 +318,7 @@ fun BrowseScreen(
                     },
                 ),
             ) {
-                TopAppBar(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .then(
-                                if (LocalLiquidGlassEnabled.current) {
-                                    Modifier.liquidGlass(glassBackdrop, RoundedCornerShape(28.dp), interactive = false)
-                                } else {
-                                    Modifier
-                                },
-                            ),
-                    title = {
-                        Text(
-                            text = (uiState as? BrowseUIState.Success)?.page?.title ?: title.orEmpty(),
-                            style = typo().titleMedium,
-                            maxLines = 1,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(
-                                        align = Alignment.CenterVertically,
-                                    ).basicMarquee(
-                                        iterations = Int.MAX_VALUE,
-                                        animationMode = MarqueeAnimationMode.Immediately,
-                                    ).focusable(),
-                        )
-                    },
-                    navigationIcon = {
-                        Box(Modifier.padding(horizontal = 5.dp)) {
-                            AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent,
-                        ),
-                )
+                /* title bar removed */
             }
         }
     }
