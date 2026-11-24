@@ -783,7 +783,7 @@ fun App(
                                                     Brush.verticalGradient(
                                                         listOf(
                                                             MaterialTheme.colorScheme.background.copy(
-                                                                alpha = if (isScrolledToTop) 0.74f else 0.38f,
+                                                                alpha = if (isScrolledToTop) 0.34f else 0.72f,
                                                             ),
                                                             MaterialTheme.colorScheme.background.copy(alpha = 0.12f),
                                                             MaterialTheme.colorScheme.background.copy(alpha = 0f),
