@@ -94,6 +94,9 @@ import com.maxrave.simpmusic.ui.component.VoteLyricsDialog
 import com.maxrave.simpmusic.ui.component.YouTubeDislikeState
 import com.maxrave.simpmusic.ui.icon.KeyboardArrowDown
 import com.maxrave.simpmusic.ui.icon.SimpIcons
+import com.maxrave.simpmusic.expect.ui.ApplyStatusBarVisibility
+import com.maxrave.simpmusic.Platform
+import com.maxrave.simpmusic.getPlatform
 import com.maxrave.simpmusic.ui.navigation.destination.home.ListenTogetherDestination
 import com.maxrave.simpmusic.ui.navigation.destination.list.ArtistDestination
 import com.maxrave.simpmusic.ui.navigation.destination.login.LoginDestination
@@ -186,6 +189,8 @@ fun NowPlayingScreenContent(
     onDismiss: () -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val hideStatusBar by sharedViewModel.hideStatusBar.collectAsStateWithLifecycle()
+    ApplyStatusBarVisibility(hidden = hideStatusBar && getPlatform() == Platform.Android)
 
     // ViewModel State
     val controllerState by sharedViewModel.controllerState.collectAsStateWithLifecycle()
