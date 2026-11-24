@@ -264,8 +264,7 @@ fun ListenTogetherScreen(
                     ) {
                         // Reserves the strip the floating back button is drawn over — it is a sibling of
                         // this column and takes part in no measurement, so nothing else pushes down for it.
-                        Spacer(Modifier.height(BACK_BUTTON_STRIP))
-                        TitleBlock(inRoom = state.inRoom)
+                                TitleBlock(inRoom = state.inRoom)
                         ConnectionLine(state.connection, viewModel::connect, viewModel::disconnect)
                         AnimatedVisibility(visible = state.inRoom) {
                             RoomCodePoster(backdrop, state, copyCode, shareCode)
@@ -308,7 +307,6 @@ fun ListenTogetherScreen(
                         .animateContentSize(),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
-                Spacer(Modifier.height(BACK_BUTTON_STRIP))
                 TitleBlock(inRoom = state.inRoom)
                 ConnectionLine(state.connection, viewModel::connect, viewModel::disconnect)
                 AnimatedVisibility(visible = state.inRoom) {
@@ -322,7 +320,6 @@ fun ListenTogetherScreen(
             )
         }
 
-        BackButton(backdrop) { navController.navigateUp() }
     }
 
     managing?.let { member ->
