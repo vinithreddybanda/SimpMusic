@@ -42,11 +42,11 @@ fun AppNavigationGraph(
     showNavBar: (shouldShowNowPlayingSheet: Boolean) -> Unit = { },
     showNowPlayingSheet: () -> Unit = {},
     onScrolling: (onTop: Boolean) -> Unit = {},
- ) {
+) {
     val pagePadding = innerPadding.copy(top = 0.dp)
     NavHost(
         modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
-        navController,
+        navController = navController,
         startDestination = startDestination,
         enterTransition = {
             fadeIn() + slideInHorizontally { -it }
