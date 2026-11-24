@@ -179,48 +179,7 @@ fun NotificationScreen(
             }
         }
     }
-    // The bar FLOATS over the list, Home style. It used to sit in-flow above the list, so once the
-    // glow scrolled away the transparent bar stood over nothing but the black window — which is
-    // exactly what "not transparent at all" looks like. Floating gives the list something to slide
-    // under and the frost something to frost.
-    val barTint = MaterialTheme.colorScheme.background
-     { atTop ->
-        Column(
-            Modifier
-                .then(
-                    if (atTop) {
-                        Modifier
-                    } else {
-                        // AlbumScreen's bar recipe, thinned to 0.3 — see SettingScreen.
-                        Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(barTint, 0.3f)).then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false) else Modifier)
-                    },
-                ).onGloballyPositioned { coordinates ->
-                    topAppBarHeight = with(density) { coordinates.size.height.toDp() }
-                },
-        ) {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.notification),
-                        style = typo().titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-                },
-                // Transparent, or the default surface container paints an opaque strip over the
-                // very top of AmbientThemeGlow — the one part of it that actually carries colour.
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                    ),
-            )
-        }
-    }
+
 }
 
 @Composable
