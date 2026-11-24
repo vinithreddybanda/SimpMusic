@@ -6,7 +6,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateTopPadding
+import androidx.compose.foundation.layout.calculateBottomPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -43,7 +43,7 @@ fun AppNavigationGraph(
     showNowPlayingSheet: () -> Unit = {},
     onScrolling: (onTop: Boolean) -> Unit = {},
 ) {
-    val pagePadding = innerPadding.copy(top = 0.dp)
+    val pagePadding = PaddingValues(bottom = innerPadding.calculateBottomPadding())
     NavHost(
         modifier = Modifier.padding(top = innerPadding.calculateTopPadding()),
         navController = navController,
