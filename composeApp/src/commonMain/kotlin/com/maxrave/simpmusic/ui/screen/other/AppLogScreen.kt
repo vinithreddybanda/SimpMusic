@@ -229,58 +229,7 @@ fun AppLogScreen(
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 840.dp
         Column(Modifier.fillMaxSize()) {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.app_log),
-                        style = typo().titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    Box(Modifier.padding(horizontal = 5.dp)) {
-                        AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-                    }
-                },
-                actions = {
-                    // Android Studio's Logcat toolbar, in its order: clear, pause, restart, stick.
-                    RippleIconButton(SimpIcons.Delete, tint = onSurface) {
-                        clearedAt = nowEpochMillis()
-                    }
-                    RippleIconButton(if (paused) SimpIcons.PlayArrow else SimpIcons.Pause, tint = onSurface) {
-                        paused = !paused
-                    }
-                    RippleIconButton(SimpIcons.RestartAlt, tint = onSurface) {
-                        clearedAt = 0L
-                        paused = false
-                        stickToBottom = true
-                        restarts++
-                    }
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (stickToBottom) MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) else Color.Transparent,
-                            ),
-                    ) {
-                        RippleIconButton(
-                            SimpIcons.KeyboardDoubleArrowDown,
-                            tint = if (stickToBottom) MaterialTheme.colorScheme.primary else onSurface,
-                        ) {
-                            stickToBottom = !stickToBottom
-                        }
-                    }
-                    RippleIconButton(if (isDesktop) SimpIcons.Download else SimpIcons.Share, tint = onSurface) {
-                        scope.launch {
-                            if (!exportLog(shareTitle)) showToast(exportFailed, ToastGravity.Bottom)
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-            )
+            /* title bar removed */
             LogTabs(
                 selected = tab,
                 errorCount = errorCount,
