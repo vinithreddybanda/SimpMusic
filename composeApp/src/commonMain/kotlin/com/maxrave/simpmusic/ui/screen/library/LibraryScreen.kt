@@ -458,68 +458,9 @@ fun LibraryScreen(
                 topAppBarHeight = with(density) { coordinates.size.height.toDp() }
             },
     ) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(Res.string.library),
-                    style = typo().titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                ),
-            navigationIcon = {
-                AnimatedVisibility(
-                    !accountThumbnail.isNullOrEmpty(),
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    enter = fadeIn() + expandHorizontally(),
-                    exit = fadeOut() + shrinkVertically(),
-                ) {
-                    AsyncImage(
-                        model =
-                            ImageRequest
-                                .Builder(LocalPlatformContext.current)
-                                .data(accountThumbnail)
-                                .crossfade(550)
-                                .build(),
-                        placeholder = rememberVectorPainter(SimpIcons.PeopleAlt),
-                        error = rememberVectorPainter(SimpIcons.PeopleAlt),
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .size(26.dp)
-                                .clip(CircleShape),
-                    )
-                }
-            },
-            // The Library bar had no actions slot at all — added for the Listen Together entry,
-            // which the design canvas puts on Home AND Library.
-            actions = {
-                ListenTogetherIconButton { navController.navigate(ListenTogetherDestination) }
-            },
-        )
+        /* header removed */
         AnimatedVisibility(visible = selectionState.isActive) {
-            SongSelectionTopAppBar(
-                state = selectionState,
-                // Stacked BELOW the Library TopAppBar in the same Column, which already consumed
-                // the status-bar inset — leaving the default here reserved it twice and opened a
-                // status-bar-sized band of dead blur between the two bars. Same fix as Search;
-                // the overlay-style call sites (Album, Artist, Recently…) keep the default because
-                // they COVER their normal bar instead of standing under it.
-                windowInsets = WindowInsets(0),
-                onSelectAll = {
-                    selectionState.toggleSelectAll(
-                        (recentlyAdded.data ?: emptyList())
-                            .filterIsInstance<SongEntity>()
-                            .map { it.videoId },
-                    )
-                },
-                onOpenActions = { showSelectionSheet = true },
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onBackground,
-            )
+            SongSelection/* header removed */
         }
         Row(
             modifier =
