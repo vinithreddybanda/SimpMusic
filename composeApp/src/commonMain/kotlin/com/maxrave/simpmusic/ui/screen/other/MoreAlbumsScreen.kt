@@ -143,45 +143,7 @@ fun MoreAlbumsScreen(
                     scrollState = gridState,
                     modifier = Modifier.padding(top = innerPadding.calculateTopPadding() + 64.dp, bottom = DesktopMiniPlayerClearance),
                 )
-                TopAppBar(
-                    modifier =
-                        Modifier
-                            .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
-                            .then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false) else Modifier),
-                    title = {
-                        Text(
-                            text = state.title,
-                            style = typo().titleMedium,
-                            maxLines = 1,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(
-                                        align = Alignment.CenterVertically,
-                                    ).basicMarquee(
-                                        iterations = Int.MAX_VALUE,
-                                        animationMode = MarqueeAnimationMode.Immediately,
-                                    ).focusable(),
-                        )
-                    },
-                    navigationIcon = {
-                        Box(Modifier.padding(horizontal = 5.dp)) {
-                            AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            Color.Transparent,
-                            Color.Unspecified,
-                            Color.Unspecified,
-                            Color.Unspecified,
-                            Color.Unspecified,
-                        ),
-                )
+                /* header removed */
             }
 
             is MoreAlbumsUIState.Error -> {
