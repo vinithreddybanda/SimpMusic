@@ -257,42 +257,5 @@ fun CreditScreen(
         scrollState = scrollState,
         modifier = Modifier.padding(top = paddingValues.calculateTopPadding() + 64.dp, bottom = DesktopMiniPlayerClearance),
     )
-    TopAppBar(
-        modifier =
-            Modifier
-                .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
-        title = {
-            Text(
-                text = stringResource(Res.string.app_name),
-                style = typo().titleMedium,
-                maxLines = 1,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(
-                            align = Alignment.CenterVertically,
-                        ).basicMarquee(
-                            iterations = Int.MAX_VALUE,
-                            animationMode = MarqueeAnimationMode.Immediately,
-                        ).focusable(),
-            )
-        },
-        navigationIcon = {
-            Box(Modifier.padding(horizontal = 5.dp)) {
-                AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-            }
-        },
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                Color.Transparent,
-                Color.Unspecified,
-                Color.Unspecified,
-                Color.Unspecified,
-                Color.Unspecified,
-            ),
-    )
+    /* title bar removed */
 }
