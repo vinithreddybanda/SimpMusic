@@ -450,9 +450,7 @@ fun App(
         // Only a NEWER release is offered. This used to compare the tags for inequality, which told a
         // build ahead of the latest release (dev, beta) to "update" back down to it, and told every
         // F-Droid-channel user to update on each launch: that channel's tag carries no leading "v".
-        if (viewModel.showedUpdateDialog && VersionManager.isBehind(response.tagName)) {
-            shouldShowUpdateDialog = true
-        }
+        // Automatic update prompts are disabled; updates remain available in Settings.
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
