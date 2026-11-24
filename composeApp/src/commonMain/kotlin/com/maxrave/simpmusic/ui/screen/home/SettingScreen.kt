@@ -587,6 +587,7 @@ fun SettingScreen(
     val autoBackupLastTime by viewModel.autoBackupLastTime.collectAsStateWithLifecycle()
     val updateChannel by viewModel.updateChannel.collectAsStateWithLifecycle()
     val nowPlayingStyle by sharedViewModel.getNowPlayingStyle().collectAsStateWithLifecycle(DataStoreManager.NOW_PLAYING_STYLE_SPOTIFY)
+    val hideStatusBar by sharedViewModel.hideStatusBar.collectAsStateWithLifecycle()
     val lyricsStyle by sharedViewModel.getLyricsStyle().collectAsStateWithLifecycle(DataStoreManager.LYRICS_STYLE_CLASSIC)
     val romanizationStored by sharedViewModel.getRomanizationLanguages().collectAsStateWithLifecycle("")
     val japaneseDictionaryState by viewModel.japaneseDictionaryState.collectAsStateWithLifecycle()
@@ -767,6 +768,13 @@ fun SettingScreen(
                         subtitle = "Always enabled across the entire app",
                         smallSubtitle = true,
                     )
+                    if (getPlatform() == Platform.Android) {
+                        SettingItem(
+                            title = "Hide status bar",
+                            subtitle = "Immersive full-screen experience. Swipe from the top to reveal system status.",
+                            switch = hideStatusBar to { sharedViewModel.setHideStatusBar(it) },
+                        )
+                    }
                     // The Apple Music treatments ARE the blur — the frosted page behind the player, and
                     // the depth of field on the lyrics — and Modifier.blur is a documented no-op below
                     // Android 12, so on an older device they render as a flat, wrong-looking version of
