@@ -166,6 +166,8 @@ fun NowPlayingScreen(
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         shape = RectangleShape,
     ) {
+        val hideStatusBar by sharedViewModel.hideStatusBar.collectAsStateWithLifecycle()
+        ApplyStatusBarVisibility(hidden = hideStatusBar && getPlatform() == Platform.Android)
         NowPlayingScreenContent(
             sharedViewModel = sharedViewModel,
             navController = navController,
@@ -189,8 +191,6 @@ fun NowPlayingScreenContent(
     onDismiss: () -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val hideStatusBar by sharedViewModel.hideStatusBar.collectAsStateWithLifecycle()
-    ApplyStatusBarVisibility(hidden = hideStatusBar && getPlatform() == Platform.Android)
 
     // ViewModel State
     val controllerState by sharedViewModel.controllerState.collectAsStateWithLifecycle()
