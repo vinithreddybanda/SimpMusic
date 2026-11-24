@@ -460,7 +460,25 @@ fun LibraryScreen(
     ) {
         /* header removed */
         AnimatedVisibility(visible = selectionState.isActive) {
-            SongSelection/* header removed */
+            SongSelectionTopAppBar(
+                state = selectionState,
+                // Stacked BELOW the Library TopAppBar in the same Column, which already consumed
+                // the status-bar inset — leaving the default here reserved it twice and opened a
+                // status-bar-sized band of dead blur between the two bars. Same fix as Search;
+                // the overlay-style call sites (Album, Artist, Recently…) keep the default because
+                // they COVER their normal bar instead of standing under it.
+                windowInsets = WindowInsets(0),
+                onSelectAll = {
+                    selectionState.toggleSelectAll(
+                        (recentlyAdded.data ?: emptyList())
+                            .filterIsInstance<SongEntity>()
+                            .map { it.videoId },
+                    )
+                },
+                onOpenActions = { showSelectionSheet = true },
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onBackground,
+            )
         }
         Row(
             modifier =
