@@ -109,6 +109,7 @@ fun NotificationScreen(
     val density = LocalDensity.current
     val hazeState = rememberHazeState()
     val headerBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
+    var topAppBarHeight by remember { mutableStateOf(0.dp) }
     // Home's rule: transparent only while pixel-0 is on screen; the frost itself stays light.
     val isAtTop by remember {
         derivedStateOf { listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0 }
@@ -178,5 +179,273 @@ fun NotificationScreen(
             }
         }
     }
+    // The bar FLOATS over the list, Home style. It used to sit in-flow above the list, so once the
+    // glow scrolled away the transparent bar stood over nothing but the black window — which is
+    // exactly what "not transparent at all" looks like. Floating gives the list something to slide
+    // under and the frost something to frost.
+    val barTint = MaterialTheme.colorScheme.background
+     { atTop ->
+        Column(
+            Modifier
+                .then(
+                    if (atTop) {
+                        Modifier
+                    } else {
+                        // AlbumScreen's bar recipe, thinned to 0.3 — see SettingScreen.
+                        Modifier.hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(barTint, 0.3f)).then(if (LocalLiquidGlassEnabled.current) Modifier.liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false) else Modifier)
+                    },
+                ).onGloballyPositioned { coordinates ->
+                    topAppBarHeight = with(density) { coordinates.size.height.toDp() }
+                },
+        ) {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(Res.string.notification),
+                        style = typo().titleMedium,
+                    )
+                },
+                navigationIcon = {
+                    AppBackButton(
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        onClick = { navController.navigateUp() },
+                    )
+                },
+                // Transparent, or the default surface container paints an opaque strip over the
+                // very top of AmbientThemeGlow — the one part of it that actually carries colour.
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                    ),
+            )
+        }
+    }
+}
 
+@Composable
+fun NotificationItem(
+    notification: NotificationEntity,
+    navController: NavController,
+) {
+    if (notification.type == NotificationEntity.TYPE_BLOG) {
+        BlogNotificationItem(notification)
+        return
+    }
+    Box(
+        modifier =
+            Modifier
+                .padding(5.dp)
+                .fillMaxWidth(),
+    ) {
+        Column {
+            Row(
+                Modifier.clickable {
+                    navController.navigate(
+                        ArtistDestination(
+                            channelId = notification.channelId,
+                        ),
+                    )
+                },
+            ) {
+                val thumb = notification.thumbnail
+                AsyncImage(
+                    model =
+                        ImageRequest
+                            .Builder(LocalPlatformContext.current)
+                            .data(thumb)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .diskCacheKey(thumb)
+                            .crossfade(true)
+                            .build(),
+                    placeholder = rememberHolderPainter(),
+                    error = rememberHolderPainter(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier =
+                        Modifier
+                            .align(Alignment.CenterVertically)
+                            .size(50.dp)
+                            .clip(
+                                CircleShape,
+                            ),
+                )
+                Spacer(modifier = Modifier.padding(5.dp))
+                Column {
+                    Text(text = stringResource(Res.string.new_release), style = typo().titleSmall)
+                    Spacer(modifier = Modifier.padding(3.dp))
+                    Text(text = notification.name, style = typo().headlineMedium)
+                }
+            }
+            val singlesRowState = rememberLazyListState()
+            LazyRow(
+                Modifier.padding(top = 15.dp).mouseDragScroll(singlesRowState),
+                state = singlesRowState,
+            ) {
+                items(notification.single) { single ->
+                    ItemAlbumNotification(
+                        isAlbum = false,
+                        browseId = single["browseId"] ?: "",
+                        title = single["title"] ?: "",
+                        thumbnail = single["thumbnails"],
+                        navController,
+                    )
+                }
+                items(notification.album) { album ->
+                    ItemAlbumNotification(
+                        isAlbum = true,
+                        browseId = album["browseId"] ?: "",
+                        title = album["title"] ?: "",
+                        thumbnail = album["thumbnails"],
+                        navController = navController,
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+        Text(
+            text = notification.time.formatTimeAgo(),
+            style = typo().titleSmall,
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 15.dp),
+        )
+    }
+}
+
+@Composable
+fun BlogNotificationItem(notification: NotificationEntity) {
+    val uriHandler = LocalUriHandler.current
+    val link = notification.link
+    Box(
+        modifier =
+            Modifier
+                .padding(5.dp)
+                .fillMaxWidth(),
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !link.isNullOrEmpty()) {
+                    link?.let { uriHandler.openUri(it) }
+                },
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .align(Alignment.Top)
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = SimpIcons.RssFeed,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(26.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(Modifier.padding(end = 56.dp)) {
+                Text(text = "New blog post", style = typo().titleSmall)
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(text = notification.name, style = typo().titleMedium)
+                notification.description?.takeIf { it.isNotBlank() }?.let { desc ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = desc,
+                        style = typo().bodySmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+        Text(
+            text = notification.time.formatTimeAgo(),
+            style = typo().titleSmall,
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 15.dp),
+        )
+    }
+}
+
+@Composable
+fun ItemAlbumNotification(
+    isAlbum: Boolean,
+    browseId: String,
+    title: String,
+    thumbnail: String?,
+    navController: NavController,
+) {
+    Box(
+        modifier =
+            Modifier
+                .clickable {
+                    navController.navigate(
+                        AlbumDestination(
+                            browseId = browseId,
+                        ),
+                    )
+                },
+    ) {
+        Column(
+            Modifier.padding(5.dp),
+        ) {
+            AsyncImage(
+                model =
+                    ImageRequest
+                        .Builder(LocalPlatformContext.current)
+                        .data(thumbnail)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .diskCacheKey(thumbnail)
+                        .crossfade(true)
+                        .build(),
+                placeholder = rememberHolderPainter(),
+                error = rememberHolderPainter(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(150.dp)
+                        .clip(
+                            ArtworkShape,
+                        ),
+            )
+            Text(
+                text = title,
+                style = typo().titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                modifier =
+                    Modifier
+                        .width(150.dp)
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                        .padding(top = 10.dp)
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            animationMode = MarqueeAnimationMode.Immediately,
+                        ).focusable(),
+            )
+            Text(
+                text = if (isAlbum) stringResource(Res.string.album) else stringResource(Res.string.singles),
+                style = typo().bodySmall,
+                maxLines = 1,
+                modifier =
+                    Modifier
+                        .width(150.dp)
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                        .padding(top = 10.dp)
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            animationMode = MarqueeAnimationMode.Immediately,
+                        ).focusable(),
+            )
+        }
+    }
 }
