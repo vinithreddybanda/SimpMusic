@@ -1,6 +1,8 @@
 package com.maxrave.simpmusic.expect.ui
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalView
@@ -11,7 +13,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 actual fun ApplyStatusBarVisibility(hidden: Boolean) {
     val view = LocalView.current
     DisposableEffect(view, hidden) {
-        val activity = view.context as? Activity
+        val activity = view.context.findActivity()
         val controller = activity?.window?.let { WindowInsetsControllerCompat(it, view) }
         if (hidden) {
             controller?.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -24,3 +26,10 @@ actual fun ApplyStatusBarVisibility(hidden: Boolean) {
         }
     }
 }
+
+private tailrec fun Context.findActivity(): Activity? =
+    when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
