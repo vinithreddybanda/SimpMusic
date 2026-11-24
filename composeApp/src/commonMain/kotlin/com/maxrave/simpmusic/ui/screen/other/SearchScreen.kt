@@ -1071,7 +1071,6 @@ fun SearchScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .widthIn(max = 344.dp)
-                        .onGloballyPositioned { searchBarHeightPx = it.size.height }
                         .liquidGlass(
                             backdrop = chipBackdrop,
                             shape = RoundedCornerShape(28.dp),
@@ -1108,7 +1107,8 @@ fun SearchScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(48.dp),
+                            .height(48.dp)
+                            .onGloballyPositioned { searchBarHeightPx = it.size.height },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Crossfade(
