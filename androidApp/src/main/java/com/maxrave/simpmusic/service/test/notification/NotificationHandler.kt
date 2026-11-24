@@ -156,37 +156,7 @@ object NotificationHandler {
         text: String?,
         url: String,
     ) {
-        val action =
-            Intent(Intent.ACTION_VIEW, url.toUri()).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-        val pendingIntent =
-            PendingIntent.getActivity(
-                context,
-                url.hashCode(),
-                action,
-                PendingIntent.FLAG_IMMUTABLE,
-            )
-        val builder =
-            NotificationCompat
-                .Builder(context, BLOG_CHANNEL_ID)
-                .setSmallIcon(R.drawable.mono)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        with(NotificationManagerCompat.from(context)) {
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
-            notify(url.hashCode(), builder.build())
-        }
+        // Blog and website-post notifications are intentionally disabled in this build.
+
     }
 }
