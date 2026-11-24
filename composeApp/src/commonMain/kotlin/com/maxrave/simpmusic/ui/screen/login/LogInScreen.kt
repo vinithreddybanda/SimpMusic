@@ -256,44 +256,7 @@ fun LoginScreen(
         if (browserViewModel != null) manualLogin()
 
         // Top App Bar with haze effect
-        TopAppBar(
-            modifier =
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle()),
-            title = {
-                Text(
-                    text = stringResource(Res.string.log_in),
-                    style = typo().titleMedium,
-                )
-            },
-            navigationIcon = {
-                Box(Modifier.padding(horizontal = 5.dp)) {
-                    AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-                }
-            },
-            actions = {
-                IconButton(
-                    enabled = browserState?.importingId == null,
-                    onClick = {
-                        devLoginSheet = true
-                    },
-                ) {
-                    Icon(
-                        SimpIcons.LogoDev,
-                        "Developer Mode",
-                    )
-                }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                ),
-        )
+        /* title bar removed */
     }
 }
 
