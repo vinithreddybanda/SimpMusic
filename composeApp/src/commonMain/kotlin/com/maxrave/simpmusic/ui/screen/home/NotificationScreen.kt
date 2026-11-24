@@ -151,7 +151,7 @@ fun NotificationScreen(
                         ),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    items(it) { notification ->
+                    items(it.filterNot { notification -> notification.type == NotificationEntity.TYPE_BLOG }) { notification ->
                         NotificationItem(
                             notification = notification,
                             navController,
