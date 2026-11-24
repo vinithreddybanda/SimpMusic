@@ -130,21 +130,11 @@ object NotificationHandler {
      * notifications.
      */
     fun createBlogNotificationChannel(context: Context) {
+        // Remove the legacy channel and any already-posted blog notifications.
         val notificationManager: NotificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (notificationManager.getNotificationChannel(BLOG_CHANNEL_ID) == null) {
-            val channel =
-                NotificationChannel(
-                    BLOG_CHANNEL_ID,
-                    "Blog updates",
-                    NotificationManager.IMPORTANCE_DEFAULT,
-                ).apply {
-                    description = "Notifies when a new blog post is published"
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
+        notificationManager.deleteNotificationChannel(BLOG_CHANNEL_ID)
     }
-
     /**
      * Posts a local notification for a new blog post. Tapping opens [url] in the browser
      * (ACTION_VIEW). No image is loaded — the feed carries no per-item thumbnail.
