@@ -742,6 +742,16 @@ class SharedViewModel(
 
     fun getString(key: String): String? = runBlocking { dataStoreManager.getString(key).first() }
 
+    private val _hideStatusBar = MutableStateFlow(
+        runBlocking { dataStoreManager.getString("hide_status_bar").first() == TRUE },
+    )
+    val hideStatusBar: StateFlow<Boolean> = _hideStatusBar.asStateFlow()
+
+    fun setHideStatusBar(hidden: Boolean) {
+        _hideStatusBar.value = hidden
+        runBlocking { dataStoreManager.putString("hide_status_bar", hidden.toString()) }
+    }
+
     /**
      * The `promos` block the last config fetch saved, as it changes. Every DataStore write re-emits
      * the whole settings file (the playback position is saved every few seconds), so only a change
