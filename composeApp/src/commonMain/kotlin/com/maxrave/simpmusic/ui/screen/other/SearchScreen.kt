@@ -122,6 +122,11 @@ import com.maxrave.simpmusic.ui.component.MoodCategoryCard
 import com.maxrave.simpmusic.ui.component.rememberHolderPainter
 import com.maxrave.simpmusic.extension.getStringBlocking
 import com.maxrave.simpmusic.extension.toAppDeepLinkOrNull
+import com.maxrave.simpmusic.extension.ultraThinBarStyle
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.blur.hazeBlur
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import com.maxrave.simpmusic.ui.component.ArtistFullWidthItems
 import com.maxrave.simpmusic.ui.component.Chip
 import com.maxrave.simpmusic.ui.component.EndOfPage
@@ -231,6 +236,7 @@ fun SearchScreen(
     // The floating chip row refracts the page scrolling under it, so the page is the glass source and
     // the row its sibling (nesting the row inside the source is the RuntimeShader feedback loop).
     val chipBackdrop = rememberBackdrop(MaterialTheme.colorScheme.background)
+    val hazeState = rememberHazeState()
     val suggestionsState = rememberLazyListState()
     val historyState = rememberLazyListState()
     val moodGridState = rememberLazyGridState()
@@ -479,7 +485,7 @@ fun SearchScreen(
         }
         Crossfade(
             targetState = searchUIType,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().hazeSource(hazeState),
         ) {
             when (it) {
                 SearchUIType.SEARCH_SUGGESTIONS -> {
@@ -498,6 +504,7 @@ fun SearchScreen(
                                 .padding(horizontal = 16.dp)
                                 .widthIn(max = 344.dp)
                                 .heightIn(max = 240.dp)
+                                .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle())
                                 .liquidGlass(
                                     backdrop = chipBackdrop,
                                     shape = RoundedCornerShape(28.dp),
@@ -1071,6 +1078,7 @@ fun SearchScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .widthIn(max = 344.dp)
+                        .hazeBlur(HazeInput.Sources(hazeState), ultraThinBarStyle())
                         .liquidGlass(
                             backdrop = chipBackdrop,
                             shape = RoundedCornerShape(28.dp),
