@@ -589,126 +589,6 @@ fun LibraryDynamicPlaylistScreen(
                 is LibraryDynamicPlaylistType.TopAlbums -> topListSubtitle(type)
                 else -> null
             }
-        Box {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = type.title(),
-                            style = typo().titleMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        if (subtitle != null) {
-                            Text(
-                                text = subtitle,
-                                style = typo().bodySmall,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    AppBackButton(
-                        backdrop = searchBackdrop,
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        onClick = { navController.navigateUp() },
-                    )
-                },
-                actions = {
-                    if (isSongType) {
-                        RippleIconButton(
-                            SimpIcons.PlayCircle,
-                            Modifier
-                                .size(48.dp),
-                            fillMaxSize = true,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        ) {
-                            if (type is LibraryDynamicPlaylistType.TopTracks) {
-                                val data = analyticsUIState.topTracks.data
-                                if (!data.isNullOrEmpty()) {
-                                    val first = data.first().second
-                                    sharedViewModel.setQueueData(
-                                        QueueData.Data(
-                                            listTracks = data.map { it.second }.toArrayListTrack(),
-                                            firstPlayedTrack = first.toTrack(),
-                                            playlistId = null,
-                                            playlistName = getStringBlocking(Res.string.your_top_tracks),
-                                            playlistType = PlaylistType.RADIO,
-                                            continuation = null,
-                                        ),
-                                    )
-                                    sharedViewModel.loadMediaItem(
-                                        first.toTrack(),
-                                        Config.PLAYLIST_CLICK,
-                                        0,
-                                    )
-                                }
-                            } else {
-                                viewModel.playAll(type)
-                            }
-                        }
-                        RippleIconButton(
-                            SimpIcons.Shuffle,
-                            Modifier.size(32.dp),
-                            true,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                        ) {
-                            if (type is LibraryDynamicPlaylistType.TopTracks) {
-                                val data = analyticsUIState.topTracks.data
-                                if (!data.isNullOrEmpty()) {
-                                    val shuffled = data.shuffled()
-                                    val first = shuffled.first().second
-                                    sharedViewModel.setQueueData(
-                                        QueueData.Data(
-                                            listTracks = shuffled.map { it.second }.toArrayListTrack(),
-                                            firstPlayedTrack = first.toTrack(),
-                                            playlistId = null,
-                                            playlistName = getStringBlocking(Res.string.your_top_tracks),
-                                            playlistType = PlaylistType.RADIO,
-                                            continuation = null,
-                                        ),
-                                    )
-                                    sharedViewModel.loadMediaItem(
-                                        first.toTrack(),
-                                        Config.PLAYLIST_CLICK,
-                                        0,
-                                    )
-                                }
-                            } else {
-                                viewModel.shuffle(type)
-                            }
-                        }
-                    }
-                    AppIconButton(
-                        imageVector = if (showSearchBar) SimpIcons.Close else SimpIcons.Search,
-                        backdrop = searchBackdrop,
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                        contentDescription = if (showSearchBar) "Close search" else "Search",
-                        onClick = { showSearchBar = !showSearchBar },
-                    )
-                },
-                modifier =
-                    Modifier
-                        .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(MaterialTheme.colorScheme.background, 0.3f))
-                        .then(
-                            if (LocalLiquidGlassEnabled.current) {
-                                Modifier.liquidGlass(searchBackdrop, RoundedCornerShape(28.dp), interactive = false)
-                            } else {
-                                Modifier
-                            },
-                        ),
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                    ),
-            )
-            // Drawn last inside the same Box, with an opaque colour, so it covers the normal bar
-            // instead of pushing it around — the search bar below keeps its position either way.
             if (selectionState.isActive) {
                 SongSelectionTopAppBar(
                     state = selectionState,
@@ -753,7 +633,6 @@ fun LibraryDynamicPlaylistScreen(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 )
             }
-        }
         androidx.compose.animation.AnimatedVisibility(
             visible = showSearchBar,
             enter = SearchBarEnter,
