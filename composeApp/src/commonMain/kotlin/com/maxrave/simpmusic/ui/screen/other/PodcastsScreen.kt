@@ -438,40 +438,7 @@ fun PodcastScreen(
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically(),
                 ) {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = data.title,
-                                style = typo().titleMedium,
-                                maxLines = 1,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .wrapContentHeight(align = Alignment.CenterVertically)
-                                        .basicMarquee(
-                                            iterations = Int.MAX_VALUE,
-                                            animationMode = MarqueeAnimationMode.Immediately,
-                                        ).focusable(),
-                            )
-                        },
-                        navigationIcon = {
-                            Box(Modifier.padding(horizontal = 5.dp)) {
-                                AppBackButton(
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        onClick = { navController.navigateUp() },
-                    )
-                            }
-                        },
-                        colors =
-                            TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent,
-                            ),
-                        modifier =
-                            Modifier
-                                .hazeBlur(HazeInput.Sources(hazeState), barBlurStyle(Color.Black, 0.3f))
-                                .liquidGlass(headerBackdrop, RoundedCornerShape(28.dp), interactive = false),
-                    )
+                    /* header removed */
                 }
 
                 if (shouldShowMoreBottomSheet) {
