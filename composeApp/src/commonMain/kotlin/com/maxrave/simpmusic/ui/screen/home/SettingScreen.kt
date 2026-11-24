@@ -3255,29 +3255,7 @@ fun SettingScreen(
                     ),
                 header = {
                     item {
-                        TopAppBar(
-                            windowInsets = WindowInsets(0, 0, 0, 0),
-                            title = {
-                                Text(
-                                    text =
-                                        stringResource(
-                                            Res.string.third_party_libraries,
-                                        ),
-                                    style = typo().titleMedium,
-                                )
-                            },
-                            navigationIcon = {
-                                AppBackButton(
-                                    modifier = Modifier.size(44.dp),
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            sheetState.hide()
-                                            showThirdPartyLibraries = false
-                                        }
-                                    },
-                                )
-                            },
-                        )
+                        /* header removed */
                     }
                 },
             )
@@ -3325,26 +3303,7 @@ private fun SettingTopBar(
     modifier: Modifier = Modifier,
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
 ) {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(Res.string.settings),
-                style = typo().titleMedium,
-            )
-        },
-        navigationIcon = {
-            AppBackButton(
-                modifier = Modifier.size(44.dp),
-                onClick = onBack,
-            )
-        },
-        windowInsets = windowInsets,
-        modifier = modifier,
-        colors =
-            TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-            ),
-    )
+    /* header removed */
 }
 
 /**
