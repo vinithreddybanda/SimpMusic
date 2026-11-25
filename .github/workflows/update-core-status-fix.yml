@@ -22,7 +22,7 @@ jobs:
 
       - name: Pin core to the fix commit
         env:
-          TARGET_CORE_SHA: 2a19fdf4eac5f3ac09834de48f1ca6bd5fa75c0c
+          TARGET_CORE_SHA: 59af06659296008a93420e4c0d42eedafc2e80ad
         run: |
           CURRENT_CORE_SHA="$(git ls-tree HEAD core | awk '{print $3}')"
           echo "Current core: $CURRENT_CORE_SHA"
