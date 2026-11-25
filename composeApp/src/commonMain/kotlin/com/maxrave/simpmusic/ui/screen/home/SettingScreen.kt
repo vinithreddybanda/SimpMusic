@@ -85,6 +85,7 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
@@ -2216,6 +2217,7 @@ fun SettingScreen(
                                 value = musicStatusToken,
                                 onValueChange = { musicStatusToken = it },
                                 label = { Text("Worker token") },
+                                visualTransformation = PasswordVisualTransformation(),
                                 singleLine = true,
                             )
                         }
