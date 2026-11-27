@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   update-core:
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore: pin core Cloudflare status fix') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SimpMusic
