@@ -530,6 +530,14 @@ fun App(
         // colorScheme.background carries the seed's hue, which the glass's saturation boost brings out.
         val backdrop = rememberBackdrop(if (isDesktopShell) desktopPanel else MaterialTheme.colorScheme.background)
         Scaffold(
+            // Draw the page behind the status bar. Keep only the bottom navigation-bar inset so
+            // the app content is edge-to-edge without sacrificing gesture/navigation spacing.
+            contentWindowInsets = WindowInsets(
+                left = 0,
+                top = 0,
+                right = 0,
+                bottom = WindowInsets.navigationBars.getBottom(LocalDensity.current),
+            ),
             // Watches for userStarted without consuming anything. Dialogs and sheets are windows or
             // layers of their own, so a press inside one (closing the update dialog, say) does not count.
             modifier =
