@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -619,6 +620,13 @@ fun App(
                 }
             },
             content = { innerPadding ->
+                // Keep backgrounds edge-to-edge while readable screen content starts below
+                // the status bar, with a little breathing room for the first heading.
+                val contentTopPadding =
+                    with(LocalDensity.current) {
+                        WindowInsets.statusBars.getTop(this).toDp() + 8.dp
+                    }
+                val screenContentPadding = innerPadding.copy(top = contentTopPadding)
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -767,7 +775,7 @@ fun App(
                                             LocalUserStarted provides userStarted,
                                         ) {
                                             AppNavigationGraph(
-                                                innerPadding = innerPadding,
+                                                innerPadding = screenContentPadding,
                                                 navController = navController,
                                                 hideNavBar = {
                                                     isNavBarVisible = false
@@ -792,9 +800,9 @@ fun App(
                                                 .background(
                                                     Brush.verticalGradient(
                                                         listOf(
-                                                            Color(0xFF17130F).copy(alpha = if (isScrolledToTop) 0f else 0.88f),
-                                                            Color(0xFF17130F).copy(alpha = if (isScrolledToTop) 0f else 0.58f),
-                                                            Color(0xFF17130F).copy(alpha = 0f),
+                                                            (if (isLightScheme) Color(0xFFF0E5D5) else Color(0xFF211A15)).copy(alpha = if (isScrolledToTop) 0.18f else 0.76f),
+                                                            (if (isLightScheme) Color(0xFFE8DDCF) else Color(0xFF211A15)).copy(alpha = if (isScrolledToTop) 0.08f else 0.42f),
+                                                            MaterialTheme.colorScheme.background.copy(alpha = 0f),
                                                         ),
                                                     ),
                                                 ),
